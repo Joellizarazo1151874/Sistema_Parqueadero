@@ -4,7 +4,7 @@
 
 <head>
   <title>Home | SmartPark</title>
-  <!-- [Meta] -->
+  <!-- [Meta] Información meta para el documento -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,15 +19,17 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
     id="main-font-link">
+  <!-- [Bootstrap CSS] -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <!-- [Font Awesome CSS] -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <!-- [Tabler Icons] https://tablericons.com -->
+  <!-- [Tabler Icons] -->
   <link rel="stylesheet" href="../assets/fonts/tabler-icons.min.css">
-  <!-- [Feather Icons] https://feathericons.com -->
+  <!-- [Feather Icons] -->
   <link rel="stylesheet" href="../assets/fonts/feather.css">
-  <!-- [Font Awesome Icons] https://fontawesome.com/icons -->
+  <!-- [Font Awesome Icons] -->
   <link rel="stylesheet" href="../assets/fonts/fontawesome.css">
-  <!-- [Material Icons] https://fonts.google.com/icons -->
+  <!-- [Material Icons] -->
   <link rel="stylesheet" href="../assets/fonts/material.css">
   <!-- [Template CSS Files] -->
   <link rel="stylesheet" href="../assets/css/style.css" id="main-style-link">
@@ -91,10 +93,25 @@
                   </div>
                 </div>
                 <div class="ticket-content">
-                  <p>Entrada: <span>13/03 09:26</span></p>
-                  <p>Tiempo: <span>0:00</span></p>
-                  <p>Importe Actual: <span>$100</span></p>
-                  <p>Debe: <span class="debt">$100</span></p>
+                  <div class="row">
+                    <div class="col-6 text-start">
+                      <small>ENTRADA</small>
+                      <br>
+                      <b>13/03 09:26</b>
+                      <br>
+                      <small>IMPORTE ACTUAL</small>
+                      <b>$100</b>
+                    </div>
+                    <div class="col-6 text-end">
+                      <small>TIEMPO</small>
+                      <br>
+                      <b>2:00</b>
+                      <br>
+                      <small class="debt">DEBE</small>
+                      <br>
+                      <b class="debt">$100</b>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="ticket-actions">
@@ -103,74 +120,66 @@
                     <button class="icon-btn"><i class="fas fa-print"></i></button>
                     <button class="icon-btn"><i class="fas fa-file-alt"></i></button>
                   </div>
-                  <button class="close-btn">Cerrar</button>
+                  <button class="close-btn" data-bs-toggle="modal" data-bs-target="#modalPago">Cerrar</button>
+
+                  <!-- Modal de Pago -->
+                  <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="modalPagoLabel">CAJA</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="ticket-info mb-3">
+                            <small>#JOEL • Moto • Inicio: 13/03 09:26. Permanencia: 0:00</small>
+                          </div>
+                          <div class="amount text-center mb-4">
+                            <h6>Importe:</h6>
+                            <h3>$100</h3>
+                          </div>
+                          <div class="mb-3">
+                          <div class="mb-3">
+                            <label class="form-label">Seleccione la forma de pago</label>
+                            <select class="form-select">
+                              <option>Efectivo</option>
+                              <option>Tarjeta de Crédito</option>
+                              <option>Tarjeta de Débito</option>
+                              <option>MercadoPago</option>
+                            </select>
+                          </div>
+                            <label class="form-label">Descripción (Caja)</label>
+                            <input type="text" class="form-control" value="Ticket #JOEL. Permanencia: 0:00">
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Items</label>
+                            <div class="input-group">
+                              <input type="text" class="form-control" value="1 x Hora ($100) = $100" readonly>
+                            </div>
+                          </div>
+                          
+                          <div class="card mb-2">
+                            <div class="card-body py-2">
+                              <small class="text-muted d-block mb-2">Impresión de Comprobante</small>
+                              <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="comprobante" id="sinComprobante" value="sin" checked>
+                                <label class="form-check-label" for="sinComprobante">Sin Comprobante</label>
+                              </div>
+                              <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="comprobante" id="recibo" value="recibo">
+                                <label class="form-check-label" for="recibo">Recibo</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-primary">Cobrar</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="ticket">
-                <!-- Cuadro con el ícono del reloj -->
-                <div class="row" style="background-color: rgb(174, 213, 255); padding: 15px; ">
-                  <div class="col-3">
-                    <div class="time-box">
-                      <i class="feather icon-clock"></i>
-                      <span>HORA</span>
-                    </div>
-                  </div>
-                  <div class="col-9">
-                    <div class="ticket-header">
-                      <h3>CAMIONETA</h3>
-                      <p class="plate">ABC-123</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="ticket-content">
-                  <p>Entrada: <span>13/03 09:26</span></p>
-                  <p>Tiempo: <span>0:00</span></p>
-                  <p>Importe Actual: <span>$100</span></p>
-                  <p>Debe: <span class="debt">$100</span></p>
-                </div>
-
-                <div class="ticket-actions">
-                  <div class="icon-btn-group">
-                    <button class="icon-btn"><i class="fas fa-edit"></i></button>
-                    <button class="icon-btn"><i class="fas fa-print"></i></button>
-                    <button class="icon-btn"><i class="fas fa-file-alt"></i></button>
-                  </div>
-                  <button class="close-btn">Cerrar</button>
-                </div>
-              </div>
-              <div class="ticket">
-                <!-- Cuadro con el ícono del reloj -->
-                <div class="row" style="background-color: rgb(174, 213, 255); padding: 15px; ">
-                  <div class="col-3">
-                    <div class="time-box">
-                      <i class="feather icon-clock"></i>
-                      <span>HORA</span>
-                    </div>
-                  </div>
-                  <div class="col-9">
-                    <div class="ticket-header">
-                      <h3>CAMIONETA</h3>
-                      <p class="plate">ABC-123</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="ticket-content">
-                  <p>Entrada: <span>13/03 09:26</span></p>
-                  <p>Tiempo: <span>0:00</span></p>
-                  <p>Importe Actual: <span>$100</span></p>
-                  <p>Debe: <span class="debt">$100</span></p>
-                </div>
-
-                <div class="ticket-actions">
-                  <div class="icon-btn-group">
-                    <button class="icon-btn"><i class="fas fa-edit"></i></button>
-                    <button class="icon-btn"><i class="fas fa-print"></i></button>
-                    <button class="icon-btn"><i class="fas fa-file-alt"></i></button>
-                  </div>
-                  <button class="close-btn">Cerrar</button>
-                </div>
-              </div>
-
             </div>
           </div>
           <div id="tab2" class="tab-content d-none">
@@ -318,7 +327,7 @@
                       </thead>
                       <tbody>
                         <tr>
-                          <td>➡️</td>
+                          <td><i class="fas fa-arrow-right text-success"></i></td>
                           <td>13/03/25</td>
                           <td>09:26</td>
                           <td>#JOEL</td>
@@ -328,7 +337,7 @@
                           <td>joel lizarazo</td>
                         </tr>
                         <tr>
-                          <td>➡️</td>
+                        <td><i class="fas fa-arrow-right text-success"></i></td>
                           <td>13/03/25</td>
                           <td>09:26</td>
                           <td>#CARRO</td>
@@ -338,7 +347,7 @@
                           <td>joel lizarazo</td>
                         </tr>
                         <tr>
-                          <td>⬅️</td>
+                          <td><i class="fas fa-arrow-left text-danger"></i></td>
                           <td>13/03/25</td>
                           <td>09:26</td>
                           <td>#CAMIONETA</td>
@@ -348,7 +357,7 @@
                           <td>joel lizarazo</td>
                         </tr>
                         <tr>
-                          <td>➡️</td>
+                        <td><i class="fas fa-arrow-right text-success"></i></td>
                           <td>13/03/25</td>
                           <td>09:27</td>
                           <td>#JOEL</td>

@@ -4,7 +4,7 @@
 
 <head>
   <title>Home | SmartPark</title>
-  <!-- [Meta] -->
+  <!-- [Meta] Información meta para el documento -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,15 +19,17 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
     id="main-font-link">
+  <!-- [Bootstrap CSS] -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <!-- [Bootstrap Icons] -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-  <!-- [Tabler Icons] https://tablericons.com -->
+  <!-- [Tabler Icons] -->
   <link rel="stylesheet" href="../assets/fonts/tabler-icons.min.css">
-  <!-- [Feather Icons] https://feathericons.com -->
+  <!-- [Feather Icons] -->
   <link rel="stylesheet" href="../assets/fonts/feather.css">
-  <!-- [Font Awesome Icons] https://fontawesome.com/icons -->
+  <!-- [Font Awesome Icons] -->
   <link rel="stylesheet" href="../assets/fonts/fontawesome.css">
-  <!-- [Material Icons] https://fonts.google.com/icons -->
+  <!-- [Material Icons] -->
   <link rel="stylesheet" href="../assets/fonts/material.css">
   <!-- [Template CSS Files] -->
   <link rel="stylesheet" href="../assets/css/style.css" id="main-style-link">
@@ -92,6 +94,7 @@
 
         <!-- Contenido dinámico -->
         <div class="tab-container mt-4">
+          <!-- Tab de Categorías -->
           <div id="tab1" class="tab-content active">
             <div class="row justify-content-center">
               <div class="col-md-5">
@@ -176,6 +179,7 @@
             </div>
           </div>
 
+          <!-- Tab de Tarifas -->
           <div id="tab2" class="tab-content d-none">
             <div class="ticket-summary">
               <div class="d-flex justify-content-between align-items-center mb-4">
@@ -314,6 +318,7 @@
               </div>
             </div>
           </div>
+          <!-- Tab de Precios -->
           <div id="tab3" class="tab-content d-none">
             <h3>Precios</h3>
             <p>Establece los precios para cada categoría de vehículo en cada tipo de tarifa</p>
@@ -353,6 +358,7 @@
               </div>
             </div>
           </div>
+          <!-- Tab de Usuarios -->
           <div id="tab4" class="tab-content d-none">
             <h3>Usuarios</h3>
             <div class="card p-4 mb-4">
@@ -488,14 +494,17 @@
               </div>
             </div>
           </div>
+          <!-- Tab de Medios de Pago -->
           <div id="tab5" class="tab-content d-none">
             <h3>Medios de pago</h3>
             <p>Sección de análisis y estadísticas sobre el rendimiento del sistema.</p>
           </div>
+          <!-- Tab de Informes -->
           <div id="tab6" class="tab-content d-none">
             <h3>Informes</h3>
             <p>Sección de análisis y estadísticas sobre el rendimiento del sistema.</p>
           </div>
+          <!-- Tab de Ajustes -->
           <div id="tab7" class="tab-content d-none">
             <h3>Ajustes</h3>
             <p class="text-muted small">Establece los datos de la empresa y las impresoras</p>
