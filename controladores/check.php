@@ -3,8 +3,8 @@ session_start(); // Inicia la sesión o reanuda una sesión existente.
 
 include "../modelo/conexion.php"; // Incluye el archivo de conexión a la base de datos.
 
-if (isset($_POST['usuario']) && isset($_POST['password'])) {
-    // Verifica que se hayan enviado los campos 'usuario' y 'password' a través de POST.
+if (isset($_POST['usuario']) && isset($_POST['contraseña'])) {
+    // Verifica que se hayan enviado los campos 'usuario' y 'contraseña' a través de POST.
 
     // Prepara la consulta SQL para evitar inyección SQL
     $stmt = $conexion->prepare("SELECT * FROM usuarios WHERE correo = ? AND contraseña = ?");
@@ -15,8 +15,8 @@ if (isset($_POST['usuario']) && isset($_POST['password'])) {
     }
     
     // Genera el hash de la contraseña
-    $passwordHash = sha1($_POST['password']);
-    
+    $passwordHash = sha1($_POST['contraseña']);
+
     // Vincula los parámetros a la consulta
     $stmt->bind_param("ss", $_POST['usuario'], $passwordHash);
     
@@ -30,12 +30,21 @@ if (isset($_POST['usuario']) && isset($_POST['password'])) {
 
     // Verifica si hay un usuario con esas credenciales
     if ($resultado->num_rows > 0) {
-        $datos_usuario = $resultado->fetch_assoc();
+        $datos_usuario = $resultado->fetch_row();
         // Asegúrate de usar los nombres correctos de las columnas
-        $_SESSION['nombre'] = $datos_usuario['nombre']; // Usa el nombre real de la columna
-        $_SESSION['id_usuario'] = $datos_usuario['id']; // Usa el nombre real de la columna
-        $_SESSION['rol'] = $datos_usuario['rol']; // Usa el nombre real de la columna
+        $nombre = $datos_usuario[1]; // Nombre del usuario 
+        $id_usuario = $datos_usuario[0]; // ID del usuario 
+        $correo = $datos_usuario[2]; // correo del usuario 
+        $rol = $datos_usuario[4]; // Nivel del usuario 
         
+         // Guarda la información del usuario en la sesión.
+         $_SESSION['datos_login'] = array(
+            'nombre' => $nombre,
+            'id_usuario' => $id_usuario,
+            'correo' => $correo,
+            'rol' => $rol  
+        );
+
 
         // Redirige al usuario a la página de registro.
         header("location: ../vistas/estructuras/gestion.php");

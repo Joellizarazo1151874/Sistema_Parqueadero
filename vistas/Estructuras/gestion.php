@@ -1,3 +1,10 @@
+<?php
+session_start();
+include '../../modelo/conexion.php';
+include '../../controladores/seguridad.php';
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <!-- [Head] start -->
@@ -75,53 +82,94 @@
         <!-- Contenido dinámico -->
         <div class="tab-container mt-4">
           <div id="tab1" class="tab-content active">
+            <div class="search-bar mb-3">
+              <div class="row">
+                <div class="col-md-1">
+                  <select class="form-select">
+                    <option value="todos">Todos</option>
+                    <option value="orden">Orden</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+
+                  <select class="form-select">
+                    <option value="ultimos">Últimos Ingresados</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <input type="text" id="searchInput" name="busqueda" class="form-control" placeholder="Buscar matrícula" value="<?php echo isset($_GET['busqueda']) ? htmlspecialchars($_GET['busqueda']) : ''; ?>">
+                </div>
+              </div>
+            </div>
             <div class="tickets-container">
-              <div class="ticket">
-                <!-- Cuadro con el ícono del reloj -->
-                <div class="row" style="background-color: rgb(174, 213, 255); padding: 15px; ">
-                  <div class="col-3">
-                    <div class="time-box">
-                      <i class="feather icon-clock"></i>
-                      <span>HORA</span>
-                    </div>
-                  </div>
-                  <div class="col-9">
-                    <div class="ticket-header">
-                      <h3>CAMIONETA</h3>
-                      <p class="plate">ABC-123</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="ticket-content">
-                  <div class="row">
-                    <div class="col-6 text-start">
-                      <small>ENTRADA</small>
-                      <br>
-                      <b>13/03 09:26</b>
-                      <br>
-                      <small>IMPORTE ACTUAL</small>
-                      <b>$100</b>
-                    </div>
-                    <div class="col-6 text-end">
-                      <small>TIEMPO</small>
-                      <br>
-                      <b>2:00</b>
-                      <br>
-                      <small class="debt">DEBE</small>
-                      <br>
-                      <b class="debt">$100</b>
-                    </div>
-                  </div>
-                </div>
+              <?php
+              // Consulta para obtener los registros activos con la información del vehículo
+              $query = "SELECT r.*, v.placa, v.tipo 
+                       FROM registros_parqueo r 
+                       INNER JOIN vehiculos v ON r.id_vehiculo = v.id_vehiculo
+                       WHERE r.estado = 'activo' 
+                       ORDER BY r.hora_ingreso DESC";
 
-                <div class="ticket-actions">
-                  <div class="icon-btn-group">
-                    <button class="icon-btn"><i class="fas fa-edit"></i></button>
-                    <button class="icon-btn"><i class="fas fa-print"></i></button>
-                    <button class="icon-btn"><i class="fas fa-file-alt"></i></button>
-                  </div>
-                  <button class="close-btn" data-bs-toggle="modal" data-bs-target="#modalPago">Cerrar</button>
+              $resultado = $conexion->query($query);
 
+              if ($resultado && $resultado->num_rows > 0) {
+                while ($row = $resultado->fetch_assoc()) {
+                  // Calcular el tiempo transcurrido
+                  $hora_ingreso = new DateTime($row['hora_ingreso']);
+                  $hora_actual = new DateTime();
+                  $diferencia = $hora_actual->diff($hora_ingreso);
+                  $tiempo_transcurrido = sprintf("%d:%02d", $diferencia->h, $diferencia->i);
+
+                  // Formatear la hora de ingreso
+                  $fecha_formateada = $hora_ingreso->format('d/m H:i');
+              ?>
+
+                  <div class="ticket">
+                    <div class="row" style="background-color: rgb(174, 213, 255); padding: 15px;">
+                      <div class="col-3">
+                        <div class="time-box">
+                          <i class="feather icon-clock"></i>
+                          <span>HORA</span>
+                        </div>
+                      </div>
+                      <div class="col-9">
+                        <div class="ticket-header">
+                          <h3><?php echo strtoupper($row['tipo']); ?></h3>
+                          <p class="plate"><?php echo $row['placa']; ?></p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="ticket-content">
+                      <div class="row">
+                        <div class="col-6 text-start">
+                          <small>ENTRADA</small>
+                          <br>
+                          <b><?php echo $fecha_formateada; ?></b>
+                          <br>
+                          <small>IMPORTE ACTUAL</small>
+                          <br>
+                          <b>$<?php echo $row['total_pagado']; ?></b>
+                        </div>
+                        <div class="col-6 text-end">
+                          <small>TIEMPO</small>
+                          <br>
+                          <b><?php echo $tiempo_transcurrido; ?></b>
+                          <br>
+                          <small class="debt">DEBE</small>
+                          <br>
+                          <b class="debt">$<?php echo $row['total_pagado']; ?></b>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="ticket-actions">
+                      <div class="icon-btn-group">
+                        <button class="icon-btn"><i class="fas fa-edit"></i></button>
+                        <button class="icon-btn"><i class="fas fa-print"></i></button>
+                        <button class="icon-btn"><i class="fas fa-file-alt"></i></button>
+                      </div>
+                      <button class="close-btn" data-bs-toggle="modal" data-bs-target="#modalPago">Cerrar</button>
+                    </div>
+                  </div>
                   <!-- Modal de Pago -->
                   <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -139,15 +187,15 @@
                             <h3>$100</h3>
                           </div>
                           <div class="mb-3">
-                          <div class="mb-3">
-                            <label class="form-label">Seleccione la forma de pago</label>
-                            <select class="form-select">
-                              <option>Efectivo</option>
-                              <option>Tarjeta de Crédito</option>
-                              <option>Tarjeta de Débito</option>
-                              <option>MercadoPago</option>
-                            </select>
-                          </div>
+                            <div class="mb-3">
+                              <label class="form-label">Seleccione la forma de pago</label>
+                              <select class="form-select">
+                                <option>Efectivo</option>
+                                <option>Tarjeta de Crédito</option>
+                                <option>Tarjeta de Débito</option>
+                                <option>MercadoPago</option>
+                              </select>
+                            </div>
                             <label class="form-label">Descripción (Caja)</label>
                             <input type="text" class="form-control" value="Ticket #JOEL. Permanencia: 0:00">
                           </div>
@@ -157,7 +205,7 @@
                               <input type="text" class="form-control" value="1 x Hora ($100) = $100" readonly>
                             </div>
                           </div>
-                          
+
                           <div class="card mb-2">
                             <div class="card-body py-2">
                               <small class="text-muted d-block mb-2">Impresión de Comprobante</small>
@@ -178,9 +226,14 @@
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
+              <?php
+                }
+              } else {
+                echo '<div class="alert alert-info">No hay vehículos estacionados actualmente.</div>';
+              }
+              ?>
             </div>
+
           </div>
           <div id="tab2" class="tab-content d-none">
             <div class="row">
@@ -337,7 +390,7 @@
                           <td>joel lizarazo</td>
                         </tr>
                         <tr>
-                        <td><i class="fas fa-arrow-right text-success"></i></td>
+                          <td><i class="fas fa-arrow-right text-success"></i></td>
                           <td>13/03/25</td>
                           <td>09:26</td>
                           <td>#CARRO</td>
@@ -357,7 +410,7 @@
                           <td>joel lizarazo</td>
                         </tr>
                         <tr>
-                        <td><i class="fas fa-arrow-right text-success"></i></td>
+                          <td><i class="fas fa-arrow-right text-success"></i></td>
                           <td>13/03/25</td>
                           <td>09:27</td>
                           <td>#JOEL</td>
@@ -423,6 +476,7 @@
   <script src="../assets/js/fonts/custom-font.js"></script>
   <script src="../assets/js/pcoded.js"></script>
   <script src="../assets/js/plugins/feather.min.js"></script>
+  <script src="../assets/js/busqueda_parqueo.js"></script>
   <script>
     layout_change('light');
   </script>

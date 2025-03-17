@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Verificar si el vehículo ya existe
-        $stmt = $conexion->prepare("SELECT * FROM vehiculos WHERE placa = ?");
+        $stmt = $conexion->prepare("SELECT id_vehiculo FROM vehiculos WHERE placa = ?");
         if ($stmt === false) {
             die("Error en la preparación de la consulta: " . $conexion->error);
         }
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($result->num_rows > 0) {
             // El vehículo ya existe, obtener su ID
             $row = $result->fetch_assoc();
-            $id_vehiculo = $row['id'];
+            $id_vehiculo = $row['id_vehiculo'];
         } else {
             // El vehículo no existe, registrarlo
             $stmt = $conexion->prepare("INSERT INTO vehiculos (id_cliente, placa, tipo, descripcion) VALUES (NULL, ?, ?, ?)");
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Registrar el ingreso del vehículo con la hora actual
         $hora_actual = date('Y-m-d H:i:s');
-        $stmt = $conexion->prepare("INSERT INTO registro_parqueo (id_vehiculo, hora_ingreso, hora_salida, estado, total_pagado, metodo_pago) VALUES (?, ?, NULL, 'activo', 0, NULL)");
+        $stmt = $conexion->prepare("INSERT INTO registros_parqueo (id_vehiculo, hora_ingreso, hora_salida, estado, total_pagado, metodo_pago) VALUES (?, ?, NULL, 'activo', 0, NULL)");
         if ($stmt === false) {
             die("Error en la preparación de la consulta: " . $conexion->error);
         }

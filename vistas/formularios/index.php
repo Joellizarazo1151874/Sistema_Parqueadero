@@ -61,7 +61,7 @@
               </div>
               <div class="form-group mb-3">
                 <label class="form-label">Contraseña</label>
-                <input type="password" class="form-control" name="password" id="password" placeholder="Contraseña" required="true">
+                <input type="password" class="form-control" name="contraseña" id="contraseña" placeholder="Contraseña" required="true">
               </div>
               <div class="d-flex mt-1 justify-content-between">
                 <div class="form-check">
@@ -75,7 +75,7 @@
               <?php 
                 if (isset($_GET['error'])) {
                   // alerta de credenciales incorrectas
-                  echo '<div class="alert alert-warning text-white col-12" role="alert">'.$_GET['error'].'</div>';
+                  echo '<br><div class="alert alert-danger text-white col-12" role="alert">'.$_GET['error'].'</div>';
                 }
               ?>
             </form>

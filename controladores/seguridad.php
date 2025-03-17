@@ -1,16 +1,16 @@
 <?php
-  //si no es administrados con permiso de entrada lo envia al index
-  if ($arregloUsuario['nivel']!='entrada') {
-    header("location: index.php"); 
-  }
+// Verificar si existe la sesión 'datos_login'
+if (!isset($_SESSION['datos_login'])) {
+    header("location: formularios/index.php");
+    exit();
+}
 
-  //si es un administrador lo envia al dashboard
-  if ($arregloUsuario['nivel']=='admin') {
-    header("location: ../../admin/pages/dashboard.php"); 
-  }
+$arregloUsuario = $_SESSION['datos_login'];
 
-  //si es un administrador lo envia al dashboard
-  if ($arregloUsuario['nombre']=='computobecl') {
-    header("location: registro_computo.php"); 
-  }
+
+// Si el usuario no es administrador, redirigir
+if ($arregloUsuario['rol'] != 'patrocinador' && $arregloUsuario['rol'] != 'administrador') {
+    header("location:../formularios/index.php");
+    exit();
+}
 ?>
