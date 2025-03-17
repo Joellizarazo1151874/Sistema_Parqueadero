@@ -35,13 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_vehiculo = $conexion->insert_id;
         }
 
-        // Registrar el ingreso del vehículo con la hora actual
-        $hora_actual = date('Y-m-d H:i:s');
-        $stmt = $conexion->prepare("INSERT INTO registros_parqueo (id_vehiculo, hora_ingreso, hora_salida, estado, total_pagado, metodo_pago) VALUES (?, ?, NULL, 'activo', 0, NULL)");
+        // Registrar el ingreso del vehículo al parqueadero
+        $stmt = $conexion->prepare("INSERT INTO registros_parqueo (id_vehiculo, hora_ingreso, hora_salida, estado, total_pagado, metodo_pago) VALUES (?, NOW(), NULL, 'activo', 0, NULL)");
         if ($stmt === false) {
             die("Error en la preparación de la consulta: " . $conexion->error);
         }
-        $stmt->bind_param("is", $id_vehiculo, $hora_actual);
+        $stmt->bind_param("i", $id_vehiculo);
         $stmt->execute();
 
         header("Location: ../vistas/Estructuras/gestion.php");

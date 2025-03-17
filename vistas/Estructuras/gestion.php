@@ -2,7 +2,14 @@
 session_start();
 include '../../modelo/conexion.php';
 include '../../controladores/seguridad.php';
+// Consulta para obtener los registros activos con la información del vehículo
+$query = "SELECT r.*, v.placa, v.tipo 
+FROM registros_parqueo r 
+INNER JOIN vehiculos v ON r.id_vehiculo = v.id_vehiculo
+WHERE r.estado = 'activo' 
+ORDER BY r.hora_ingreso DESC";
 
+$resultado = $conexion->query($query);
 ?>
 
 <!DOCTYPE html>
@@ -103,27 +110,14 @@ include '../../controladores/seguridad.php';
             </div>
             <div class="tickets-container">
               <?php
-              // Consulta para obtener los registros activos con la información del vehículo
-              $query = "SELECT r.*, v.placa, v.tipo 
-                       FROM registros_parqueo r 
-                       INNER JOIN vehiculos v ON r.id_vehiculo = v.id_vehiculo
-                       WHERE r.estado = 'activo' 
-                       ORDER BY r.hora_ingreso DESC";
-
-              $resultado = $conexion->query($query);
-
               if ($resultado && $resultado->num_rows > 0) {
                 while ($row = $resultado->fetch_assoc()) {
                   // Calcular el tiempo transcurrido
                   $hora_ingreso = new DateTime($row['hora_ingreso']);
-                  $hora_actual = new DateTime();
-                  $diferencia = $hora_actual->diff($hora_ingreso);
-                  $tiempo_transcurrido = sprintf("%d:%02d", $diferencia->h, $diferencia->i);
+                  $fecha_formateada = $hora_ingreso->format('d/m H:i'); // Formato de la hora de ingreso
+                  $timestamp_ingreso = strtotime($row['hora_ingreso']); // Convertir a timestamp UNIX
 
-                  // Formatear la hora de ingreso
-                  $fecha_formateada = $hora_ingreso->format('d/m H:i');
               ?>
-
                   <div class="ticket">
                     <div class="row" style="background-color: rgb(174, 213, 255); padding: 15px;">
                       <div class="col-3">
@@ -153,7 +147,7 @@ include '../../controladores/seguridad.php';
                         <div class="col-6 text-end">
                           <small>TIEMPO</small>
                           <br>
-                          <b><?php echo $tiempo_transcurrido; ?></b>
+                          <b class="tiempo-transcurrido" data-ingreso="<?php echo $timestamp_ingreso; ?>">Calculando...</b>
                           <br>
                           <small class="debt">DEBE</small>
                           <br>
@@ -167,7 +161,7 @@ include '../../controladores/seguridad.php';
                         <button class="icon-btn"><i class="fas fa-print"></i></button>
                         <button class="icon-btn"><i class="fas fa-file-alt"></i></button>
                       </div>
-                      <button class="close-btn" data-bs-toggle="modal" data-bs-target="#modalPago">Cerrar</button>
+                      <button class="close-btn cerrar-ticket" data-id="<?php echo $row['id_registro']; ?>">Cerrar</button>
                     </div>
                   </div>
                   <!-- Modal de Pago -->
@@ -180,7 +174,7 @@ include '../../controladores/seguridad.php';
                         </div>
                         <div class="modal-body">
                           <div class="ticket-info mb-3">
-                            <small>#JOEL • Moto • Inicio: 13/03 09:26. Permanencia: 0:00</small>
+                            <h6 id="ticketInfo"></h6>
                           </div>
                           <div class="amount text-center mb-4">
                             <h6>Importe:</h6>
@@ -189,11 +183,11 @@ include '../../controladores/seguridad.php';
                           <div class="mb-3">
                             <div class="mb-3">
                               <label class="form-label">Seleccione la forma de pago</label>
-                              <select class="form-select">
-                                <option>Efectivo</option>
-                                <option>Tarjeta de Crédito</option>
-                                <option>Tarjeta de Débito</option>
-                                <option>MercadoPago</option>
+                              <select class="form-select" id="metodoPago">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="tarjeta_credito">Tarjeta de Crédito</option>
+                                <option value="tarjeta_debito">Tarjeta de Débito</option>
+                                <option value="mercadopago">MercadoPago</option>
                               </select>
                             </div>
                             <label class="form-label">Descripción (Caja)</label>
@@ -221,7 +215,7 @@ include '../../controladores/seguridad.php';
                           </div>
                         </div>
                         <div class="modal-footer">
-                          <button type="button" class="btn btn-primary">Cobrar</button>
+                          <button type="button" class="btn btn-primary" id="btnCobrar">Cobrar</button>
                         </div>
                       </div>
                     </div>
@@ -476,7 +470,50 @@ include '../../controladores/seguridad.php';
   <script src="../assets/js/fonts/custom-font.js"></script>
   <script src="../assets/js/pcoded.js"></script>
   <script src="../assets/js/plugins/feather.min.js"></script>
-  <script src="../assets/js/busqueda_parqueo.js"></script>
+  <script src="../assets/js/ticket.js"></script>
+  <script>
+    // Cierre de ticket
+    document.addEventListener("DOMContentLoaded", function() {
+      const botonesCerrar = document.querySelectorAll(".cerrar-ticket");
+
+      botonesCerrar.forEach(boton => {
+        boton.addEventListener("click", function() {
+          const ticketId = this.getAttribute("data-id");
+          const ticketInfo = this.closest(".ticket").querySelector(".ticket-header h3").textContent + 
+          " • " + this.closest(".ticket").querySelector(".ticket-header .plate").textContent + 
+          " • Inicio: " + this.closest(".ticket").querySelector(".text-start b").textContent + 
+          " • Permanencia: " + this.closest(".ticket").querySelector(".text-end b").textContent;
+
+          // Mostrar el modal
+          const modalPago = new bootstrap.Modal(document.getElementById('modalPago'));
+          document.getElementById('ticketInfo').textContent = ticketInfo;
+          modalPago.show();
+
+          // Manejar el botón de cobrar
+          document.getElementById('btnCobrar').addEventListener('click', function() {
+            const metodoPago = document.getElementById('metodoPago').value;
+
+            fetch("../../controladores/ticket.php", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `id_registro=${encodeURIComponent(ticketId)}&metodo_pago=${encodeURIComponent(metodoPago)}`
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  modalPago.hide();
+                  document.querySelector(`.cerrar-ticket[data-id="${ticketId}"]`).closest(".ticket").remove(); // Eliminar el ticket de la interfaz
+                } else {
+                  alert("Error al cerrar el ticket: " + data.message);
+                }
+              })
+          });
+        });
+      });
+    });
+  </script>
   <script>
     layout_change('light');
   </script>
