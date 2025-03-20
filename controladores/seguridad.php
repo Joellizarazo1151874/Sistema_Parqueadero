@@ -1,7 +1,7 @@
 <?php
 // Verificar si existe la sesión 'datos_login'
 if (!isset($_SESSION['datos_login'])) {
-    header("location: formularios/index.php");
+    header("location: ../formularios/index.php");
     exit();
 }
 

@@ -2,14 +2,9 @@
 session_start();
 include '../../modelo/conexion.php';
 include '../../controladores/seguridad.php';
-// Consulta para obtener los registros activos con la información del vehículo
-$query = "SELECT r.*, v.placa, v.tipo 
-FROM registros_parqueo r 
-INNER JOIN vehiculos v ON r.id_vehiculo = v.id_vehiculo
-WHERE r.estado = 'activo' 
-ORDER BY r.hora_ingreso DESC";
+include '../../controladores/consultas_tap1.php';
+date_default_timezone_set('America/Bogota'); // Cambia 'America/Bogota' por tu zona horaria
 
-$resultado = $conexion->query($query);
 ?>
 
 <!DOCTYPE html>
@@ -37,6 +32,7 @@ $resultado = $conexion->query($query);
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <!-- [Font Awesome CSS] -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- [Tabler Icons] -->
   <link rel="stylesheet" href="../assets/fonts/tabler-icons.min.css">
   <!-- [Feather Icons] -->
@@ -88,339 +84,13 @@ $resultado = $conexion->query($query);
 
         <!-- Contenido dinámico -->
         <div class="tab-container mt-4">
-          <div id="tab1" class="tab-content active">
-            <div class="search-bar mb-3">
-              <div class="row">
-                <div class="col-md-1">
-                  <select class="form-select">
-                    <option value="todos">Todos</option>
-                    <option value="orden">Orden</option>
-                  </select>
-                </div>
-                <div class="col-md-2">
+          <!-- tap 1 tickets abiertos -->
+          <?php include 'gestion_tap/tap1.php'; ?>
+          <!-- tap 2 tickets cerrados -->
+          <?php include 'gestion_tap/tap2.php'; ?>
+          <!-- tap 2 tickets cerrados -->
+          <?php include 'gestion_tap/tap3.php'; ?>
 
-                  <select class="form-select">
-                    <option value="ultimos">Últimos Ingresados</option>
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <input type="text" id="searchInput" name="busqueda" class="form-control" placeholder="Buscar matrícula" value="<?php echo isset($_GET['busqueda']) ? htmlspecialchars($_GET['busqueda']) : ''; ?>">
-                </div>
-              </div>
-            </div>
-            <div class="tickets-container">
-              <?php
-              if ($resultado && $resultado->num_rows > 0) {
-                while ($row = $resultado->fetch_assoc()) {
-                  // Calcular el tiempo transcurrido
-                  $hora_ingreso = new DateTime($row['hora_ingreso']);
-                  $fecha_formateada = $hora_ingreso->format('d/m H:i'); // Formato de la hora de ingreso
-                  $timestamp_ingreso = strtotime($row['hora_ingreso']); // Convertir a timestamp UNIX
-
-              ?>
-                  <div class="ticket">
-                    <div class="row" style="background-color: rgb(174, 213, 255); padding: 15px;">
-                      <div class="col-3">
-                        <div class="time-box">
-                          <i class="feather icon-clock"></i>
-                          <span>HORA</span>
-                        </div>
-                      </div>
-                      <div class="col-9">
-                        <div class="ticket-header">
-                          <h3><?php echo strtoupper($row['tipo']); ?></h3>
-                          <p class="plate"><?php echo $row['placa']; ?></p>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="ticket-content">
-                      <div class="row">
-                        <div class="col-6 text-start">
-                          <small>ENTRADA</small>
-                          <br>
-                          <b><?php echo $fecha_formateada; ?></b>
-                          <br>
-                          <small>IMPORTE ACTUAL</small>
-                          <br>
-                          <b>$<?php echo $row['total_pagado']; ?></b>
-                        </div>
-                        <div class="col-6 text-end">
-                          <small>TIEMPO</small>
-                          <br>
-                          <b class="tiempo-transcurrido" data-ingreso="<?php echo $timestamp_ingreso; ?>">Calculando...</b>
-                          <br>
-                          <small class="debt">DEBE</small>
-                          <br>
-                          <b class="debt">$<?php echo $row['total_pagado']; ?></b>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="ticket-actions">
-                      <div class="icon-btn-group">
-                        <button class="icon-btn"><i class="fas fa-edit"></i></button>
-                        <button class="icon-btn"><i class="fas fa-print"></i></button>
-                        <button class="icon-btn"><i class="fas fa-file-alt"></i></button>
-                      </div>
-                      <button class="close-btn cerrar-ticket" data-id="<?php echo $row['id_registro']; ?>">Cerrar</button>
-                    </div>
-                  </div>
-                  <!-- Modal de Pago -->
-                  <div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="modalPagoLabel">CAJA</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                          <div class="ticket-info mb-3">
-                            <h6 id="ticketInfo"></h6>
-                          </div>
-                          <div class="amount text-center mb-4">
-                            <h6>Importe:</h6>
-                            <h3>$100</h3>
-                          </div>
-                          <div class="mb-3">
-                            <div class="mb-3">
-                              <label class="form-label">Seleccione la forma de pago</label>
-                              <select class="form-select" id="metodoPago">
-                                <option value="efectivo">Efectivo</option>
-                                <option value="tarjeta_credito">Tarjeta de Crédito</option>
-                                <option value="tarjeta_debito">Tarjeta de Débito</option>
-                                <option value="mercadopago">MercadoPago</option>
-                              </select>
-                            </div>
-                            <label class="form-label">Descripción (Caja)</label>
-                            <input type="text" class="form-control" value="Ticket #JOEL. Permanencia: 0:00">
-                          </div>
-                          <div class="mb-3">
-                            <label class="form-label">Items</label>
-                            <div class="input-group">
-                              <input type="text" class="form-control" value="1 x Hora ($100) = $100" readonly>
-                            </div>
-                          </div>
-
-                          <div class="card mb-2">
-                            <div class="card-body py-2">
-                              <small class="text-muted d-block mb-2">Impresión de Comprobante</small>
-                              <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="comprobante" id="sinComprobante" value="sin" checked>
-                                <label class="form-check-label" for="sinComprobante">Sin Comprobante</label>
-                              </div>
-                              <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="comprobante" id="recibo" value="recibo">
-                                <label class="form-check-label" for="recibo">Recibo</label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-primary" id="btnCobrar">Cobrar</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-              <?php
-                }
-              } else {
-                echo '<div class="alert alert-info">No hay vehículos estacionados actualmente.</div>';
-              }
-              ?>
-            </div>
-
-          </div>
-          <div id="tab2" class="tab-content d-none">
-            <div class="row">
-              <div class="col-lg-3 col-md-4">
-                <div class="filters card p-3">
-                  <h6 class="fw-bold">Filtros</h6>
-                  <div class="filter-options">
-                    <div class="mb-2">
-                      <label class="form-label">Categoría</label>
-                      <select class="form-select">
-                        <option value="todos">Todas</option>
-                      </select>
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label">Abierto por</label>
-                      <select class="form-select">
-                        <option value="todos">Todos los Operadores</option>
-                      </select>
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label">Cerrado por</label>
-                      <select class="form-select">
-                        <option value="todos">Todos los Operadores</option>
-                      </select>
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label">Tipo de Tickets</label>
-                      <select class="form-select">
-                        <option value="todos">Todos</option>
-                      </select>
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label">Cancelación</label>
-                      <select class="form-select">
-                        <option value="todos">Todos</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-9 col-md-8">
-                <div class="ticket-summary">
-                  <h3>Tickets Cerrados</h3>
-                  <p>Aquí encontrarás los tickets que ya han sido resueltos y cerrados.</p>
-                  <div class="table-responsive">
-                    <table class="table custom-table">
-                      <thead>
-                        <tr>
-                          <th>ID</th>
-                          <th>Fecha</th>
-                          <th>Matricula</th>
-                          <th>Categoría</th>
-                          <th>Tipo</th>
-                          <th>Desde</th>
-                          <th>Hasta</th>
-                          <th>Observación</th>
-                          <th>Importe</th>
-                          <th>Pagado</th>
-                          <th>Abierto por</th>
-                          <th>Cerrado por</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>101</td>
-                          <td>13/03/25 09:26</td>
-                          <td>JOEL</td>
-                          <td>MOTO</td>
-                          <td>x Hora</td>
-                          <td>09:26 (13/03)</td>
-                          <td>09:26 (13/03)</td>
-                          <td>Observación</td>
-                          <td>$100</td>
-                          <td>$100</td>
-                          <td>JOEL LIZARAZO</td>
-                          <td>JOEL LIZARAZO</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <div class="summary-stats row">
-                  <div class="stat col-6 col-md-3">
-                    <strong>Tickets Cerrados</strong>
-                    <span>1</span>
-                  </div>
-                  <div class="stat col-6 col-md-3">
-                    <strong>Cancelados</strong>
-                    <span>0</span>
-                  </div>
-                  <div class="stat col-6 col-md-3">
-                    <strong>Tickets x Hora</strong>
-                    <span>1</span>
-                  </div>
-                  <div class="stat col-6 col-md-3">
-                    <strong>Importe Total</strong>
-                    <span>$100</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="tab3" class="tab-content d-none">
-            <div class="row">
-              <!-- Columna del calendario -->
-              <div class="col-md-3">
-                <div class="card p-3">
-                  <h6 class="fw-bold text-center">marzo_2025</h6>
-                  <div id="calendar"></div>
-                </div>
-              </div>
-
-              <!-- Columna principal -->
-              <div class="col-md-9">
-                <div class="ticket-summary card p-3">
-                  <!-- Filtros -->
-                  <div class="d-flex align-items-center gap-2 mb-3">
-                    <select class="form-select" style="width: 180px;">
-                      <option selected>Filtrar por Fecha</option>
-                      <option>Historico</option>
-                    </select>
-                    <input type="text" class="form-control" placeholder="Matrícula">
-                    <input type="text" class="form-control" placeholder="Ticket ID">
-                    <input type="text" class="form-control" placeholder="Detalle">
-                    <button class="btn btn-outline-secondary">
-                      <i class="fas fa-share-alt"></i>
-                    </button>
-                  </div>
-
-                  <!-- Tabla de tickets -->
-                  <div class="table-responsive">
-                    <table class="table table-striped">
-                      <thead>
-                        <tr class="table-light">
-                          <th>E/S</th>
-                          <th>Fecha</th>
-                          <th>Hora</th>
-                          <th>Detalle</th>
-                          <th>Categoría</th>
-                          <th>Ticket ID</th>
-                          <th>Mensual ID</th>
-                          <th>Operador</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td><i class="fas fa-arrow-right text-success"></i></td>
-                          <td>13/03/25</td>
-                          <td>09:26</td>
-                          <td>#JOEL</td>
-                          <td>Moto</td>
-                          <td>101</td>
-                          <td>--</td>
-                          <td>joel lizarazo</td>
-                        </tr>
-                        <tr>
-                          <td><i class="fas fa-arrow-right text-success"></i></td>
-                          <td>13/03/25</td>
-                          <td>09:26</td>
-                          <td>#CARRO</td>
-                          <td>Auto</td>
-                          <td>102</td>
-                          <td>--</td>
-                          <td>joel lizarazo</td>
-                        </tr>
-                        <tr>
-                          <td><i class="fas fa-arrow-left text-danger"></i></td>
-                          <td>13/03/25</td>
-                          <td>09:26</td>
-                          <td>#CAMIONETA</td>
-                          <td>Camioneta</td>
-                          <td>103</td>
-                          <td>--</td>
-                          <td>joel lizarazo</td>
-                        </tr>
-                        <tr>
-                          <td><i class="fas fa-arrow-right text-success"></i></td>
-                          <td>13/03/25</td>
-                          <td>09:27</td>
-                          <td>#JOEL</td>
-                          <td>Moto</td>
-                          <td>101</td>
-                          <td>--</td>
-                          <td>joel lizarazo</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-          </div>
           <div id="tab4" class="tab-content d-none">
             <h3>Reportes</h3>
             <p>Genera y visualiza reportes detallados sobre los tickets y actividades.</p>
@@ -437,28 +107,10 @@ $resultado = $conexion->query($query);
   <!-- [ Footer ] start -->
   <?php include 'layouts/footer.php'; ?>
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const tabs = document.querySelectorAll(".nav-link");
-      const contents = document.querySelectorAll(".tab-content");
 
-      tabs.forEach(tab => {
-        tab.addEventListener("click", function(event) {
-          event.preventDefault();
-
-          // Quitar la clase "active" de todas las pestañas
-          tabs.forEach(t => t.classList.remove("active"));
-          // Ocultar todos los contenidos
-          contents.forEach(content => content.classList.add("d-none"));
-
-          // Agregar "active" a la pestaña seleccionada
-          this.classList.add("active");
-          // Mostrar el contenido correspondiente
-          document.getElementById(this.getAttribute("data-tab")).classList.remove("d-none");
-        });
-      });
-    });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
   <!-- [Page Specific JS] start -->
   <script src="../assets/js/plugins/apexcharts.min.js"></script>
   <script src="../assets/js/pages/dashboard-default.js"></script>
@@ -472,59 +124,89 @@ $resultado = $conexion->query($query);
   <script src="../assets/js/plugins/feather.min.js"></script>
   <script src="../assets/js/ticket.js"></script>
   <script>
-    // Cierre de ticket
     document.addEventListener("DOMContentLoaded", function() {
       const botonesCerrar = document.querySelectorAll(".cerrar-ticket");
+      let intervaloCosto = null; // Para almacenar el intervalo y poder detenerlo
 
       botonesCerrar.forEach(boton => {
         boton.addEventListener("click", function() {
           const ticketId = this.getAttribute("data-id");
-          const ticketInfo = this.closest(".ticket").querySelector(".ticket-header h3").textContent + 
-          " • " + this.closest(".ticket").querySelector(".ticket-header .plate").textContent + 
-          " • Inicio: " + this.closest(".ticket").querySelector(".text-start b").textContent + 
-          " • Permanencia: " + this.closest(".ticket").querySelector(".text-end b").textContent;
+          const horaIngreso = parseInt(this.getAttribute("data-ingreso"));
+          const costoPorMinuto = parseFloat(this.getAttribute("data-costo-por-minuto"));
+          const placa = this.getAttribute("data-placa");
+          const tipo = this.getAttribute("data-tipo");
+          const metodoPago = this.getAttribute("data-metodo-pago");
+
+          // Formatear la hora de ingreso a "dd/mm HH:MM"
+          const fechaIngreso = new Date(horaIngreso * 1000);
+          const horaIngresoFormateada = fechaIngreso.toLocaleString("es-CO", {
+            day: "2-digit",
+            month: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+
+          // Función para actualizar tiempo transcurrido y costo en el modal
+          function actualizarTiempoYCostoModal() {
+            const ahora = Math.floor(Date.now() / 1000); // Tiempo actual en segundos
+            let minutosTranscurridos = Math.floor((ahora - horaIngreso) / 60);
+
+            // Formatear tiempo transcurrido en "Xh Ym"
+            let horas = Math.floor(minutosTranscurridos / 60);
+            let minutos = minutosTranscurridos % 60;
+            let tiempoTranscurrido = `${horas}h ${minutos}m`;
+
+            let costo = 0;
+            if (minutosTranscurridos > 15) {
+              let minutosCobrados = minutosTranscurridos - 15; // Restar los 15 min de tolerancia
+              costo = minutosCobrados * costoPorMinuto;
+              costo = Math.floor(costo / 100) * 100; // Redondear en múltiplos de 100
+            }
+
+            // Calcular los items del cobro
+            let cantidadHoras = Math.floor(minutosTranscurridos / 60);
+            let cantidadMinutos = minutosTranscurridos % 60;
+            let costoHoras = cantidadHoras * 2000;
+            let costoMinutos = (cantidadMinutos > 15) ? (cantidadMinutos - 15) * costoPorMinuto : 0;
+            
+            // Obtener el valor actual del input (si ya fue editado, conservar el texto del usuario)
+            let descripcionActual = document.getElementById("modalDescripcion").value;
+            let nuevaDescripcion = `Ticket #${placa} • ${tipo} • Inicio: ${horaIngresoFormateada} • Permanencia: ${tiempoTranscurrido}`;
+
+            // Si el usuario no ha editado la descripción, actualizarla automáticamente
+            if (!descripcionActual || descripcionActual.startsWith("Ticket #")) {
+              document.getElementById("modalDescripcion").value = nuevaDescripcion;
+            }
+            // Mostrar datos en el modal
+            document.getElementById("ticketInfo").innerHTML = `
+                    #${placa} • ${tipo} <br>
+                    <small>Ingreso: ${horaIngresoFormateada}</small> <br>
+                    <small>Tiempo: ${tiempoTranscurrido}</small>
+                `;
+            document.getElementById("modalCosto").innerText = `$${costo.toLocaleString()}`;
+            document.getElementById("total_pagado").value = `${costo.toLocaleString()}`;
+            document.getElementById("id_ticket").value = `${ticketId.toLocaleString()}`;
+            // Mostrar el detalle en "Items"
+            document.getElementById("modalItems").value =
+              `${cantidadHoras} x Hora ($2000) + ${cantidadMinutos} min ($${Math.floor(costoMinutos)}) = $${costo}`;
+          }
+
+          // Llamar la función inmediatamente y actualizar cada segundo
+          actualizarTiempoYCostoModal();
+          if (intervaloCosto) clearInterval(intervaloCosto);
+          intervaloCosto = setInterval(actualizarTiempoYCostoModal, 1000);
 
           // Mostrar el modal
-          const modalPago = new bootstrap.Modal(document.getElementById('modalPago'));
-          document.getElementById('ticketInfo').textContent = ticketInfo;
-          modalPago.show();
+          const modal = new bootstrap.Modal(document.getElementById("modalPago"));
+          modal.show();
 
-          // Manejar el botón de cobrar
-          document.getElementById('btnCobrar').addEventListener('click', function() {
-            const metodoPago = document.getElementById('metodoPago').value;
-
-            fetch("../../controladores/ticket.php", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: `id_registro=${encodeURIComponent(ticketId)}&metodo_pago=${encodeURIComponent(metodoPago)}`
-              })
-              .then(response => response.json())
-              .then(data => {
-                if (data.success) {
-                  modalPago.hide();
-                  document.querySelector(`.cerrar-ticket[data-id="${ticketId}"]`).closest(".ticket").remove(); // Eliminar el ticket de la interfaz
-                } else {
-                  alert("Error al cerrar el ticket: " + data.message);
-                }
-              })
+          // Detener la actualización cuando el modal se cierre
+          document.getElementById("modalPago").addEventListener("hidden.bs.modal", function() {
+            clearInterval(intervaloCosto);
           });
         });
       });
     });
-  </script>
-  <script>
-    layout_change('light');
-  </script>
-  <script>
-    layout_rtl_change('false');
-  </script>
-  <script>
-    preset_change("preset-1");
-  </script>
-  <script>
-    font_change("Public-Sans");
   </script>
 </body>
 <!-- [Body] end -->

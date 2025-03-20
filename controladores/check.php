@@ -46,7 +46,7 @@ if (isset($_POST['usuario']) && isset($_POST['contraseña'])) {
         );
 
 
-        // Redirige al usuario a la página de registro.
+        // Redirige al usuario a la página de gestion.
         header("location: ../vistas/estructuras/gestion.php");
     } else {
         // Si no hay resultados, redirige al usuario a la página de inicio de sesión con un mensaje de error.
