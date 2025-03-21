@@ -1,5 +1,13 @@
 <?php
 include '../modelo/conexion.php'; // Conectar a la base de datos
+
+// Verificar si las funciones necesarias están disponibles
+if (!function_exists('time') || !function_exists('date_default_timezone_set') || 
+    !function_exists('json_encode') || !function_exists('date') || 
+    !function_exists('implode') || !function_exists('header')) {
+    die("Error: Funciones esenciales de PHP no están disponibles. Verifique su instalación de PHP.");
+}
+
 date_default_timezone_set('America/Bogota'); // Cambia 'America/Bogota' por tu zona horaria
 // Obtener la hora actual del servidor
 $hora_servidor = time(); // Timestamp en segundos
@@ -19,6 +27,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (empty($total_pagado)) {
         $total_pagado = 0;
     }
+    
+    // Iniciar la sesión para obtener datos del usuario actual
+    session_start();
+    $cerrado_por = $_SESSION['datos_login']['nombre'];
 
     // Array para almacenar los campos faltantes o vacíos
     $campos_faltantes = [];
@@ -44,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Actualizar el registro en la base de datos
     $query = "UPDATE registros_parqueo 
-              SET hora_salida = ?, estado = 'cerrado', total_pagado = ?, metodo_pago = ?, descripcion = ?
+              SET hora_salida = ?, estado = 'cerrado', total_pagado = ?, metodo_pago = ?, descripcion = ?, cerrado_por = ?
               WHERE id_registro = ?";
     $stmt = $conexion->prepare($query);
 
@@ -53,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Vincular los parámetros
-    $stmt->bind_param("ssssi", $hora_salida, $total_pagado, $metodo_pago, $descripcion, $id_registro);
+    $stmt->bind_param("sssssi", $hora_salida, $total_pagado, $metodo_pago, $descripcion, $cerrado_por, $id_registro);
 
     // Ejecutar la consulta
     if ($stmt->execute()) {

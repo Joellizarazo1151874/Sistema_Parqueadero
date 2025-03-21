@@ -26,7 +26,7 @@ function actualizarTiempoYCosto() {
       costo = Math.floor(costo / 100) * 100; // Redondear hacia abajo en múltiplos de 100
     }
 
-    elemento.innerText = `$${costo.toLocaleString()}`;
+    elemento.innerText = `$${costo.toLocaleString('en-US')}`;
   });
 }
 
@@ -98,8 +98,8 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
 
         //datos los cuales seran enviados al formulario para cerrar el ticket
-        document.getElementById("modalCosto").innerText = `$${costo.toLocaleString()}`;
-        document.getElementById("total_pagado").value = `${costo.toLocaleString()}`;
+        document.getElementById("modalCosto").innerText = `$${costo.toLocaleString('en-US')}`;
+        document.getElementById("total_pagado").value = `${costo.toLocaleString().replace(/\./g, '')}`;
         document.getElementById("id_ticket").value = `${ticketId.toLocaleString()}`;
         // Mostrar el detalle en "Items"
         document.getElementById("modalItems").value =
@@ -129,19 +129,46 @@ document.addEventListener("DOMContentLoaded", function () {
   const tabs = document.querySelectorAll(".nav-link");
   const contents = document.querySelectorAll(".tab-content");
 
+  // Comprobar si hay un parámetro tab en la URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  
+  if (tabParam) {
+    // Si hay un parámetro tab, activar esa pestaña
+    tabs.forEach(t => t.classList.remove("active"));
+    contents.forEach(content => content.classList.add("d-none"));
+    
+    // Activar la pestaña correspondiente
+    const selectedTab = document.querySelector(`.nav-link[data-tab="${tabParam}"]`);
+    if (selectedTab) {
+      selectedTab.classList.add("active");
+      document.getElementById(tabParam).classList.remove("d-none");
+    }
+  }
+
   tabs.forEach(tab => {
     tab.addEventListener("click", function (event) {
-      event.preventDefault();
+      if (!this.getAttribute('href') || this.getAttribute('href') === '#') {
+        event.preventDefault();
 
-      // Quitar la clase "active" de todas las pestañas
-      tabs.forEach(t => t.classList.remove("active"));
-      // Ocultar todos los contenidos
-      contents.forEach(content => content.classList.add("d-none"));
+        // Obtener el ID de la pestaña
+        const tabId = this.getAttribute("data-tab");
+        
+        // Actualizar la URL sin recargar la página
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tabId);
+        window.history.pushState({}, '', url);
 
-      // Agregar "active" a la pestaña seleccionada
-      this.classList.add("active");
-      // Mostrar el contenido correspondiente
-      document.getElementById(this.getAttribute("data-tab")).classList.remove("d-none");
+        // Quitar la clase "active" de todas las pestañas
+        tabs.forEach(t => t.classList.remove("active"));
+        // Ocultar todos los contenidos
+        contents.forEach(content => content.classList.add("d-none"));
+
+        // Agregar "active" a la pestaña seleccionada
+        this.classList.add("active");
+        // Mostrar el contenido correspondiente
+        document.getElementById(tabId).classList.remove("d-none");
+      }
     });
   });
 });

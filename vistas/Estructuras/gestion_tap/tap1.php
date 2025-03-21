@@ -121,7 +121,7 @@
                                         </div>
                                         <label class="form-label">Descripción (Caja)</label>
                                         <input type="text" class="form-control" id="modalDescripcion" name="descripcion">
-                                        <input type="hidden" class="form-control" id="total_pagado" name="total_pagado">
+                                        <input type="hidden" class="form-control" id="total_pagado" name="total_pagado"> 
                                         <input type="hidden" class="form-control" id="id_ticket" name="id_registro">
                                     </div>
                                     <div class="mb-3">
@@ -160,4 +160,6 @@
         ?>
     </div>
 
+    <!-- Espacio adicional para evitar que el footer oculte contenido -->
+    <div class="mb-4"></div>
 </div>

@@ -3,7 +3,10 @@ session_start();
 include '../../modelo/conexion.php';
 include '../../controladores/seguridad.php';
 include '../../controladores/consultas_tap1.php';
+include '../../controladores/consultas_tap2.php';
 date_default_timezone_set('America/Bogota'); // Cambia 'America/Bogota' por tu zona horaria
+
+
 
 ?>
 
@@ -66,19 +69,19 @@ date_default_timezone_set('America/Bogota'); // Cambia 'America/Bogota' por tu z
         <!-- Menú de Navegación -->
         <ul class="nav nav-tabs justify-content-center" id="menu-tabs">
           <li class="nav-item">
-            <a class="nav-link active" data-tab="tab1" href="#">Tickets Abiertos</a>
+            <a class="nav-link <?php echo (!isset($_GET['tab']) || $_GET['tab'] == 'tab1') ? 'active' : ''; ?>" data-tab="tab1" href="?tab=tab1">Tickets Abiertos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-tab="tab2" href="#">Tickets Cerrados</a>
+            <a class="nav-link <?php echo (isset($_GET['tab']) && $_GET['tab'] == 'tab2') ? 'active' : ''; ?>" data-tab="tab2" href="?tab=tab2">Tickets Cerrados</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-tab="tab3" href="#">Entradas / Salidas</a>
+            <a class="nav-link <?php echo (isset($_GET['tab']) && $_GET['tab'] == 'tab3') ? 'active' : ''; ?>" data-tab="tab3" href="?tab=tab3">Entradas / Salidas</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-tab="tab4" href="#">Reportes</a>
+            <a class="nav-link <?php echo (isset($_GET['tab']) && $_GET['tab'] == 'tab4') ? 'active' : ''; ?>" data-tab="tab4" href="?tab=tab4">Reportes</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-tab="tab5" href="#">Estadísticas</a>
+            <a class="nav-link <?php echo (isset($_GET['tab']) && $_GET['tab'] == 'tab5') ? 'active' : ''; ?>" data-tab="tab5" href="?tab=tab5">Estadísticas</a>
           </li>
         </ul>
 
@@ -107,7 +110,21 @@ date_default_timezone_set('America/Bogota'); // Cambia 'America/Bogota' por tu z
   <!-- [ Footer ] start -->
   <?php include 'layouts/footer.php'; ?>
   <script>
-
+  // Activar la pestaña correspondiente según la URL
+  document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab') || 'tab1';
+    
+    // Mostrar la pestaña activa
+    document.querySelectorAll('.tab-content').forEach(function(content) {
+      content.classList.add('d-none');
+    });
+    
+    const activeTab = document.getElementById(tab);
+    if (activeTab) {
+      activeTab.classList.remove('d-none');
+    }
+  });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

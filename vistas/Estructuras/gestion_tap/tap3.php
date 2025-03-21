@@ -88,4 +88,7 @@
             </div>
         </div>
     </div>
+
+    <!-- Espacio adicional para evitar que el footer oculte contenido -->
+    <div class="mb-4"></div>
 </div>
