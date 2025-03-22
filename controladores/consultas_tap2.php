@@ -1,6 +1,6 @@
 <?php
 // Definir el número de registros por página
-$registros_por_pagina = 7;
+$registros_por_pagina = 10;
 
 // Consulta para obtener el total de registros para la paginación
 $query_total = "SELECT COUNT(*) as total FROM registros_parqueo r 

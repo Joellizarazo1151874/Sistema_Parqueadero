@@ -40,7 +40,6 @@
         </div>
         <div class="col-lg-9 col-md-8">
             <div class="ticket-summary">
-                <p>Aquí encontrarás los tickets que ya han sido resueltos y cerrados.</p>
                 <div class="table-responsive">
                     <?php
                     // Inicializar variable para la suma total
@@ -58,9 +57,9 @@
                                         <th>Tipo</th>
                                         <th>Desde</th>
                                         <th>Hasta</th>
-                                        <th>Observación</th>
                                         <th>Total</th>
                                         <th>Método Pago</th>
+                                        <th>Abierto por</th>
                                         <th>Cerrado por</th>
                                     </tr>
                                 </thead>
@@ -81,10 +80,10 @@
                                         <td>x Hora</td>
                                         <td><?php echo $fecha_ingreso; ?></td>
                                         <td><?php echo $fecha_salida; ?></td>
-                                        <td><?php echo $row['descripcion']; ?></td>
                                         <td>$<?php echo number_format($row['total_pagado'], 0, ',', '.'); ?></td>
                                         <td><?php echo $row['metodo_pago']; ?></td>
-                                        <td><?php echo $row['cerrado_por']; ?></td>
+                                        <td><?php echo !empty($row['abierto_por']) ? $row['abierto_por'] : 'Sistema'; ?></td>
+                                        <td><?php echo !empty($row['cerrado_por']) ? $row['cerrado_por'] : $_SESSION['datos_login']['nombre']; ?></td>
                                     </tr>
                                 <?php } ?>
                                 </tbody>
@@ -98,9 +97,9 @@
                 
                 <!-- Navegación de paginación -->
                 <?php if ($total_paginas > 1): ?>
-                <div class="pagination-container py-0">
+                <div class="pagination-container py-0 mb-0">
                     <nav aria-label="Navegación de página">
-                        <ul class="pagination justify-content-center mb-2 py-0">
+                        <ul class="pagination justify-content-center mb-0 py-0">
                             <!-- Botón Anterior -->
                             <li class="page-item <?php echo ($pagina_actual <= 1) ? 'disabled' : ''; ?>">
                                 <a class="page-link" href="javascript:void(0);" onclick="<?php echo ($pagina_actual <= 1) ? 'return false' : 'cambiarPagina(' . ($pagina_actual - 1) . ')'; ?>" aria-label="Anterior">
@@ -147,7 +146,7 @@
                 }
                 </script>
             </div>
-            <div class="summary-stats row">
+            <div class="summary-stats row mt-2">
                 <div class="stat col-6 col-md-3">
                     <strong>Tickets Cerrados</strong>
                     <span><?php echo ($resultado_cerrados) ? $resultado_cerrados->num_rows : 0; ?></span>

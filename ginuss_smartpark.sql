@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 20-03-2025 a las 19:21:54
+-- Tiempo de generación: 22-03-2025 a las 17:54:41
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -86,25 +86,31 @@ CREATE TABLE `registros_parqueo` (
   `hora_ingreso` datetime NOT NULL,
   `hora_salida` datetime DEFAULT NULL,
   `estado` varchar(50) NOT NULL,
-  `total_pagado` decimal(10,3) NOT NULL DEFAULT 0.000,
+  `total_pagado` int(10) DEFAULT 0,
   `metodo_pago` varchar(100) DEFAULT NULL,
-  `descripcion` text NOT NULL
+  `descripcion` text NOT NULL,
+  `cerrado_por` varchar(100) NOT NULL,
+  `abierto_por` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `registros_parqueo`
 --
 
-INSERT INTO `registros_parqueo` (`id_registro`, `id_vehiculo`, `hora_ingreso`, `hora_salida`, `estado`, `total_pagado`, `metodo_pago`, `descripcion`) VALUES
-(40, 22, '2025-03-19 15:16:14', '2025-03-20 13:07:32', 'cerrado', 43.100, 'mercadopago', 'Ticket #JSB287 • MOTO • Inicio: 19/3, 03:16 p. m. • Permanencia: 21h 51m'),
-(54, 18, '2025-03-19 15:52:01', '2025-03-20 18:54:57', 'cerrado', 41.500, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 19/3, 03:52 p. m. • Permanencia: 21h 2m'),
-(55, 19, '2025-03-19 16:53:11', '2025-03-20 18:53:14', 'cerrado', 39.400, 'efectivo', 'Ticket #YEV52G • MOTO • Inicio: 19/3, 04:53 p. m. • Permanencia: 20h 0m'),
-(56, 21, '2025-03-20 11:38:51', '2025-03-20 13:01:03', 'cerrado', 2200.000, 'tarjeta_credito', 'Ticket #SQL-623 • AUTO • Inicio: 20/3, 11:38 a. m. • Permanencia: 1h 22m'),
-(57, 19, '2025-03-20 13:03:58', '2025-03-20 13:06:57', 'cerrado', 0.000, 'efectivo', 'Ticket #YEV52G • MOTO • Inicio: 20/3, 01:03 p. m. • Permanencia: 0h 2m'),
-(58, 19, '2025-03-20 13:08:13', NULL, 'activo', 0.000, NULL, ''),
-(59, 18, '2025-03-20 13:08:16', NULL, 'activo', 0.000, NULL, ''),
-(60, 20, '2025-03-20 13:08:20', '2025-03-20 13:17:41', 'cerrado', 0.000, 'efectivo', 'Ticket #HDN121 • MOTOCARRO • Inicio: 20/3, 01:08 p. m. • Permanencia: 0h 9m'),
-(61, 22, '2025-03-20 13:17:59', NULL, 'activo', 0.000, NULL, '');
+INSERT INTO `registros_parqueo` (`id_registro`, `id_vehiculo`, `hora_ingreso`, `hora_salida`, `estado`, `total_pagado`, `metodo_pago`, `descripcion`, `cerrado_por`, `abierto_por`) VALUES
+(57, 19, '2025-03-20 13:03:58', '2025-03-20 13:06:57', 'cerrado', 0, 'efectivo', 'Ticket #YEV52G • MOTO • Inicio: 20/3, 01:03 p. m. • Permanencia: 0h 2m', 'Joel Lizarazo', ''),
+(60, 20, '2025-03-20 13:08:20', '2025-03-20 13:17:41', 'cerrado', 0, 'efectivo', 'Ticket #HDN121 • MOTOCARRO • Inicio: 20/3, 01:08 p. m. • Permanencia: 0h 9m', 'Joel Lizarazo', ''),
+(62, 20, '2025-03-21 15:38:45', '2025-03-21 16:29:48', 'cerrado', 1100, 'efectivo', 'Ticket #HDN121 • MOTOCARRO • Inicio: 21/3, 03:38 p. m. • Permanencia: 0h 51m', 'Joel Lizarazo', ''),
+(63, 18, '2025-03-21 15:44:00', '2025-03-21 15:44:04', 'cerrado', 0, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 21/3, 03:44 p. m. • Permanencia: 0h 0m', 'Joel Lizarazo', ''),
+(64, 23, '2025-03-21 15:58:59', '2025-03-21 17:09:35', 'cerrado', 1800, 'efectivo', 'Ticket #HDN123 • MOTO • Inicio: 21/3, 03:58 p. m. • Permanencia: 1h 10m', 'Joel Lizarazo', ''),
+(66, 18, '2025-03-21 11:59:20', '2025-03-21 16:31:39', 'cerrado', 8500, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 21/3, 11:59 a. m. • Permanencia: 4h 32m', 'Joel Lizarazo', ''),
+(67, 19, '2025-03-21 16:31:47', '2025-03-21 17:07:42', 'cerrado', 600, 'mercadopago', 'Ticket #YEV52G • MOTO • Inicio: 21/3, 04:31 p. m. • Permanencia: 0h 35m', 'Patrocinador 1', ''),
+(68, 18, '2025-03-21 17:08:11', '2025-03-21 17:08:14', 'cerrado', 0, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 21/3, 05:08 p. m. • Permanencia: 0h 0m', 'Joel Lizarazo', ''),
+(69, 18, '2025-03-21 17:08:47', '2025-03-21 17:09:19', 'cerrado', 0, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 21/3, 05:08 p. m. • Permanencia: 0h 0m', 'Joel Lizarazo', ''),
+(70, 18, '2025-03-21 17:09:48', '2025-03-21 17:09:50', 'cerrado', 0, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 21/3, 05:09 p. m. • Permanencia: 0h 0m', 'Joel Lizarazo', ''),
+(71, 18, '2025-03-21 17:17:37', '2025-03-22 11:01:48', 'cerrado', 34900, 'efectivo', 'Ticket #SQL625 • auto • Inicio: 21/3, 05:17 p. m. • Permanencia: 17h 44m', 'Joel Lizarazo', ''),
+(72, 19, '2025-03-22 11:00:46', NULL, 'activo', 0, NULL, '', '', 'Joel Lizarazo'),
+(73, 18, '2025-03-22 11:03:52', NULL, 'activo', 0, NULL, '', '', 'Joel Lizarazo');
 
 -- --------------------------------------------------------
 
@@ -180,7 +186,7 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id_usuario`, `nombre`, `correo`, `contraseña`, `rol`, `fecha_registro`) VALUES
 (1, 'Admin Principal', 'admin@smartpark.com', 'F865B53623B121FD34EE5426C792E5C33AF8C227', 'administrador', '2025-03-10 18:32:30'),
-(2, 'Patrocinador 1', 'patrocinador@smartpark.com', '85EAF14397D4A2CD0CFAE1F3395C04A31BAFB3F8', 'patrocinador', '2025-03-10 18:32:30');
+(2, 'Joel Lizarazo', 'patrocinador@smartpark.com', '85EAF14397D4A2CD0CFAE1F3395C04A31BAFB3F8', 'patrocinador', '2025-03-10 18:32:30');
 
 -- --------------------------------------------------------
 
@@ -205,7 +211,8 @@ INSERT INTO `vehiculos` (`id_vehiculo`, `id_cliente`, `placa`, `tipo`, `descripc
 (19, NULL, 'YEV52G', 'moto', ''),
 (20, NULL, 'HDN121', 'motocarro', ''),
 (21, NULL, 'SQL-623', 'auto', ''),
-(22, NULL, 'JSB287', 'moto', '');
+(22, NULL, 'JSB287', 'moto', ''),
+(23, NULL, 'HDN123', 'moto', '');
 
 --
 -- Índices para tablas volcadas
@@ -302,7 +309,7 @@ ALTER TABLE `pagos`
 -- AUTO_INCREMENT de la tabla `registros_parqueo`
 --
 ALTER TABLE `registros_parqueo`
-  MODIFY `id_registro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `id_registro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT de la tabla `reportes_caja`
@@ -332,7 +339,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `vehiculos`
 --
 ALTER TABLE `vehiculos`
-  MODIFY `id_vehiculo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id_vehiculo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- Restricciones para tablas volcadas

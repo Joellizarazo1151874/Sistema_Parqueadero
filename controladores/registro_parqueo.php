@@ -9,6 +9,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tipo_vehiculo = $_POST['tipo_vehiculo'];
     $matricula = $_POST['matricula'];
     $descripcion = $_POST['descripcion'];
+    
+    // Iniciar sesión para obtener datos del usuario actual
+    session_start();
+    $abierto_por = isset($_SESSION['datos_login']['nombre']) ? $_SESSION['datos_login']['nombre'] : 'Sistema';
 
     try {
         // Verificar si el vehículo ya existe
@@ -36,11 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Registrar el ingreso del vehículo al parqueadero
-        $stmt = $conexion->prepare("INSERT INTO registros_parqueo (id_vehiculo, hora_ingreso, hora_salida, estado, total_pagado, metodo_pago) VALUES (?, NOW(), NULL, 'activo', 0, NULL)");
+        $stmt = $conexion->prepare("INSERT INTO registros_parqueo (id_vehiculo, hora_ingreso, hora_salida, estado, total_pagado, metodo_pago, abierto_por) VALUES (?, NOW(), NULL, 'activo', 0, NULL, ?)");
         if ($stmt === false) {
             die("Error en la preparación de la consulta: " . $conexion->error);
         }
-        $stmt->bind_param("i", $id_vehiculo);
+        $stmt->bind_param("is", $id_vehiculo, $abierto_por);
         $stmt->execute();
 
         header("Location: ../vistas/Estructuras/gestion.php");
