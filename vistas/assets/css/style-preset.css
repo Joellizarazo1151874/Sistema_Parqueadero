@@ -333,7 +333,16 @@ h2 {
   transition: 0.3s ease-in-out;
   box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
 }
+.add-matricula,
+.remove-matricula {
+    background-color: #007bff;
+    color: white;
+}
 
+.add-matricula:hover,
+.remove-matricula:hover {
+    background-color: #0056b3;
+}
 /* Efecto al pasar el mouse */
 .btn-edit:hover {
   background: #0056b3;

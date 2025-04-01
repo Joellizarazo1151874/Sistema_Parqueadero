@@ -69,11 +69,6 @@ include '../../controladores/consultas_clientes_tap1.php';
             $tipoToast = 'danger';
             $mensajeToast = 'El usuario ya existe.';
         }
-        if (isset($_GET['success']) && $_GET['success'] == '1') {
-            $mostrarToast = true;
-            $tipoToast = 'success';
-            $mensajeToast = 'Cliente registrado correctamente.';
-        }
         ?>
         
         <!-- Toast de aviso -->
@@ -131,8 +126,25 @@ include '../../controladores/consultas_clientes_tap1.php';
   <?php include 'layouts/footer.php'; ?>
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const activeTab = urlParams.get('tab') || 'tab1';
+
       const tabs = document.querySelectorAll(".nav-link");
       const contents = document.querySelectorAll(".tab-content");
+
+      tabs.forEach(tab => {
+        tab.classList.remove("active");
+        if (tab.getAttribute("data-tab") === activeTab) {
+          tab.classList.add("active");
+        }
+      });
+
+      contents.forEach(content => {
+        content.classList.add("d-none");
+        if (content.id === activeTab) {
+          content.classList.remove("d-none");
+        }
+      });
 
       tabs.forEach(tab => {
         tab.addEventListener("click", function(event) {

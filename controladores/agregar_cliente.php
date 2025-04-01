@@ -1,14 +1,15 @@
 <?php
 include_once '../modelo/conexion.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = $_POST['nombre'];
     $telefono = $_POST['telefono'];
     $correo = $_POST['correo'];
-    $matriculas = $_POST['matriculas']; // Array de matrículas
-    $tipos_vehiculo = $_POST['tipo_vehiculo']; // Array de tipos de vehículo
-    $descripciones = $_POST['descripciones']; // Array de descripciones de vehículos
+    $matriculas = $_POST['matriculas'];
+    $tipos_vehiculo = $_POST['tipo_vehiculo'];
+    $descripciones = $_POST['descripciones'];
 
-    // Verificar si el correo ya existe en la base de datos
+    // Verificar si el correo ya existe
     $check_email = $conexion->prepare("SELECT id_cliente FROM clientes WHERE correo = ?");
     $check_email->bind_param("s", $correo);
     $check_email->execute();
@@ -59,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 
-    // Redirigir o mostrar un mensaje de éxito
+    // Redirigir
     header("Location: ../vistas/Estructuras/clientes.php?success=1");
     exit();
 }
