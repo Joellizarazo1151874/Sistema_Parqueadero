@@ -124,6 +124,8 @@ include '../../controladores/consultas_clientes_tap1.php';
   <!-- [ Main Content ] end -->
   <!-- [ Footer ] start -->
   <?php include 'layouts/footer.php'; ?>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -164,9 +166,7 @@ include '../../controladores/consultas_clientes_tap1.php';
     });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- [Page Specific JS] start -->
-  <script src="../assets/js/plugins/apexcharts.min.js"></script>
-  <script src="../assets/js/pages/dashboard-default.js"></script>
+
   <!-- [Page Specific JS] end -->
   <!-- Required Js -->
   <script src="../assets/js/plugins/popper.min.js"></script>

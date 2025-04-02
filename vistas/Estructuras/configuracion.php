@@ -2,6 +2,7 @@
 session_start();
 include '../../modelo/conexion.php';
 include '../../controladores/seguridad.php';
+include '../../controladores/consultas_configuracion_tap1.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,6 +25,10 @@ include '../../controladores/seguridad.php';
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
     id="main-font-link">
+    <!-- Incluir SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
+  <!-- Font Awesome CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <!-- [Bootstrap CSS] -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <!-- [Bootstrap Icons] -->
@@ -100,229 +105,10 @@ include '../../controladores/seguridad.php';
         <!-- Contenido dinámico -->
         <div class="tab-container mt-4">
           <!-- Tab de Categorías -->
-          <div id="tab1" class="tab-content active">
-            <div class="row justify-content-center">
-              <div class="col-md-5">
-                <div class="card p-3">
-                  <h3 class="text-center mb-4">Categorías</h3>
-                  <div class="list-group mb-3" id="categoriasList">
-                    <div class="list-group-item" onclick="seleccionarCategoria(this)">Moto</div>
-                    <div class="list-group-item" onclick="seleccionarCategoria(this)">Auto</div>
-                    <div class="list-group-item" onclick="seleccionarCategoria(this)">Camioneta</div>
-                  </div>
-                  <div class="d-flex justify-content-center gap-2">
-                    <button class="btn btn-outline-danger" id="btnEliminar" data-bs-toggle="modal" data-bs-target="#eliminarModal" disabled>Eliminar</button>
-                    <button class="btn btn-outline-primary" id="btnModificar" data-bs-toggle="modal" data-bs-target="#modificarModal" disabled>Modificar</button>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaModal">Nueva Categoría</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Modal Eliminar -->
-            <div class="modal fade" id="eliminarModal" tabindex="-1" aria-labelledby="eliminarModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="eliminarModalLabel">Eliminar Categoría</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <p>¿Está seguro que desea eliminar esta categoría?</p>
-                    <p id="categoriaAEliminar"></p>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger">Eliminar</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Modal Modificar -->
-            <div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="modificarModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="modificarModalLabel">Modificar Categoría</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <div class="mb-3">
-                      <label for="nombreCategoria" class="form-label">Nombre de la categoría</label>
-                      <input type="text" class="form-control" id="nombreCategoria">
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary">Guardar cambios</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Modal Nueva Categoría -->
-            <div class="modal fade" id="nuevaModal" tabindex="-1" aria-labelledby="nuevaModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="nuevaModalLabel">Nueva Categoría</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <div class="mb-3">
-                      <label for="nuevaCategoria" class="form-label">Nombre de la nueva categoría</label>
-                      <input type="text" class="form-control" id="nuevaCategoria">
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary">Crear</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <?php include 'configuracion_tap/tap1.php'; ?>
 
           <!-- Tab de Tarifas -->
-          <div id="tab2" class="tab-content d-none">
-            <div class="ticket-summary">
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3>Tarifas en bloques de tiempo</h3>
-                <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#agregarTarifaModal">
-                  <i class="fas fa-plus"></i> Agregar Nueva tarifa
-                </button>
-              </div>
-              <div class="table-responsive">
-                <table class="table custom-table">
-                  <thead>
-                    <tr>
-                      <th class="highlight-column"></th>
-                      <th class="highlight-column">Día</th>
-                      <th class="highlight-column">Horas</th>
-                      <th class="highlight-column">Minuto</th>
-                      <th class="highlight-column">Tolerancia(min)</th>
-                      <th class="highlight-column">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="highlight-column">Hora</td>
-                      <td></td>
-                      <td>1</td>
-                      <td></td>
-                      <td>15</td>
-                      <td>
-                        <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editarTarifaModal">
-                          <i class="fas fa-edit"></i> Editar
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="highlight-column">Dia</td>
-                      <td>1</td>
-                      <td></td>
-                      <td></td>
-                      <td>15</td>
-                      <td>
-                        <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editarTarifaModal">
-                          <i class="fas fa-edit"></i> Editar
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Modal Editar Tarifa -->
-              <div class="modal fade" id="editarTarifaModal" tabindex="-1" aria-labelledby="editarTarifaModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="editarTarifaModalLabel">Tarifa x Hora</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      <p class="text-muted small">Establece un Lapso de Tiempo. En la etiqueta describe brevemente el tiempo. Ej: 1 Hora, 15 Minutos, 7 Días, etc. Luego de establecer este Lapso de Tiempo no olvides definir los importes en PRECIOS.</p>
-
-                      <div class="mb-3">
-                        <label class="form-label">Etiqueta</label>
-                        <input type="text" class="form-control" value="Hora">
-                      </div>
-
-                      <div class="row mb-3">
-                        <div class="col">
-                          <label class="form-label">Días</label>
-                          <input type="number" class="form-control" value="0">
-                        </div>
-                        <div class="col">
-                          <label class="form-label">Horas</label>
-                          <input type="number" class="form-control" value="1">
-                        </div>
-                        <div class="col">
-                          <label class="form-label">Minutos</label>
-                          <input type="number" class="form-control" value="0">
-                        </div>
-                      </div>
-
-                      <div class="mb-3">
-                        <label class="form-label">Tolerancia en minutos</label>
-                        <input type="text" class="form-control" value="15">
-                      </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                      <button type="button" class="btn btn-primary">Guardar</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Modal Agregar Tarifa -->
-              <div class="modal fade" id="agregarTarifaModal" tabindex="-1" aria-labelledby="agregarTarifaModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="agregarTarifaModalLabel">Tarifa x Hora</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      <p class="text-muted small">Establece un Lapso de Tiempo. En la etiqueta describe brevemente el tiempo. Ej: 1 Hora, 15 Minutos, 7 Días, etc. Luego de establecer este Lapso de Tiempo no olvides definir los importes en PRECIOS.</p>
-
-                      <div class="mb-3">
-                        <label class="form-label">Etiqueta</label>
-                        <input type="text" class="form-control" value="">
-                      </div>
-
-                      <div class="row mb-3">
-                        <div class="col">
-                          <label class="form-label">Días</label>
-                          <input type="number" class="form-control" value="0">
-                        </div>
-                        <div class="col">
-                          <label class="form-label">Horas</label>
-                          <input type="number" class="form-control" value="0">
-                        </div>
-                        <div class="col">
-                          <label class="form-label">Minutos</label>
-                          <input type="number" class="form-control" value="0">
-                        </div>
-                      </div>
-
-                      <div class="mb-3">
-                        <label class="form-label">Tolerancia en minutos</label>
-                        <input type="text" class="form-control" value="0">
-                      </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                      <button type="button" class="btn btn-primary">Guardar</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <?php include 'configuracion_tap/tap2.php'; ?>
           <!-- Tab de Precios -->
           <div id="tab3" class="tab-content d-none">
             <h3>Precios</h3>
@@ -592,9 +378,7 @@ include '../../controladores/seguridad.php';
     });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- [Page Specific JS] start -->
-  <script src="../assets/js/plugins/apexcharts.min.js"></script>
-  <script src="../assets/js/pages/dashboard-default.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
   <!-- [Page Specific JS] end -->
   <!-- Required Js -->
   <script src="../assets/js/plugins/popper.min.js"></script>

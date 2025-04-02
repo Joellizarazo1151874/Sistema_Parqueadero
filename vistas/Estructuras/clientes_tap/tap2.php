@@ -6,19 +6,15 @@
                 <!-- Filtros -->
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <form action="" method="GET" class="d-flex gap-2">
-                        <input type="hidden" name="tab" value="2">
-                        <select class="form-select" name="filtro_fecha" style="width: 180px;">
-                            <option value="">Filtrar por Fecha</option>
-                            <option value="historico" <?php echo isset($_GET['filtro_fecha']) && $_GET['filtro_fecha'] == 'historico' ? 'selected' : ''; ?>>Histórico</option>
-                        </select>
+                        <input type="hidden" name="tab" value="tab2">
                         <input type="text" class="form-control" name="matricula" placeholder="Matrícula" value="<?php echo isset($_GET['matricula']) ? htmlspecialchars($_GET['matricula']) : ''; ?>">
                         <input type="text" class="form-control" name="cliente" placeholder="Cliente" value="<?php echo isset($_GET['cliente']) ? htmlspecialchars($_GET['cliente']) : ''; ?>">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Buscar
+                            <i class="fas fa-search"></i>
                         </button>
                         <?php if(isset($_GET['matricula']) || isset($_GET['cliente']) || isset($_GET['filtro_fecha'])): ?>
-                            <a href="?tab=2" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Limpiar
+                            <a href="?tab=tab2" class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
                             </a>
                         <?php endif; ?>
                     </form>
@@ -132,8 +128,26 @@
     </div>
 </div>
 
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si hay mensajes de éxito en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('actualizado');
+
+        if (success && success === '1') {
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'El vehículo ha sido editado correctamente',
+                icon: 'success',
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                toast: true
+            });
+        }
+
         // Manejar el modal de edición de vehículo
         const editarVehiculoModal = document.getElementById('editarVehiculoModal');
         if (editarVehiculoModal) {

@@ -302,3 +302,24 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si hay mensajes de éxito en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+
+        if (success && success === '1') {
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'El ingreso del vehículo ha sido registrado correctamente',
+                icon: 'success',
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                toast: true
+            });
+        }
+    });
+</script>

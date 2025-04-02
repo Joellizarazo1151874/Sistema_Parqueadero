@@ -53,6 +53,6 @@ if (isset($_POST['id_vehiculo']) && isset($_POST['placa']) && isset($_POST['tipo
 }
 
 // Redirigimos de vuelta a la página de gestión con un parámetro para indicar actualización
-header('Location: ../vistas/Estructuras/clientes.php?actualizado=1&tab=2');
+header('Location: ../vistas/Estructuras/clientes.php?actualizado=1&tab=tab2');
 exit;
 ?>

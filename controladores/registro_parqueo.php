@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("is", $id_vehiculo, $abierto_por);
         $stmt->execute();
 
-        header("Location: ../vistas/Estructuras/gestion.php");
+        header("Location: ../vistas/Estructuras/gestion.php?success=1");
         exit();
 
     } catch (Exception $e) {
