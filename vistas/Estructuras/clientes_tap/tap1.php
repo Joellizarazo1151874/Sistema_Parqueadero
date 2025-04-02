@@ -66,16 +66,16 @@
                                         echo "<td>{$row['correo']}</td>";
                                         echo "<td>{$row['fecha_registro']}</td>";
                                         echo "<td>";
-                                        echo "<button class='btn-edit' data-bs-toggle='modal' data-bs-target='#editarClienteModal' 
+                                        echo "<button class='btn btn-sm btn-outline-primary me-2 btn-editar-tolerancia' data-bs-toggle='modal' data-bs-target='#editarClienteModal' 
                                               data-id='{$row['id_cliente']}'
                                               data-nombre='{$row['nombre']}'
                                               data-telefono='{$row['telefono']}'
                                               data-correo='{$row['correo']}'>
-                                              <i class='fas fa-edit'></i> Editar</button> ";
-                                        echo "<button class='btn-eliminar' data-bs-toggle='modal' data-bs-target='#eliminarClienteModal'
+                                              <i class='fas fa-edit'></i></button> ";
+                                        echo "<button class='btn btn-sm btn-outline-danger btn-eliminar-tolerancia' data-bs-toggle='modal' data-bs-target='#eliminarClienteModal'
                                               data-id='{$row['id_cliente']}'
                                               data-nombre='{$row['nombre']}'>
-                                              <i class='fas fa-trash-alt'></i> Eliminar</button>";
+                                              <i class='fas fa-trash-alt'></i></button>";
                                         echo "</td>";
                                         echo "</tr>";
                                     }

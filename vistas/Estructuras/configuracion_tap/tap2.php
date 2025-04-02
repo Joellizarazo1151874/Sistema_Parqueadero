@@ -223,10 +223,10 @@
                                 echo '<td>' . htmlspecialchars($row['tolerancia']) . '</td>';
                                 echo '<td>';
                                 echo '<button class="btn btn-sm btn-outline-primary me-2 btn-editar-tolerancia" data-bs-toggle="modal" data-bs-target="#editarTarifaModal">';
-                                echo '<i class="fas fa-edit me-1"></i> Editar';
+                                echo '<i class="fas fa-edit me-1"></i>';
                                 echo '</button>';
                                 echo '<button class="btn btn-sm btn-outline-danger btn-eliminar-tolerancia">';
-                                echo '<i class="fas fa-trash-alt me-1"></i> Eliminar';
+                                echo '<i class="fas fa-trash-alt me-1"></i>';
                                 echo '</button>';
                                 echo '</td>';
                                 echo '</tr>';

@@ -68,7 +68,7 @@
                                     echo "<td>{$row['descripcion']}</td>";
                                     echo "<td>" . ($row['nombre_cliente'] ?? 'Sin asignar') . "</td>";
                                     echo "<td>";
-                                    echo "<button class='btn btn-sm btn-primary' data-bs-toggle='modal' data-bs-target='#editarVehiculoModal' 
+                                    echo "<button class='btn btn-sm btn-outline-primary me-2 btn-editar-tolerancia' data-bs-toggle='modal' data-bs-target='#editarVehiculoModal' 
                                           data-id='{$row['id_vehiculo']}'
                                           data-placa='{$row['placa']}'
                                           data-tipo='{$row['tipo']}'
