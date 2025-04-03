@@ -1,4 +1,8 @@
   <!-- [ Sidebar Menu ] end --> <!-- [ Header Topbar ] start -->
+  <!-- SweetAlert2 CSS y JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+  
   <header class="pc-header">
     <div class="header-wrapper"> <!-- [Mobile Media Block] start -->
       <div class="me-auto pc-mob-drp">

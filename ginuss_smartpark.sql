@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 01-04-2025 a las 21:34:39
+-- Tiempo de generación: 03-04-2025 a las 16:54:57
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -42,11 +42,9 @@ CREATE TABLE `clientes` (
 INSERT INTO `clientes` (`id_cliente`, `nombre`, `telefono`, `correo`, `fecha_registro`) VALUES
 (1, 'Juan Pérez', '3001234567', 'juanperez@mail.com', '2025-03-10 18:32:30'),
 (2, 'Ana Gómez', '3107654321', 'anagomez@mail.com', '2025-03-10 18:32:30'),
-(3, 'Joel Lizarazo', '3209939817', 'correo@ejemplo.com', '2025-03-26 22:15:38'),
-(5, 'Marcos Mejia', '3209939816', 'correo2@ejemplo.com', '2025-03-26 22:17:15'),
-(6, 'Anderson Patiño', '3209939812', 'correo3@ejemplo.com', '2025-03-26 22:25:14'),
-(7, 'Angelica castillo', '3121525456', 'correo4@ejemplo.com', '2025-03-26 22:30:58'),
-(8, 'Pancho Villa', '1231231234', 'pancho@gmail.com', '2025-03-26 22:38:39');
+(3, 'Joel Lizarazo ', '3209939812', 'correo@ejemplo.com', '2025-03-26 22:15:38'),
+(5, 'Marcos Mejia G', '3209939816', 'correo2@ejemplo.com', '2025-03-26 22:17:15'),
+(8, 'Pancho Villa', '123123121', 'pancho@gmail.com', '2025-03-26 22:38:39');
 
 -- --------------------------------------------------------
 
@@ -95,40 +93,51 @@ CREATE TABLE `registros_parqueo` (
   `metodo_pago` varchar(100) DEFAULT NULL,
   `descripcion` text NOT NULL,
   `cerrado_por` varchar(100) NOT NULL,
-  `abierto_por` varchar(100) NOT NULL
+  `abierto_por` varchar(100) NOT NULL,
+  `tipo` varchar(20) NOT NULL DEFAULT 'hora'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `registros_parqueo`
 --
 
-INSERT INTO `registros_parqueo` (`id_registro`, `id_vehiculo`, `hora_ingreso`, `hora_salida`, `estado`, `total_pagado`, `metodo_pago`, `descripcion`, `cerrado_por`, `abierto_por`) VALUES
-(72, 19, '2025-03-22 11:00:46', '2025-03-25 15:08:26', 'cerrado', 151700, 'efectivo', 'Ticket #YEV52G • MOTO • Inicio: 22/3, 11:00 a. m. • Permanencia: 76h 7m', 'Andres Tellez', 'Andres Tellez'),
-(73, 18, '2025-03-22 11:03:52', '2025-03-25 13:12:10', 'cerrado', 147700, 'tarjeta_debito', 'Ticket #SQL625 • AUTO • Inicio: 22/3, 11:03 a. m. • Permanencia: 74h 8m', 'Andres Tellez', 'Andres Tellez'),
-(74, 20, '2025-03-25 13:06:43', '2025-03-25 13:10:20', 'cerrado', 0, 'efectivo', 'Ticket #HDN121 • MOTOCARRO • Inicio: 25/3, 01:06 p. m. • Permanencia: 0h 3m', 'Andres Tellez', 'Andres Tellez'),
-(75, 22, '2025-03-25 13:11:56', '2025-03-25 15:08:04', 'cerrado', 3300, 'efectivo', 'Ticket #JSB287 • MOTO • Inicio: 25/3, 01:11 p. m. • Permanencia: 1h 56m', 'Andres Tellez', 'Andres Tellez'),
-(76, 18, '2025-03-25 13:14:59', '2025-03-25 13:17:28', 'cerrado', 67, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 21/3, 05:08 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez'),
-(77, 18, '2025-03-25 13:23:21', '2025-03-25 13:58:26', 'cerrado', 600, 'tarjeta_debito', 'Ticket #SQL625 • AUTO • Inicio: 25/3, 01:23 p. m. • Permanencia: 0h 35m', 'Andres Tellez', 'Andres Tellez'),
-(78, 20, '2025-03-25 13:28:22', '2025-03-25 13:28:31', 'cerrado', 0, 'mercadopago', 'Ticket #HDN121 • MOTOCARRO • Inicio: 25/3, 01:28 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez'),
-(79, 23, '2025-03-25 13:28:54', '2025-03-25 13:39:04', 'cerrado', 300, 'mercadopago', 'Ticket #HDN123 · MOTO · Inicio: 25/3, 13:28 · Permanencia: 0h 9m', 'Andres Tellez', 'Andres Tellez'),
-(80, 18, '2025-03-25 15:07:07', '2025-03-25 15:44:35', 'cerrado', 700, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 25/3, 03:07 p. m. • Permanencia: 0h 37m', 'Andres Tellez', 'Andres Tellez'),
-(81, 23, '2025-03-25 15:07:14', '2025-03-25 16:42:42', 'cerrado', 2600, 'efectivo', 'Ticket #TKN983 • CAMIONETA • Inicio: 25/3, 03:07 p. m. • Permanencia: 1h 35m', 'Andres Tellez', 'Andres Tellez'),
-(82, 24, '2025-03-25 15:07:49', '2025-03-25 15:18:25', 'cerrado', 0, 'efectivo', 'Ticket #MGO18G · MOTO · Inicio: 25/3, 15:07 · Permanencia: 0h 0m (con 15 min de tolerancia)', 'Andres Tellez', 'Andres Tellez'),
-(83, 25, '2025-03-25 15:07:56', '2025-03-25 15:17:55', 'cerrado', 0, 'efectivo', 'Ticket #NQS772 · AUTO · Inicio: 25/3, 15:07 · Permanencia: 0h 0m (con 15 min de tolerancia)', 'Andres Tellez', 'Andres Tellez'),
-(85, 20, '2025-03-25 15:51:34', '2025-03-25 17:42:06', 'cerrado', 3100, 'efectivo', '#HDN122 ce cerro con exito', 'Andres Tellez', 'Andres Tellez'),
-(86, 23, '2025-03-25 15:51:41', '2025-03-25 15:51:57', 'cerrado', 0, 'efectivo', 'Ticket #HDN123 • MOTO • Inicio: 25/3, 03:51 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez'),
-(87, 19, '2025-03-25 15:52:02', '2025-03-25 15:52:37', 'cerrado', 0, 'efectivo', 'Ticket #YEV52G • MOTO • Inicio: 25/3, 03:52 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez'),
-(88, 20, '2025-03-25 15:52:13', '2025-03-25 15:52:18', 'cerrado', 0, 'efectivo', 'Ticket #HDN121 • MOTOCARRO • Inicio: 25/3, 03:52 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez'),
-(90, 18, '2025-03-25 17:30:55', '2025-03-25 17:31:00', 'cerrado', 0, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 25/3, 05:30 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez'),
-(93, 18, '2025-03-26 09:01:39', NULL, 'activo', 0, NULL, '', '', 'Andres Tellez'),
-(94, 19, '2025-03-26 09:01:43', '2025-03-26 12:33:49', 'cerrado', 6500, 'efectivo', '#YEV52G', 'Admin Principal', 'Andres Tellez'),
-(95, 26, '2025-03-26 11:48:26', '2025-03-26 11:48:40', 'cerrado', 0, 'tarjeta_debito', '#HDN121', 'Admin Principal', 'Admin Principal'),
-(96, 27, '2025-03-26 11:51:53', '2025-03-26 17:52:08', 'cancelado', 0, 'cancelado', 'se fue sin pagar :C', 'Admin Principal', 'Admin Principal'),
-(97, 22, '2025-03-26 11:53:06', NULL, 'activo', 0, NULL, '', '', 'Admin Principal'),
-(98, 27, '2025-03-26 11:53:11', '2025-03-26 11:53:58', 'cerrado', 0, 'tarjeta_credito', '#HDN123 me cae bien', 'Admin Principal', 'Admin Principal'),
-(99, 26, '2025-03-26 11:53:19', '2025-03-26 17:53:29', 'cancelado', 0, 'cancelado', 'no le crobre', 'Admin Principal', 'Admin Principal'),
-(100, 19, '2025-03-26 13:07:27', NULL, 'activo', 0, NULL, '', '', 'Admin Principal'),
-(101, 26, '2025-03-26 17:26:52', NULL, 'activo', 0, NULL, '', '', 'Admin Principal');
+INSERT INTO `registros_parqueo` (`id_registro`, `id_vehiculo`, `hora_ingreso`, `hora_salida`, `estado`, `total_pagado`, `metodo_pago`, `descripcion`, `cerrado_por`, `abierto_por`, `tipo`) VALUES
+(72, 19, '2025-03-22 11:00:46', '2025-03-25 15:08:26', 'cerrado', 151700, 'efectivo', 'Ticket #YEV52G • MOTO • Inicio: 22/3, 11:00 a. m. • Permanencia: 76h 7m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(73, 18, '2025-03-22 11:03:52', '2025-03-25 13:12:10', 'cerrado', 147700, 'tarjeta_debito', 'Ticket #SQL625 • AUTO • Inicio: 22/3, 11:03 a. m. • Permanencia: 74h 8m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(74, 20, '2025-03-25 13:06:43', '2025-03-25 13:10:20', 'cerrado', 0, 'efectivo', 'Ticket #HDN121 • MOTOCARRO • Inicio: 25/3, 01:06 p. m. • Permanencia: 0h 3m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(75, 22, '2025-03-25 13:11:56', '2025-03-25 15:08:04', 'cerrado', 3300, 'efectivo', 'Ticket #JSB287 • MOTO • Inicio: 25/3, 01:11 p. m. • Permanencia: 1h 56m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(76, 18, '2025-03-25 13:14:59', '2025-03-25 13:17:28', 'cerrado', 67, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 21/3, 05:08 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(77, 18, '2025-03-25 13:23:21', '2025-03-25 13:58:26', 'cerrado', 600, 'tarjeta_debito', 'Ticket #SQL625 • AUTO • Inicio: 25/3, 01:23 p. m. • Permanencia: 0h 35m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(78, 20, '2025-03-25 13:28:22', '2025-03-25 13:28:31', 'cerrado', 0, 'mercadopago', 'Ticket #HDN121 • MOTOCARRO • Inicio: 25/3, 01:28 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(79, 23, '2025-03-25 13:28:54', '2025-03-25 13:39:04', 'cerrado', 300, 'mercadopago', 'Ticket #HDN123 · MOTO · Inicio: 25/3, 13:28 · Permanencia: 0h 9m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(80, 18, '2025-03-25 15:07:07', '2025-03-25 15:44:35', 'cerrado', 700, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 25/3, 03:07 p. m. • Permanencia: 0h 37m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(81, 23, '2025-03-25 15:07:14', '2025-03-25 16:42:42', 'cerrado', 2600, 'efectivo', 'Ticket #TKN983 • CAMIONETA • Inicio: 25/3, 03:07 p. m. • Permanencia: 1h 35m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(82, 24, '2025-03-25 15:07:49', '2025-03-25 15:18:25', 'cerrado', 0, 'efectivo', 'Ticket #MGO18G · MOTO · Inicio: 25/3, 15:07 · Permanencia: 0h 0m (con 15 min de tolerancia)', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(83, 25, '2025-03-25 15:07:56', '2025-03-25 15:17:55', 'cerrado', 0, 'efectivo', 'Ticket #NQS772 · AUTO · Inicio: 25/3, 15:07 · Permanencia: 0h 0m (con 15 min de tolerancia)', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(85, 20, '2025-03-25 15:51:34', '2025-03-25 17:42:06', 'cerrado', 3100, 'efectivo', '#HDN122 ce cerro con exito', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(86, 23, '2025-03-25 15:51:41', '2025-03-25 15:51:57', 'cerrado', 0, 'efectivo', 'Ticket #HDN123 • MOTO • Inicio: 25/3, 03:51 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(87, 19, '2025-03-25 15:52:02', '2025-03-25 15:52:37', 'cerrado', 0, 'efectivo', 'Ticket #YEV52G • MOTO • Inicio: 25/3, 03:52 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(88, 20, '2025-03-25 15:52:13', '2025-03-25 15:52:18', 'cerrado', 0, 'efectivo', 'Ticket #HDN121 • MOTOCARRO • Inicio: 25/3, 03:52 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(90, 18, '2025-03-25 17:30:55', '2025-03-25 17:31:00', 'cerrado', 0, 'efectivo', 'Ticket #SQL625 • AUTO • Inicio: 25/3, 05:30 p. m. • Permanencia: 0h 0m', 'Andres Tellez', 'Andres Tellez', 'hora'),
+(93, 18, '2025-03-26 09:01:39', '2025-04-03 08:54:01', 'cerrado', 383200, 'efectivo', '#SQL625', 'Admin Principal', 'Andres Tellez', 'hora'),
+(94, 19, '2025-03-26 09:01:43', '2025-03-26 12:33:49', 'cerrado', 6500, 'efectivo', '#YEV52G', 'Admin Principal', 'Andres Tellez', 'hora'),
+(95, 26, '2025-03-26 11:48:26', '2025-03-26 11:48:40', 'cerrado', 0, 'tarjeta_debito', '#HDN121', 'Admin Principal', 'Admin Principal', 'hora'),
+(96, 27, '2025-03-26 11:51:53', '2025-03-26 17:52:08', 'cancelado', 0, 'cancelado', 'se fue sin pagar :C', 'Admin Principal', 'Admin Principal', 'hora'),
+(97, 22, '2025-03-26 11:53:06', '2025-04-03 08:53:59', 'cerrado', 377400, 'efectivo', '#JSB287', 'Admin Principal', 'Admin Principal', 'hora'),
+(98, 27, '2025-03-26 11:53:11', '2025-03-26 11:53:58', 'cerrado', 0, 'tarjeta_credito', '#HDN123 me cae bien', 'Admin Principal', 'Admin Principal', 'hora'),
+(99, 26, '2025-03-26 11:53:19', '2025-03-26 17:53:29', 'cancelado', 0, 'cancelado', 'no le crobre', 'Admin Principal', 'Admin Principal', 'hora'),
+(100, 19, '2025-03-26 13:07:27', '2025-04-03 08:53:58', 'cerrado', 375000, 'efectivo', '#YEV52G', 'Admin Principal', 'Admin Principal', 'hora'),
+(101, 26, '2025-03-26 17:26:52', '2025-04-03 08:53:56', 'cerrado', 366300, 'efectivo', '#HDN121', 'Admin Principal', 'Admin Principal', 'hora'),
+(102, 34, '2025-04-02 13:14:18', '2025-04-03 08:53:54', 'cerrado', 38700, 'efectivo', '#YEV52N', 'Admin Principal', 'Admin Principal', 'hora'),
+(103, 35, '2025-04-02 13:15:22', '2025-04-02 13:16:40', 'cerrado', 0, 'efectivo', '#YEV52R', 'Admin Principal', 'Admin Principal', 'hora'),
+(104, 35, '2025-04-02 13:16:49', '2025-04-03 08:53:51', 'cerrado', 38700, 'efectivo', '#YEV52R', 'Admin Principal', 'Admin Principal', 'hora'),
+(105, 36, '2025-04-02 15:38:15', '2025-04-03 08:53:50', 'cerrado', 33900, 'efectivo', '#SQL621', 'Admin Principal', 'Admin Principal', 'hora'),
+(106, 37, '2025-04-02 17:45:18', '2025-04-03 08:53:46', 'cerrado', 29700, 'efectivo', '#SQL741', 'Admin Principal', 'Admin Principal', 'hora'),
+(107, 18, '2025-04-03 09:01:12', '2025-04-03 09:28:33', 'cerrado', 3900, 'efectivo', '#SQL625', 'Admin Principal', 'Admin Principal', 'hora'),
+(108, 19, '2025-04-03 09:03:40', '2025-04-03 09:28:30', 'cerrado', 200, 'efectivo', '#YEV52G', 'Admin Principal', 'Admin Principal', 'hora'),
+(109, 38, '2025-04-03 09:22:24', '2025-04-03 09:28:31', 'cerrado', 0, 'efectivo', '#HDN123', 'Admin Principal', 'Admin Principal', 'hora'),
+(110, 18, '2025-04-03 09:29:44', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora'),
+(111, 19, '2025-04-03 09:31:27', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora');
 
 -- --------------------------------------------------------
 
@@ -170,7 +179,7 @@ CREATE TABLE `suscripciones` (
 CREATE TABLE `tarifas` (
   `id_tarifa` int(11) NOT NULL,
   `tipo_vehiculo` varchar(50) NOT NULL,
-  `precio_por_hora` int(10) DEFAULT NULL,
+  `hora` int(10) DEFAULT NULL,
   `fecha_actualizacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -178,11 +187,29 @@ CREATE TABLE `tarifas` (
 -- Volcado de datos para la tabla `tarifas`
 --
 
-INSERT INTO `tarifas` (`id_tarifa`, `tipo_vehiculo`, `precio_por_hora`, `fecha_actualizacion`) VALUES
-(1, 'auto', 5, '2025-03-26 16:17:55'),
-(2, 'moto', 2, '2025-03-10 18:32:30'),
-(3, 'motocarro', 4, '2025-03-10 18:32:30'),
-(4, 'camioneta', NULL, '2025-03-26 16:18:19');
+INSERT INTO `tarifas` (`id_tarifa`, `tipo_vehiculo`, `hora`, `fecha_actualizacion`) VALUES
+(1, 'auto', 20000, '2025-04-03 14:24:39'),
+(2, 'moto', 2000, '2025-04-03 14:24:39'),
+(4, 'camioneta', 2500, '2025-04-03 14:24:39'),
+(7, 'motocarro', 2000, '2025-04-03 14:24:39');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `tolerancia`
+--
+
+CREATE TABLE `tolerancia` (
+  `tipo` varchar(50) NOT NULL,
+  `tolerancia` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tolerancia`
+--
+
+INSERT INTO `tolerancia` (`tipo`, `tolerancia`) VALUES
+('hora', 0);
 
 -- --------------------------------------------------------
 
@@ -226,7 +253,7 @@ CREATE TABLE `vehiculos` (
 --
 
 INSERT INTO `vehiculos` (`id_vehiculo`, `id_cliente`, `placa`, `tipo`, `descripcion`) VALUES
-(18, NULL, 'SQL625', 'auto', 'BLANCO con negro'),
+(18, NULL, 'SQL625', 'auto', 'negro con blanco :\"3'),
 (19, 5, 'YEV52G', 'moto', 'Honda Bonita'),
 (20, NULL, 'HDN122', 'camioneta', 'MORADA'),
 (21, NULL, 'SQL-623', 'auto', ''),
@@ -235,11 +262,17 @@ INSERT INTO `vehiculos` (`id_vehiculo`, `id_cliente`, `placa`, `tipo`, `descripc
 (24, NULL, 'MGO18G', 'moto', ''),
 (25, NULL, 'NQS772', 'auto', ''),
 (26, NULL, 'HDN121', 'motocarro', 'blanco'),
-(27, NULL, 'HDN123', 'moto', ''),
-(28, 6, 'PNG123', 'auto', 'CARRO AMARILLO'),
-(29, 7, 'MIA123', 'motocarro', 'MIAABURRIDA'),
-(30, 8, 'FER123', 'auto', 'un ferrari amarillo'),
-(31, 8, 'VEA123', 'moto', 'BMW 1200 cilindrage');
+(27, NULL, 'HDN432', 'moto', ''),
+(28, NULL, 'PNG123', 'auto', 'CARRO AMARILLO'),
+(30, 8, 'FER432', 'auto', 'un ferrari amarillo'),
+(31, 8, 'VEA121', 'moto', 'BMW 1200 cilindro'),
+(32, NULL, 'PER122', 'auto', 'AUTO BACANO'),
+(33, NULL, 'MAS989', 'moto', ''),
+(34, NULL, 'YEV52N', 'auto', ''),
+(35, NULL, 'YEV52R', 'auto', ''),
+(36, NULL, 'SQL621', 'motocarro', ''),
+(37, NULL, 'SQL741', 'auto', ''),
+(38, NULL, 'HDN123', 'auto', '');
 
 --
 -- Índices para tablas volcadas
@@ -318,7 +351,7 @@ ALTER TABLE `vehiculos`
 -- AUTO_INCREMENT de la tabla `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `incidentes`
@@ -336,7 +369,7 @@ ALTER TABLE `pagos`
 -- AUTO_INCREMENT de la tabla `registros_parqueo`
 --
 ALTER TABLE `registros_parqueo`
-  MODIFY `id_registro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
+  MODIFY `id_registro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
 
 --
 -- AUTO_INCREMENT de la tabla `reportes_caja`
@@ -354,7 +387,7 @@ ALTER TABLE `suscripciones`
 -- AUTO_INCREMENT de la tabla `tarifas`
 --
 ALTER TABLE `tarifas`
-  MODIFY `id_tarifa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_tarifa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
@@ -366,7 +399,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `vehiculos`
 --
 ALTER TABLE `vehiculos`
-  MODIFY `id_vehiculo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id_vehiculo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- Restricciones para tablas volcadas

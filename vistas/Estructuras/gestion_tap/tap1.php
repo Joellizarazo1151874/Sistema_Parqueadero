@@ -57,13 +57,16 @@
                 $fecha_formateada = $hora_ingreso->format('d/n, h:i a'); // Formato: "19/3, 04:53 p. m."
                 $timestamp_ingreso = strtotime($row['hora_ingreso']); // Convertir a timestamp UNIX
                 $timestamp_actual = time(); // Obtiene el tiempo actual
+                
+                // Inicializar la variable tipo_registro para todos los tickets
+                $tipo_registro = isset($row['tipo_registro']) ? $row['tipo_registro'] : 'hora';
         ?>
                 <div class="ticket">
                     <div class="row" style="background-color: rgb(174, 213, 255); padding: 15px;">
                         <div class="col-3">
                             <div class="time-box">
                                 <i class="feather icon-clock"></i>
-                                <span>HORA</span>
+                                <span><?php echo ucfirst($tipo_registro); ?></span>
                             </div>
                         </div>
                         <div class="col-9">
@@ -82,9 +85,60 @@
                                 <br>
                                 <small>IMPORTE ACTUAL</small>
                                 <br>
+                                <?php 
+                                    // Obtener la tarifa por hora para este tipo de vehículo
+                                    $tipo_vehiculo_actual = $row['tipo'];
+                                    $tarifa_hora = 0;
+                                    $tarifa_dia = 0;
+                                    $tolerancia_minutos = 15; // Valor por defecto
+                                    
+                                    // Obtener tarifa correspondiente
+                                    if (isset($tarifas_por_tipo[$tipo_vehiculo_actual])) {
+                                        // Obtener la tarifa según el tipo de registro (hora, día, etc.)
+                                        if (isset($tarifas_por_tipo[$tipo_vehiculo_actual][$tipo_registro])) {
+                                            $tarifa_valor = floatval($tarifas_por_tipo[$tipo_vehiculo_actual][$tipo_registro]);
+                                        }
+                                        
+                                        // También guardar las tarifas de hora y día para referencia
+                                        if (isset($tarifas_por_tipo[$tipo_vehiculo_actual]['hora'])) {
+                                            $tarifa_hora = floatval($tarifas_por_tipo[$tipo_vehiculo_actual]['hora']);
+                                        }
+                                        if (isset($tarifas_por_tipo[$tipo_vehiculo_actual]['dia'])) {
+                                            $tarifa_dia = floatval($tarifas_por_tipo[$tipo_vehiculo_actual]['dia']);
+                                        }
+                                    }
+                                    
+                                    // Obtener tolerancia según el tipo de registro
+                                    if (isset($tolerancias_por_tipo[$tipo_registro])) {
+                                        $tolerancia_minutos = $tolerancias_por_tipo[$tipo_registro];
+                                    }
+                                    
+                                    // Calcular costo por minuto basado en el tipo de registro
+                                    $costo_por_minuto = 0;
+                                    if ($tipo_registro == 'hora' && $tarifa_hora > 0) {
+                                        $costo_por_minuto = $tarifa_hora / 60;
+                                    } elseif ($tipo_registro == 'dia' && $tarifa_dia > 0) {
+                                        $costo_por_minuto = $tarifa_dia / (24 * 60); // Costo por minuto basado en día
+                                    } elseif (isset($tarifa_valor) && $tarifa_valor > 0) {
+                                        // Si es otro tipo, usamos el valor específico
+                                        // Para un tipo como "mes", podríamos usar: $tarifa_valor / (30 * 24 * 60)
+                                        // Pero como puede haber múltiples tipos, haremos una lógica simple:
+                                        if ($tipo_registro == 'mes') {
+                                            $costo_por_minuto = $tarifa_valor / (30 * 24 * 60);
+                                        } elseif ($tipo_registro == 'semana') {
+                                            $costo_por_minuto = $tarifa_valor / (7 * 24 * 60);
+                                        } else {
+                                            // Un caso predeterminado para tipos desconocidos
+                                            $costo_por_minuto = $tarifa_valor / 60;
+                                        }
+                                    }
+                                ?>
                                 <b class="importe-actual"
                                     data-ingreso="<?php echo $timestamp_ingreso; ?>"
-                                    data-costo-por-minuto="<?php echo (2000 / 60); ?>">
+                                    data-costo-por-minuto="<?php echo $costo_por_minuto; ?>"
+                                    data-tolerancia="<?php echo $tolerancia_minutos; ?>"
+                                    data-tarifa-hora="<?php echo $tarifa_hora; ?>"
+                                    data-tarifa-dia="<?php echo $tarifa_dia; ?>">
                                     Calculando...
                                 </b>
                             </div>
@@ -97,7 +151,10 @@
                                 <br>
                                 <b class="debt importe-actual"
                                     data-ingreso="<?php echo $timestamp_ingreso; ?>"
-                                    data-costo-por-minuto="<?php echo (2000 / 60); ?>">
+                                    data-costo-por-minuto="<?php echo $costo_por_minuto; ?>"
+                                    data-tolerancia="<?php echo $tolerancia_minutos; ?>"
+                                    data-tarifa-hora="<?php echo $tarifa_hora; ?>"
+                                    data-tarifa-dia="<?php echo $tarifa_dia; ?>">
                                     Calculando...
                                 </b>
                             </div>
@@ -123,9 +180,15 @@
                         <button class="close-btn cerrar-ticket"
                             data-id="<?php echo $row['id_registro']; ?>"
                             data-ingreso="<?php echo $timestamp_ingreso; ?>"
-                            data-costo-por-minuto="<?php echo (2000 / 60); ?>"
+                            data-costo-por-minuto="<?php echo $costo_por_minuto; ?>"
                             data-placa="<?php echo $row['placa']; ?>"
                             data-tipo="<?php echo strtoupper($row['tipo']); ?>"
+                            data-tolerancia="<?php echo $tolerancia_minutos; ?>"
+                            data-tolerancia-tipo="<?php echo $tipo_registro; ?>"
+                            data-tipo-registro="<?php echo $tipo_registro; ?>"
+                            data-tarifa-hora="<?php echo $tarifa_hora; ?>"
+                            data-tarifa-dia="<?php echo $tarifa_dia; ?>"
+                            data-tarifa-valor="<?php echo isset($tarifa_valor) ? $tarifa_valor : 0; ?>"
                             data-tiempo="<?php echo floor($minutos_transcurridos / 60) . 'h ' . ($minutos_transcurridos % 60) . 'm'; ?>"
                             data-total-pagado="<?php echo $row['total_pagado']; ?>"
                             data-metodo-pago="<?php echo $row['metodo_pago']; ?>">
@@ -321,5 +384,34 @@
                 toast: true
             });
         }
+
+        console.log('DOM cargado completamente');
+        
+        // Detectar si hay tickets en la página
+        const tickets = document.querySelectorAll('.ticket');
+        console.log('Tickets encontrados:', tickets.length);
+        
+        // Mostrar información de los tickets para depuración
+        tickets.forEach((ticket, index) => {
+            const ticketHeader = ticket.querySelector('.ticket-header h3');
+            const ticketPlate = ticket.querySelector('.plate');
+            const closeButton = ticket.querySelector('.cerrar-ticket');
+            
+            if (closeButton) {
+                const tipoRegistro = closeButton.getAttribute('data-tolerancia-tipo');
+                const tipo = closeButton.getAttribute('data-tipo');
+                
+                console.log(`Ticket #${index + 1}:`, {
+                    vehiculo: ticketHeader ? ticketHeader.textContent : 'N/A',
+                    placa: ticketPlate ? ticketPlate.textContent : 'N/A',
+                    tipo: tipo || 'N/A',
+                    tipoRegistro: tipoRegistro || 'N/A',
+                    tarifa: {
+                        hora: closeButton.getAttribute('data-tarifa-hora'),
+                        dia: closeButton.getAttribute('data-tarifa-dia')
+                    }
+                });
+            }
+        });
     });
 </script>

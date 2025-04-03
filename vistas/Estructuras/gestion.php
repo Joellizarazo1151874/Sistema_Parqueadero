@@ -139,7 +139,29 @@ date_default_timezone_set('America/Bogota'); // Cambia 'America/Bogota' por tu z
   <script src="../assets/js/plugins/feather.min.js"></script>
   <script src="../assets/js/ticket.js"></script>
   <script>
-    
+    // Script para cargar tarifas y tolerancias actualizadas
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Cargando valores de tarifas y tolerancias actualizados...');
+      
+      // Verificar si estamos en la pestaña de tickets abiertos (tab1)
+      const currentTab = new URLSearchParams(window.location.search).get('tab') || 'tab1';
+      if (currentTab !== 'tab1') return;
+      
+      // Cargar las tolerancias primero
+      fetch('../../controladores/obtener_tolerancia.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Tolerancias cargadas:', data.tolerancias);
+            // No necesitamos hacer nada más porque las tolerancias ya se cargan en PHP
+          } else {
+            console.error('Error al cargar tolerancias:', data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error de red al cargar tolerancias:', error);
+        });
+    });
   </script>
 </body>
 <!-- [Body] end -->

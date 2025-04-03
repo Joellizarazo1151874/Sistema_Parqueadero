@@ -20,7 +20,7 @@ $categoria_cerrados = isset($_GET['categoria_cerrados']) ? $_GET['categoria_cerr
 $orden = ($orden === 'asc') ? 'ASC' : 'DESC';
 
 // Consulta para tickets abiertos con búsqueda opcional
-$sql_abiertos = "SELECT rp.*, v.placa, v.tipo, v.descripcion
+$sql_abiertos = "SELECT rp.*, rp.tipo AS tipo_registro, v.placa, v.tipo, v.descripcion
                  FROM registros_parqueo rp 
                  JOIN vehiculos v ON rp.id_vehiculo = v.id_vehiculo 
                  WHERE rp.estado = 'activo'";
@@ -61,6 +61,28 @@ $tipos_vehiculo = [];
 if ($resultado_tipos_vehiculo->num_rows > 0) {
     while ($row = $resultado_tipos_vehiculo->fetch_assoc()) {
         $tipos_vehiculo[] = $row['tipo_vehiculo'];
+    }
+}
+
+// Obtener todas las tarifas
+$sql_tarifas = "SELECT * FROM tarifas";
+$resultado_tarifas = $conexion->query($sql_tarifas);
+$tarifas_por_tipo = [];
+
+if ($resultado_tarifas && $resultado_tarifas->num_rows > 0) {
+    while ($row = $resultado_tarifas->fetch_assoc()) {
+        $tarifas_por_tipo[$row['tipo_vehiculo']] = $row;
+    }
+}
+
+// Obtener todas las tolerancias
+$sql_tolerancias = "SELECT tipo, tolerancia FROM tolerancia";
+$resultado_tolerancias = $conexion->query($sql_tolerancias);
+$tolerancias_por_tipo = [];
+
+if ($resultado_tolerancias && $resultado_tolerancias->num_rows > 0) {
+    while ($row = $resultado_tolerancias->fetch_assoc()) {
+        $tolerancias_por_tipo[$row['tipo']] = intval($row['tolerancia']);
     }
 }
 ?>

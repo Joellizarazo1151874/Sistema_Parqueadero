@@ -110,45 +110,7 @@ include '../../controladores/consultas_configuracion_tap1.php';
           <!-- Tab de Tarifas -->
           <?php include 'configuracion_tap/tap2.php'; ?>
           <!-- Tab de Precios -->
-          <div id="tab3" class="tab-content d-none">
-            <h3>Precios</h3>
-            <p>Establece los precios para cada categoría de vehículo en cada tipo de tarifa</p>
-
-            <div class="card p-4 mb-4">
-              <div class="ticket-summary">
-                <h5>Tarifas</h5>
-                <div class="table-responsive">
-                  <table class="table custom-table">
-                    <thead>
-                      <tr>
-                        <th class="highlight-column"></th>
-                        <th class="highlight-column">AUTO</th>
-                        <th class="highlight-column">CAMIONETA</th>
-                        <th class="highlight-column">MOTO</th>
-                        <th class="highlight-column">MOTOCARRO</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td class="highlight-column">HORA</td>
-                        <td><input type="number" class="form-control" value="1500"></td>
-                        <td><input type="number" class="form-control" value="2000"></td>
-                        <td><input type="number" class="form-control" value="1000"></td>
-                        <td><input type="number" class="form-control" value="1500"></td>
-                      </tr>
-                      <tr>
-                        <td class="highlight-column">DIA</td>
-                        <td><input type="number" class="form-control" value="1500"></td>
-                        <td><input type="number" class="form-control" value="2000"></td>
-                        <td><input type="number" class="form-control" value="1000"></td>
-                        <td><input type="number" class="form-control" value="1500"></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
+          <?php include 'configuracion_tap/tap3.php'; ?>
           <!-- Tab de Usuarios -->
           <div id="tab4" class="tab-content d-none">
             <h3>Usuarios</h3>
