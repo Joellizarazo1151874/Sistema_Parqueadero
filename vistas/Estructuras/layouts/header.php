@@ -3,6 +3,19 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
   
+  <!-- Asegurar que Bootstrap está correctamente cargado -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Inicializar todos los dropdowns de Bootstrap cuando la página cargue
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Inicializando dropdowns de Bootstrap');
+      var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+      var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
+        return new bootstrap.Dropdown(dropdownToggleEl);
+      });
+    });
+  </script>
+  
   <header class="pc-header">
     <div class="header-wrapper"> <!-- [Mobile Media Block] start -->
       <div class="me-auto pc-mob-drp">

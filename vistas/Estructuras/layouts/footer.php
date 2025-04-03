@@ -10,18 +10,21 @@ if ($resultado_tipos_vehiculo->num_rows > 0) {
 }
 
 // Obtener los tipos de tarifa de la tabla tolerancia
-$sql_tipos_tarifa = "SELECT tipo FROM tolerancia ORDER BY tipo";
+$sql_tipos_tarifa = "SELECT tipo, tolerancia, tiempo FROM tolerancia ORDER BY tipo";
 $resultado_tipos_tarifa = $conexion->query($sql_tipos_tarifa);
 $tipos_tarifa = [];
+$tiempos_tarifa = []; // Nuevo array para almacenar los tiempos de cada tipo
 if ($resultado_tipos_tarifa && $resultado_tipos_tarifa->num_rows > 0) {
     while ($fila = $resultado_tipos_tarifa->fetch_assoc()) {
         $tipos_tarifa[] = $fila['tipo'];
+        $tiempos_tarifa[$fila['tipo']] = $fila['tiempo']; // Guardar el tiempo asociado a cada tipo
     }
 }
 
 // Si no hay tipos de tarifa definidos, añadir al menos "hora" por defecto
 if (empty($tipos_tarifa)) {
     $tipos_tarifa = ['hora'];
+    $tiempos_tarifa['hora'] = 1; // Tiempo por defecto para hora = 1 hora
 }
 
 // Tipo de tarifa seleccionado (por defecto hora)
@@ -37,14 +40,28 @@ if (isset($_COOKIE['tipo_tarifa_seleccionado']) && in_array($_COOKIE['tipo_tarif
         <div class="button-group">
             <!-- Selector de tipo de tarifa -->
             <div class="dropdown d-inline-block me-3">
-                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="tipoTarifaDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    x<?php echo ucfirst($tipo_tarifa_seleccionado); ?>
+                <button class="btn btn-sm btn-primary" type="button" id="tipoTarifaDropdown" 
+                    onclick="toggleTipoTarifaMenu()" style="position: relative; z-index: 1000; padding: 8px 15px; font-weight: bold;">
+                    <i class="ti ti-clock me-1"></i>x<?php echo ucfirst($tipo_tarifa_seleccionado); ?> <i class="ti ti-chevron-up ms-1"></i>
                 </button>
-                <ul class="dropdown-menu" aria-labelledby="tipoTarifaDropdown">
-                    <?php foreach ($tipos_tarifa as $tipo): ?>
-                        <li><a class="dropdown-item tipo-tarifa-option" href="#" data-tipo="<?php echo $tipo; ?>"><?php echo ucfirst($tipo); ?></a></li>
+                <div id="tipoTarifaMenu" class="position-absolute bg-white shadow-lg rounded p-2" 
+                    style="display: none; min-width: 150px; z-index: 1001; bottom: 100%; left: 0; margin-bottom: 5px; border: 1px solid #e9ecef; border-radius: 0.375rem; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;">
+                    <?php 
+                    // Mostrar cada tipo de tarifa disponible como una opción en el menú
+                    foreach ($tipos_tarifa as $tipo): 
+                        $active = ($tipo === $tipo_tarifa_seleccionado) ? ' fw-bold text-primary' : '';
+                    ?>
+                        <div class="px-3 py-2 tipo-tarifa-item" style="cursor: pointer; transition: background-color 0.2s;" 
+                             onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                             onmouseout="this.style.backgroundColor='transparent'">
+                            <a href="javascript:void(0)" class="text-decoration-none tipo-tarifa-option<?php echo $active; ?>" 
+                               data-tipo="<?php echo $tipo; ?>" 
+                               onclick="cambiarTipoTarifa('<?php echo $tipo; ?>'); return false;" style="display: block;">
+                                <i class="ti ti-<?php echo ($tipo === 'hora') ? 'clock' : 'calendar'; ?> me-2"></i><?php echo ucfirst($tipo); ?>
+                            </a>
+                        </div>
                     <?php endforeach; ?>
-                </ul>
+                </div>
             </div>
             <span class="separator">|</span>
             <?php
@@ -178,52 +195,119 @@ if (isset($_COOKIE['tipo_tarifa_seleccionado']) && in_array($_COOKIE['tipo_tarif
 
 <!-- Script para manejar el cambio de tipo de tarifa -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Obtener todos los elementos de opciones de tipo de tarifa
-    const tipoTarifaOptions = document.querySelectorAll('.tipo-tarifa-option');
+// Función para alternar la visibilidad del menú de tipos de tarifa
+function toggleTipoTarifaMenu() {
+    const menu = document.getElementById('tipoTarifaMenu');
+    if (menu) {
+        if (menu.style.display === 'none' || menu.style.display === '') {
+            menu.style.display = 'block';
+            console.log('Menú abierto');
+        } else {
+            menu.style.display = 'none';
+            console.log('Menú cerrado');
+        }
+    } else {
+        console.error('No se encontró el menú de tipos de tarifa');
+    }
+}
+
+// Función para actualizar el tipo de tarifa
+function cambiarTipoTarifa(tipo) {
+    console.log('Cambiando tipo de tarifa a:', tipo);
     
-    // Manejar clic en opciones de tipo de tarifa
-    tipoTarifaOptions.forEach(option => {
-        option.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const tipoSeleccionado = this.getAttribute('data-tipo');
-            console.log('Tipo de tarifa seleccionado:', tipoSeleccionado);
-            
-            // Actualizar el texto del botón
-            document.getElementById('tipoTarifaDropdown').textContent = 'x' + tipoSeleccionado.charAt(0).toUpperCase() + tipoSeleccionado.slice(1);
-            
-            // Actualizar todos los elementos de texto
-            document.querySelectorAll('.tipo-tarifa-texto').forEach(elem => {
-                elem.textContent = tipoSeleccionado.charAt(0).toUpperCase() + tipoSeleccionado.slice(1);
-            });
-            
-            // Actualizar todos los campos ocultos
-            document.querySelectorAll('.tipo-tarifa-input').forEach(input => {
-                input.value = tipoSeleccionado;
-                console.log('Campo actualizado:', input, 'valor:', tipoSeleccionado);
-            });
-            
-            // Guardar la selección en una cookie para persistencia
-            document.cookie = "tipo_tarifa_seleccionado=" + tipoSeleccionado + "; path=/; max-age=86400";
-            console.log('Cookie guardada:', "tipo_tarifa_seleccionado=" + tipoSeleccionado);
-            
-            // Mostrar notificación de cambio
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Tipo de tarifa actualizado',
-                    text: 'Se ha cambiado a tarifa por ' + tipoSeleccionado,
-                    icon: 'success',
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    timerProgressBar: true,
-                    toast: true
-                });
-            } else {
-                alert('Tipo de tarifa cambiado a: ' + tipoSeleccionado);
-            }
-        });
+    // Ocultar el menú después de seleccionar
+    const menu = document.getElementById('tipoTarifaMenu');
+    if (menu) {
+        menu.style.display = 'none';
+    }
+    
+    // Determinar ícono según el tipo
+    const icono = tipo === 'hora' ? 'clock' : 'calendar';
+    
+    // Actualizar el texto del botón
+    document.getElementById('tipoTarifaDropdown').innerHTML = '<i class="ti ti-' + icono + ' me-1"></i>x' + tipo.charAt(0).toUpperCase() + tipo.slice(1) + ' <i class="ti ti-chevron-up ms-1"></i>';
+    
+    // Actualizar todos los elementos de texto
+    document.querySelectorAll('.tipo-tarifa-texto').forEach(elem => {
+        elem.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
     });
+    
+    // Actualizar todos los campos ocultos
+    document.querySelectorAll('.tipo-tarifa-input').forEach(input => {
+        input.value = tipo;
+        console.log('Campo actualizado:', input, 'valor:', tipo);
+    });
+    
+    // Guardar la selección en una cookie para persistencia
+    document.cookie = "tipo_tarifa_seleccionado=" + tipo + "; path=/; max-age=86400";
+    console.log('Cookie guardada:', "tipo_tarifa_seleccionado=" + tipo);
+    
+    // Mostrar notificación de cambio
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Tipo de tarifa actualizado',
+            text: 'Se ha cambiado a tarifa por ' + tipo,
+            icon: 'success',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+            toast: true
+        });
+    } else {
+        alert('Tipo de tarifa cambiado a: ' + tipo);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM cargado, inicializando selector de tipo de tarifa');
+    
+    // Cerrar el menú cuando se hace clic fuera de él
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('tipoTarifaMenu');
+        const toggleButton = document.getElementById('tipoTarifaDropdown');
+        
+        if (menu && menu.style.display === 'block' && 
+            e.target !== menu && 
+            e.target !== toggleButton && 
+            !menu.contains(e.target) && 
+            !toggleButton.contains(e.target)) {
+            menu.style.display = 'none';
+            console.log('Menú cerrado por clic fuera');
+        }
+    });
+    
+    // Verificar si hay un tipo de tarifa en la cookie
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+    
+    const savedType = getCookie('tipo_tarifa_seleccionado');
+    if (savedType) {
+        console.log('Tipo de tarifa guardado en cookie:', savedType);
+        
+        // Determinar ícono según el tipo guardado
+        const savedIcono = savedType === 'hora' ? 'clock' : 'calendar';
+        
+        // Aplicar el tipo guardado sin mostrar notificación
+        const dropdownBtn = document.getElementById('tipoTarifaDropdown');
+        if (dropdownBtn) {
+            dropdownBtn.innerHTML = '<i class="ti ti-' + savedIcono + ' me-1"></i>x' + savedType.charAt(0).toUpperCase() + savedType.slice(1) + ' <i class="ti ti-chevron-up ms-1"></i>';
+        }
+        
+        // Actualizar todos los elementos de texto
+        document.querySelectorAll('.tipo-tarifa-texto').forEach(elem => {
+            elem.textContent = savedType.charAt(0).toUpperCase() + savedType.slice(1);
+        });
+        
+        // Actualizar todos los campos ocultos
+        document.querySelectorAll('.tipo-tarifa-input').forEach(input => {
+            input.value = savedType;
+        });
+    }
 });
 </script>
+

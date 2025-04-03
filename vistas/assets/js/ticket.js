@@ -233,17 +233,19 @@ document.addEventListener("DOMContentLoaded", function () {
       const toleranciaMinutos = parseInt(this.getAttribute("data-tolerancia") || "15");
       const tarifaHora = parseFloat(this.getAttribute("data-tarifa-hora") || "0");
       const tarifaDia = parseFloat(this.getAttribute("data-tarifa-dia") || "0");
+      const tarifaValor = parseFloat(this.getAttribute("data-tarifa-valor") || "0");
       const placa = this.getAttribute("data-placa");
       const tipo = this.getAttribute("data-tipo");
       const tipoRegistro = this.getAttribute("data-tipo-registro") || this.getAttribute("data-tolerancia-tipo") || "hora"; // Obtener el tipo de registro
+      const tiempoHoras = parseFloat(this.getAttribute("data-tiempo-horas") || "1"); // Obtener el tiempo en horas configurado
       const metodoPago = this.getAttribute("data-metodo-pago");
-      const tarifaValor = parseFloat(this.getAttribute("data-tarifa-valor") || "0");
 
       console.log('Datos del ticket a cerrar:', {
         id: ticketId,
         placa: placa,
         tipo: tipo,
         tipoRegistro: tipoRegistro,
+        tiempoHoras: tiempoHoras,
         tarifas: {
           hora: tarifaHora,
           dia: tarifaDia,
@@ -270,22 +272,21 @@ document.addEventListener("DOMContentLoaded", function () {
         let minutos = minutosTranscurridos % 60;
         let tiempoTranscurrido = `${horas}h ${minutos}m`;
 
-        let costo = 0;
+        let costoItem = 0;
         if (minutosTranscurridos > toleranciaMinutos) {
           let minutosCobrados = minutosTranscurridos - toleranciaMinutos; // Restar los min de tolerancia
-          costo = minutosCobrados * costoPorMinuto;
-          costo = Math.floor(costo / 100) * 100; // Redondear en múltiplos de 100
+          costoItem = minutosCobrados * costoPorMinuto;
+          costoItem = Math.floor(costoItem / 100) * 100; // Redondear en múltiplos de 100
         }
 
         // Calcular los items del cobro según el tipo de registro
         let cantidadHoras = Math.floor(minutosTranscurridos / 60);
         let cantidadMinutos = minutosTranscurridos % 60;
-        let costoItem = 0;
         let detalleCobro = '';
         
-        console.log('Calculando costo para tipo de registro:', tipoRegistro);
+        console.log('Calculando costo para tipo de registro:', tipoRegistro, 'con tiempo configurado:', tiempoHoras, 'horas');
         
-        // Ajustar el detalle según el tipo de registro
+        // Ajustar el detalle según el tipo de registro y el tiempo configurado
         if (tipoRegistro === 'hora') {
           // Calcular costo por horas completas
           costoItem = cantidadHoras * tarifaHora;
@@ -304,31 +305,69 @@ document.addEventListener("DOMContentLoaded", function () {
           
           detalleCobro = `${cantidadHoras} x Hora ($${tarifaHora.toLocaleString()}) + ${Math.max(0, cantidadMinutos - toleranciaMinutos)} min ($${Math.floor(costoMinutos)})`;
           console.log('Costo calculado por hora:', costoItem, '(Horas:', cantidadHoras * tarifaHora, '+ Minutos:', costoMinutos, ')');
-        } else if (tipoRegistro === 'dia') {
-          // Calcular días transcurridos (si han pasado más de 24 horas, se cobra un día completo)
-          let cantidadDias = Math.ceil(minutosTranscurridos / (24 * 60));
+        } else {
+          // Para cualquier tipo de tarifa que no sea hora, usar el tiempo configurado
+          // Convertir minutos transcurridos a horas
+          let horasTranscurridas = minutosTranscurridos / 60;
           
           // Si no ha pasado la tolerancia, no se cobra nada
           if (minutosTranscurridos <= toleranciaMinutos) {
-            cantidadDias = 0;
+            costoItem = 0;
+            detalleCobro = `Dentro de tolerancia (${toleranciaMinutos} min)`;
+          } else {
+            // Calcular proporción del periodo transcurrido
+            let proporcion = Math.min(horasTranscurridas / tiempoHoras, 1);
+            
+            // Si ha pasado más tiempo que el configurado, calcular periodos completos y la proporción adicional
+            if (horasTranscurridas > tiempoHoras) {
+              let periodosCompletos = Math.floor(horasTranscurridas / tiempoHoras);
+              let horasRestantes = horasTranscurridas % tiempoHoras;
+              let proporcionRestante = horasRestantes / tiempoHoras;
+              
+              // Cobrar periodos completos más la proporción adicional
+              costoItem = (periodosCompletos + proporcionRestante) * tarifaValor;
+              
+              // Formatear el detalle según el tipo de periodo
+              if (tipoRegistro === 'dia') {
+                detalleCobro = `${periodosCompletos} día(s) y ${(horasRestantes).toFixed(1)} horas ($${tarifaValor.toLocaleString()})`;
+              } else if (tipoRegistro === 'semana') {
+                detalleCobro = `${periodosCompletos} semana(s) y ${(horasRestantes / 24).toFixed(1)} días ($${tarifaValor.toLocaleString()})`;
+              } else if (tipoRegistro === 'mes') {
+                detalleCobro = `${periodosCompletos} mes(es) y ${(horasRestantes / 24).toFixed(1)} días ($${tarifaValor.toLocaleString()})`;
+              } else if (tipoRegistro === 'año' || tipoRegistro === 'anio') {
+                detalleCobro = `${periodosCompletos} año(s) y ${(horasRestantes / 24).toFixed(1)} días ($${tarifaValor.toLocaleString()})`;
+              } else {
+                detalleCobro = `${periodosCompletos} x ${tipoRegistro} y fracción (${(proporcionRestante * 100).toFixed(1)}%) ($${tarifaValor.toLocaleString()})`;
+              }
+            } else {
+              // Si es menos que el tiempo configurado, cobrar la proporción
+              costoItem = proporcion * tarifaValor;
+              
+              // Formatear el detalle según el tipo de periodo
+              if (tipoRegistro === 'dia') {
+                detalleCobro = `${horasTranscurridas.toFixed(1)} horas de día ($${tarifaValor.toLocaleString()})`;
+              } else if (tipoRegistro === 'semana') {
+                detalleCobro = `${(horasTranscurridas / 24).toFixed(1)} días de semana ($${tarifaValor.toLocaleString()})`;
+              } else if (tipoRegistro === 'mes') {
+                detalleCobro = `${(horasTranscurridas / 24).toFixed(1)} días de mes ($${tarifaValor.toLocaleString()})`;
+              } else if (tipoRegistro === 'año' || tipoRegistro === 'anio') {
+                detalleCobro = `${(horasTranscurridas / 24).toFixed(1)} días de ${tipoRegistro === 'año' ? 'año' : 'anio'} ($${tarifaValor.toLocaleString()})`;
+              } else {
+                detalleCobro = `${(proporcion * 100).toFixed(1)}% de ${tipoRegistro} ($${tarifaValor.toLocaleString()})`;
+              }
+            }
           }
-          
-          costoItem = cantidadDias * tarifaDia;
           
           // Redondear a múltiplos de 100
           costoItem = Math.floor(costoItem / 100) * 100;
           
-          detalleCobro = `${cantidadDias} x Día ($${tarifaDia.toLocaleString()})`;
-          console.log('Costo calculado por día:', costoItem, '(', cantidadDias, 'días a $', tarifaDia, ')');
-        } else {
-          // Para otros tipos, usar el valor de tarifa específico
-          costoItem = tarifaValor;
-          detalleCobro = `Tarifa por ${tipoRegistro}: $${tarifaValor.toLocaleString()}`;
-          console.log('Costo calculado por', tipoRegistro, ':', costoItem);
+          console.log('Costo calculado para', tipoRegistro, ':', costoItem, 
+                      '(', horasTranscurridas.toFixed(2), 'horas transcurridas,',
+                      tiempoHoras, 'horas configuradas, tarifa: $', tarifaValor, ')');
         }
 
         // Usar costoItem calculado para el total a pagar
-        costo = costoItem;
+        costoItem = costoItem;
 
         // Obtener el valor actual del input (si ya fue editado, conservar el texto del usuario)
         let descripcionActual = document.getElementById("modalDescripcion").value;
@@ -343,15 +382,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 #${placa} • ${tipo} <br>
                 <small>Ingreso: ${horaIngresoFormateada}</small> <br>
                 <small>Tiempo: ${tiempoTranscurrido}</small> <br>
-                <small>Tipo: ${tipoRegistro.charAt(0).toUpperCase() + tipoRegistro.slice(1)}</small>
+                <small>Tipo: ${tipoRegistro.charAt(0).toUpperCase() + tipoRegistro.slice(1)} (${tiempoHoras}h)</small>
             `;
 
         //datos los cuales seran enviados al formulario para cerrar el ticket
-        document.getElementById("modalCosto").innerText = `$${costo.toLocaleString('en-US')}`;
-        document.getElementById("total_pagado").value = `${costo.toLocaleString().replace(/\./g, '')}`;
+        document.getElementById("modalCosto").innerText = `$${costoItem.toLocaleString('en-US')}`;
+        document.getElementById("total_pagado").value = `${costoItem.toLocaleString().replace(/\./g, '')}`;
         document.getElementById("id_ticket").value = `${ticketId.toLocaleString()}`;
         // Mostrar el detalle en "Items"
-        document.getElementById("modalItems").value = `${detalleCobro} = $${costo}`;
+        document.getElementById("modalItems").value = `${detalleCobro} = $${costoItem}`;
       }
 
       // Llamar la función inmediatamente y actualizar cada segundo

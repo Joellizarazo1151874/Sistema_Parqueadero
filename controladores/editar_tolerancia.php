@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['tipo']) && isset($_POST['tolerancia'])) {
         $tipo = $conexion->real_escape_string($_POST['tipo']);
         $tolerancia = $conexion->real_escape_string($_POST['tolerancia']);
+        $tiempo = isset($_POST['tiempo']) ? $conexion->real_escape_string($_POST['tiempo']) : 0;
         
         // Validar que la tolerancia sea un número entero positivo
         if (!is_numeric($tolerancia) || intval($tolerancia) < 0) {
@@ -26,8 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         
+        // Validar que el tiempo sea un número positivo
+        if (!is_numeric($tiempo) || floatval($tiempo) < 0) {
+            echo json_encode(['success' => false, 'error' => 'El tiempo debe ser un número positivo.']);
+            exit;
+        }
+        
         // Consulta para actualizar la tolerancia
-        $sql = "UPDATE tolerancia SET tolerancia = '$tolerancia' WHERE tipo = '$tipo'";
+        $sql = "UPDATE tolerancia SET tolerancia = '$tolerancia', tiempo = '$tiempo' WHERE tipo = '$tipo'";
         
         if ($conexion->query($sql) === TRUE) {
             // Verificar si se actualizó algún registro
@@ -36,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 // Si no se actualizó ningún registro, podría ser porque no existía ese tipo
                 // Intentar insertar un nuevo registro
-                $sqlInsert = "INSERT INTO tolerancia (tipo, tolerancia) VALUES ('$tipo', '$tolerancia')";
+                $sqlInsert = "INSERT INTO tolerancia (tipo, tolerancia, tiempo) VALUES ('$tipo', '$tolerancia', '$tiempo')";
                 if ($conexion->query($sqlInsert) === TRUE) {
                     echo json_encode(['success' => true, 'message' => 'Tolerancia agregada correctamente.']);
                 } else {

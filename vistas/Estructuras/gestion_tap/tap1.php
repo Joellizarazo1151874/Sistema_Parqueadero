@@ -113,6 +113,16 @@
                                         $tolerancia_minutos = $tolerancias_por_tipo[$tipo_registro];
                                     }
                                     
+                                    // Obtener el tiempo en horas según el tipo de registro
+                                    $tiempo_horas = 1; // Valor predeterminado: 1 hora
+                                    // Consultar el tiempo configurado para este tipo de registro
+                                    $sql_tiempo = "SELECT tiempo FROM tolerancia WHERE tipo = '$tipo_registro'";
+                                    $result_tiempo = $conexion->query($sql_tiempo);
+                                    if ($result_tiempo && $result_tiempo->num_rows > 0) {
+                                        $row_tiempo = $result_tiempo->fetch_assoc();
+                                        $tiempo_horas = floatval($row_tiempo['tiempo']);
+                                    }
+                                    
                                     // Calcular costo por minuto basado en el tipo de registro
                                     $costo_por_minuto = 0;
                                     if ($tipo_registro == 'hora' && $tarifa_hora > 0) {
@@ -120,16 +130,21 @@
                                     } elseif ($tipo_registro == 'dia' && $tarifa_dia > 0) {
                                         $costo_por_minuto = $tarifa_dia / (24 * 60); // Costo por minuto basado en día
                                     } elseif (isset($tarifa_valor) && $tarifa_valor > 0) {
-                                        // Si es otro tipo, usamos el valor específico
-                                        // Para un tipo como "mes", podríamos usar: $tarifa_valor / (30 * 24 * 60)
-                                        // Pero como puede haber múltiples tipos, haremos una lógica simple:
-                                        if ($tipo_registro == 'mes') {
-                                            $costo_por_minuto = $tarifa_valor / (30 * 24 * 60);
-                                        } elseif ($tipo_registro == 'semana') {
-                                            $costo_por_minuto = $tarifa_valor / (7 * 24 * 60);
+                                        // Si es otro tipo, usamos el valor específico y el tiempo configurado
+                                        if ($tiempo_horas > 0) {
+                                            // Convertir tiempo en horas a minutos
+                                            $tiempo_minutos = $tiempo_horas * 60;
+                                            $costo_por_minuto = $tarifa_valor / $tiempo_minutos;
                                         } else {
-                                            // Un caso predeterminado para tipos desconocidos
-                                            $costo_por_minuto = $tarifa_valor / 60;
+                                            // Fallback a los valores por defecto
+                                            if ($tipo_registro == 'mes') {
+                                                $costo_por_minuto = $tarifa_valor / (30 * 24 * 60);
+                                            } elseif ($tipo_registro == 'semana') {
+                                                $costo_por_minuto = $tarifa_valor / (7 * 24 * 60);
+                                            } else {
+                                                // Un caso predeterminado para tipos desconocidos
+                                                $costo_por_minuto = $tarifa_valor / 60;
+                                            }
                                         }
                                     }
                                 ?>
@@ -138,7 +153,9 @@
                                     data-costo-por-minuto="<?php echo $costo_por_minuto; ?>"
                                     data-tolerancia="<?php echo $tolerancia_minutos; ?>"
                                     data-tarifa-hora="<?php echo $tarifa_hora; ?>"
-                                    data-tarifa-dia="<?php echo $tarifa_dia; ?>">
+                                    data-tarifa-dia="<?php echo $tarifa_dia; ?>"
+                                    data-tipo-registro="<?php echo $tipo_registro; ?>"
+                                    data-tiempo-horas="<?php echo $tiempo_horas; ?>">
                                     Calculando...
                                 </b>
                             </div>
@@ -154,7 +171,9 @@
                                     data-costo-por-minuto="<?php echo $costo_por_minuto; ?>"
                                     data-tolerancia="<?php echo $tolerancia_minutos; ?>"
                                     data-tarifa-hora="<?php echo $tarifa_hora; ?>"
-                                    data-tarifa-dia="<?php echo $tarifa_dia; ?>">
+                                    data-tarifa-dia="<?php echo $tarifa_dia; ?>"
+                                    data-tipo-registro="<?php echo $tipo_registro; ?>"
+                                    data-tiempo-horas="<?php echo $tiempo_horas; ?>">
                                     Calculando...
                                 </b>
                             </div>
@@ -189,6 +208,7 @@
                             data-tarifa-hora="<?php echo $tarifa_hora; ?>"
                             data-tarifa-dia="<?php echo $tarifa_dia; ?>"
                             data-tarifa-valor="<?php echo isset($tarifa_valor) ? $tarifa_valor : 0; ?>"
+                            data-tiempo-horas="<?php echo $tiempo_horas; ?>"
                             data-tiempo="<?php echo floor($minutos_transcurridos / 60) . 'h ' . ($minutos_transcurridos % 60) . 'm'; ?>"
                             data-total-pagado="<?php echo $row['total_pagado']; ?>"
                             data-metodo-pago="<?php echo $row['metodo_pago']; ?>">

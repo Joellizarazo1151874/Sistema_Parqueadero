@@ -1,4 +1,3 @@
-
 <div id="tab2" class="tab-content d-none">
 
     <div class="row">
@@ -93,7 +92,7 @@
                                         <td><?php echo date('d/m/Y', strtotime($row['hora_ingreso'])); ?></td>
                                         <td><?php echo $row['placa']; ?></td>
                                         <td><?php echo $row['tipo']; ?></td>
-                                        <td>x Hora</td>
+                                        <td>x <?php echo ucfirst($row['tipo_registro'] ?? 'Hora'); ?></td>
                                         <td><?php echo $fecha_ingreso; ?></td>
                                         <td><?php echo $fecha_salida; ?></td>
                                         <td>$<?php echo number_format($row['total_pagado'], 0, ',', '.'); ?></td>

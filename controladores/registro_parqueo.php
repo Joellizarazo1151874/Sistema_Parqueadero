@@ -13,6 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtener el tipo de registro (hora, día, mes, etc.)
     $tipo_registro = isset($_POST['tipo_registro']) ? $_POST['tipo_registro'] : 'hora';
     
+    // Obtener el tiempo en horas para este tipo de tarifa
+    $tiempo_tarifa = isset($_POST['tiempo_tarifa']) ? $_POST['tiempo_tarifa'] : 1;
+    
     // Iniciar sesión para obtener datos del usuario actual
     session_start();
     $abierto_por = isset($_SESSION['datos_login']['nombre']) ? $_SESSION['datos_login']['nombre'] : 'Sistema';
@@ -42,13 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_vehiculo = $conexion->insert_id;
         }
 
-        // Registrar el ingreso del vehículo al parqueadero con el tipo de registro
-        $stmt = $conexion->prepare("INSERT INTO registros_parqueo (id_vehiculo, hora_ingreso, hora_salida, estado, total_pagado, metodo_pago, abierto_por, tipo) 
-        VALUES (?, NOW(), NULL, 'activo', 0, NULL, ?, ?)");
+        // Registrar el ingreso del vehículo al parqueadero con el tipo de registro y tiempo en horas
+        $stmt = $conexion->prepare("INSERT INTO registros_parqueo (id_vehiculo, hora_ingreso, hora_salida, estado, total_pagado, metodo_pago, abierto_por, tipo, tiempo_horas) 
+        VALUES (?, NOW(), NULL, 'activo', 0, NULL, ?, ?, ?)");
         if ($stmt === false) {
             die("Error en la preparación de la consulta: " . $conexion->error);
         }
-        $stmt->bind_param("iss", $id_vehiculo, $abierto_por, $tipo_registro);
+        $stmt->bind_param("issd", $id_vehiculo, $abierto_por, $tipo_registro, $tiempo_tarifa);
         $stmt->execute();
 
         header("Location: ../vistas/Estructuras/gestion.php?success=1");

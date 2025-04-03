@@ -80,6 +80,7 @@ if ($tipo_ticket === 'Cancelados') {
     $sql_cerrados_categoria = "SELECT 
     rp.*, 
     rp.descripcion AS descripcion_ticket, 
+    rp.tipo AS tipo_registro,
     v.placa, 
     v.tipo, 
     v.descripcion 
@@ -93,6 +94,7 @@ WHERE
     $sql_cerrados_categoria = "SELECT 
     rp.*, 
     rp.descripcion AS descripcion_ticket, 
+    rp.tipo AS tipo_registro,
     v.placa, 
     v.tipo, 
     v.descripcion 

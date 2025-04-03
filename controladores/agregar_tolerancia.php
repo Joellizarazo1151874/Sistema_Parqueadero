@@ -16,10 +16,17 @@ if (!isset($conexion) || $conexion->connect_error) {
 if (isset($_POST['tipo']) && isset($_POST['tolerancia'])) {
     $tipo = $conexion->real_escape_string($_POST['tipo']);
     $tolerancia = $conexion->real_escape_string($_POST['tolerancia']);
+    $tiempo = isset($_POST['tiempo']) ? $conexion->real_escape_string($_POST['tiempo']) : 0;
     
     // Validar que la tolerancia sea un número entero positivo
     if (!is_numeric($tolerancia) || intval($tolerancia) < 0) {
         echo json_encode(['success' => false, 'error' => 'La tolerancia debe ser un número entero positivo.']);
+        exit;
+    }
+    
+    // Validar que el tiempo sea un número positivo
+    if (!is_numeric($tiempo) || floatval($tiempo) < 0) {
+        echo json_encode(['success' => false, 'error' => 'El tiempo debe ser un número positivo.']);
         exit;
     }
     
@@ -31,7 +38,7 @@ if (isset($_POST['tipo']) && isset($_POST['tolerancia'])) {
     }
     
     // Consulta para insertar la nueva tolerancia
-    $sql = "INSERT INTO tolerancia (tipo, tolerancia) VALUES ('$tipo', '$tolerancia')";
+    $sql = "INSERT INTO tolerancia (tipo, tolerancia, tiempo) VALUES ('$tipo', '$tolerancia', '$tiempo')";
     
     if ($conexion->query($sql) === TRUE) {
         echo json_encode(['success' => true, 'message' => 'Tolerancia agregada correctamente.']);

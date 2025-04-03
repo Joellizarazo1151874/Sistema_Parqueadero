@@ -206,6 +206,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Tipo</th>
+                            <th>Tiempo (horas)</th>
                             <th>Tolerancia (min)</th>
                             <th>Acciones</th>
                         </tr>
@@ -218,8 +219,9 @@
                         
                         if ($result && $result->num_rows > 0) {
                             while ($row = $result->fetch_assoc()) {
-                                echo '<tr data-tipo="' . htmlspecialchars($row['tipo']) . '" data-tolerancia="' . htmlspecialchars($row['tolerancia']) . '">';
+                                echo '<tr data-tipo="' . htmlspecialchars($row['tipo']) . '" data-tolerancia="' . htmlspecialchars($row['tolerancia']) . '" data-tiempo="' . htmlspecialchars($row['tiempo'] ?? 0) . '">';
                                 echo '<td>' . htmlspecialchars($row['tipo']) . '</td>';
+                                echo '<td>' . htmlspecialchars($row['tiempo'] ?? 0) . '</td>';
                                 echo '<td>' . htmlspecialchars($row['tolerancia']) . '</td>';
                                 echo '<td>';
                                 echo '<button class="btn btn-sm btn-outline-primary me-2 btn-editar-tolerancia" data-bs-toggle="modal" data-bs-target="#editarTarifaModal">';
@@ -232,7 +234,7 @@
                                 echo '</tr>';
                             }
                         } else {
-                            echo '<tr><td colspan="3" class="text-center">No se encontraron configuraciones de tolerancia.</td></tr>';
+                            echo '<tr><td colspan="4" class="text-center">No se encontraron configuraciones de tolerancia.</td></tr>';
                         }
                         ?>
                     </tbody>
@@ -252,6 +254,11 @@
                                 <div class="mb-3">
                                     <label for="tipoToleranciaEdit" class="form-label">Tipo</label>
                                     <input type="text" class="form-control" id="tipoToleranciaEdit" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tiempoEdit" class="form-label">Tiempo en horas</label>
+                                    <input type="number" class="form-control" id="tiempoEdit" min="0" step="0.5" required>
+                                    <div class="form-text">Ingrese la duración del bloque de tiempo en horas (ejemplo: 1, 24, 168).</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="toleranciaEdit" class="form-label">Tolerancia en minutos</label>
@@ -281,7 +288,17 @@
                                 <div class="mb-3">
                                     <label for="tipoToleranciaAdd" class="form-label">Tipo</label>
                                     <input type="text" class="form-control" id="tipoToleranciaAdd" required>
-                                    <div class="form-text">Ejemplos: Hora, Día, Semana, Mes, etc.</div>
+                                    <div class="form-text">Ejemplos: Hora, Día, Semana, Mes, etc. No se permiten espacios.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tiempoAdd" class="form-label">Tiempo en horas</label>
+                                    <input type="number" class="form-control" id="tiempoAdd" min="0" step="0.5" required>
+                                    <div class="form-text">Ingrese la duración del bloque de tiempo en horas:<br>
+                                    - Hora: 1<br>
+                                    - Día: 24<br>
+                                    - Semana: 168 (7 días x 24 horas)<br>
+                                    - Mes: 720 (30 días x 24 horas)<br>
+                                    - Año: 8760 (365 días x 24 horas)</div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="toleranciaAdd" class="form-label">Tolerancia en minutos</label>
@@ -351,15 +368,43 @@
         // Ejecutar una limpieza inicial para asegurarnos de que la interfaz está limpia
         limpiarInterfaz();
         
+        // Validar en tiempo real si el campo de tipo contiene espacios
+        document.getElementById('tipoToleranciaAdd').addEventListener('input', function(e) {
+            const valor = e.target.value;
+            const mensajeError = document.getElementById('error-tipo-espacios');
+            
+            if (valor.includes(' ')) {
+                // Mostrar mensaje de error debajo del campo
+                if (!mensajeError) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.id = 'error-tipo-espacios';
+                    errorDiv.className = 'text-danger small mt-1';
+                    errorDiv.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i>No se permiten espacios en este campo';
+                    e.target.parentNode.appendChild(errorDiv);
+                    
+                    // Cambiar el borde del input a rojo
+                    e.target.classList.add('is-invalid');
+                }
+            } else {
+                // Eliminar mensaje de error si existe
+                if (mensajeError) {
+                    mensajeError.remove();
+                    e.target.classList.remove('is-invalid');
+                }
+            }
+        });
+        
         // Manejar evento click en botones de editar
         document.querySelectorAll('.btn-editar-tolerancia').forEach(button => {
             button.addEventListener('click', function() {
                 const row = this.closest('tr');
                 const tipo = row.dataset.tipo;
                 const tolerancia = row.dataset.tolerancia;
+                const tiempo = row.dataset.tiempo || 0;
                 
                 document.getElementById('tipoToleranciaEdit').value = tipo;
                 document.getElementById('toleranciaEdit').value = tolerancia;
+                document.getElementById('tiempoEdit').value = tiempo;
             });
         });
         
@@ -532,14 +577,21 @@
             });
         });
         
-        // Guardar cambios de edición de tolerancia
-        document.getElementById('btnGuardarEditarTolerancia').addEventListener('click', function() {
+         // Guardar cambios de edición de tolerancia
+         document.getElementById('btnGuardarEditarTolerancia').addEventListener('click', function() {
             const tipo = document.getElementById('tipoToleranciaEdit').value;
             const tolerancia = document.getElementById('toleranciaEdit').value;
+            const tiempo = document.getElementById('tiempoEdit').value;
             
             // Validar que la tolerancia sea un número positivo
             if (!tolerancia || isNaN(tolerancia) || parseInt(tolerancia) < 0) {
                 window.mostrarNotificacion('Error', 'La tolerancia debe ser un número entero positivo', 'error');
+                return;
+            }
+
+            // Validar que el tiempo sea un número positivo
+            if (!tiempo || isNaN(tiempo) || parseFloat(tiempo) < 0) {
+                window.mostrarNotificacion('Error', 'El tiempo debe ser un número positivo', 'error');
                 return;
             }
             
@@ -559,6 +611,7 @@
             const formData = new FormData();
             formData.append('tipo', tipo);
             formData.append('tolerancia', tolerancia);
+            formData.append('tiempo', tiempo);
             
             // Enviar la solicitud al servidor
             fetch('../../controladores/editar_tolerancia.php', {
@@ -597,7 +650,9 @@
                                 for (const row of rows) {
                                     if (row.dataset.tipo === tipo) {
                                         row.dataset.tolerancia = tolerancia;
-                                        row.cells[1].textContent = tolerancia;
+                                        row.dataset.tiempo = tiempo;
+                                        row.cells[1].textContent = tiempo; // Actualizar celda de tiempo
+                                        row.cells[2].textContent = tolerancia; // Actualizar celda de tolerancia
                                         break;
                                     }
                                 }
@@ -679,6 +734,13 @@
         document.getElementById('btnGuardarAgregarTolerancia').addEventListener('click', function() {
             const tipo = document.getElementById('tipoToleranciaAdd').value.trim();
             const tolerancia = document.getElementById('toleranciaAdd').value;
+            const tiempo = document.getElementById('tiempoAdd').value;
+            
+            // Validar que no contenga espacios
+            if (tipo.includes(' ')) {
+                window.mostrarNotificacion('Error', 'El tipo de tolerancia no puede contener espacios', 'error');
+                return;
+            }
             
             // Validar los campos
             if (!tipo) {
@@ -688,6 +750,11 @@
             
             if (!tolerancia || isNaN(tolerancia) || parseInt(tolerancia) < 0) {
                 window.mostrarNotificacion('Error', 'La tolerancia debe ser un número entero positivo', 'error');
+                return;
+            }
+            
+            if (!tiempo || isNaN(tiempo) || parseFloat(tiempo) < 0) {
+                window.mostrarNotificacion('Error', 'El tiempo debe ser un número positivo', 'error');
                 return;
             }
             
@@ -703,10 +770,11 @@
                 }
             });
             
-            // Preparar los datos para enviar
-            const formData = new FormData();
+             // Preparar los datos para enviar
+             const formData = new FormData();
             formData.append('tipo', tipo);
             formData.append('tolerancia', tolerancia);
+            formData.append('tiempo', tiempo);
             
             // Enviar la solicitud al servidor
             fetch('../../controladores/agregar_tolerancia.php', {
