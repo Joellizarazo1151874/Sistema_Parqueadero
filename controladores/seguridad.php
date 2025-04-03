@@ -9,7 +9,7 @@ $arregloUsuario = $_SESSION['datos_login'];
 
 
 // Si el usuario no es administrador, redirigir
-if ($arregloUsuario['rol'] != 'patrocinador' && $arregloUsuario['rol'] != 'administrador') {
+if ($arregloUsuario['rol'] != 'operador' && $arregloUsuario['rol'] != 'administrador') {
     header("location:../formularios/index.php");
     exit();
 }

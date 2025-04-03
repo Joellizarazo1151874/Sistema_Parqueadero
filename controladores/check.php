@@ -15,7 +15,7 @@ if (isset($_POST['usuario']) && isset($_POST['contraseña'])) {
     }
     
     // Genera el hash de la contraseña
-    $passwordHash = sha1($_POST['contraseña']);
+    $passwordHash = SHA1($_POST['contraseña']);
 
     // Vincula los parámetros a la consulta
     $stmt->bind_param("ss", $_POST['usuario'], $passwordHash);
