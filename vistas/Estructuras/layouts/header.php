@@ -3,8 +3,14 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
   
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
   <!-- Asegurar que Bootstrap está correctamente cargado -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Persistent Camera Controller -->
+  <script src="../assets/js/camera/camera-persistent.js"></script>
   <script>
     // Inicializar todos los dropdowns de Bootstrap cuando la página cargue
     document.addEventListener('DOMContentLoaded', function() {
@@ -32,6 +38,12 @@
       <!-- [Mobile Media Block end] -->
       <div class="ms-auto">
         <ul class="list-unstyled">
+          <!-- Botón de cámara para reconocimiento de placas -->
+          <li class="pc-h-item">
+            <a href="#" class="pc-head-link" id="openCameraBtn" title="Reconocimiento de Placas">
+              <i class="ti ti-camera"></i>
+            </a>
+          </li>
           <li class="dropdown pc-h-item">
             <a
               class="pc-head-link dropdown-toggle arrow-none me-0"
@@ -76,3 +88,6 @@
     </div>
   </header>
   <!-- [ Header ] end -->
+  
+  <!-- Persistent Camera Container - This stays mounted across all pages -->
+  <div id="persistentCameraContainer" class="persistent-camera-container" style="display: none; position: fixed; z-index: 9999;"></div>

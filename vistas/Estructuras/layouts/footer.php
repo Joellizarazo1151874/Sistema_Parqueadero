@@ -311,3 +311,32 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- Script de cámara para reconocimiento de placas -->
+<?php
+// Definir la ruta base para los scripts
+$base_url = "";
+// Obtener la ruta actual
+$current_path = $_SERVER['PHP_SELF'];
+// Determinar cuántos niveles hay que subir para llegar a la raíz
+if (strpos($current_path, '/vistas/Estructuras/') !== false) {
+    $base_url = "../../";
+} elseif (strpos($current_path, '/vistas/') !== false) {
+    $base_url = "../";
+}
+?>
+<script src="<?php echo $base_url; ?>vistas/assets/js/camera/camera-controller.js"></script>
+
+<script>
+// Inicializar el controlador de cámara cuando el DOM esté completamente cargado
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar si el controlador de cámara ya está inicializado
+    if (typeof window.cameraController !== 'undefined') {
+        console.log('CameraController ya está inicializado');
+        // Verificar si la ventana flotante estaba abierta
+        window.cameraController.checkFloatingWindowState();
+    } else {
+        console.error('CameraController no está disponible');
+    }
+});
+</script>
+

@@ -78,6 +78,7 @@ Parqueadero/
   - Tabler Icons
 
 ## 3. MODELO DE DATOS
+![mermaid-diagram-2025-04-04-150146](https://github.com/user-attachments/assets/33955a3f-5b3b-485f-8e5c-327d73653360)
 
 ### 3.1 Tablas principales
 El sistema utiliza las siguientes tablas principales:

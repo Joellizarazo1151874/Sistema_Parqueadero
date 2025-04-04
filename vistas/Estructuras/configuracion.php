@@ -108,6 +108,11 @@ include '../../controladores/consultas_configuracion_tap1.php';
               <i class="bi bi-gear"></i> Ajustes
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" data-tab="tab8" href="#">
+              <i class="bi bi-camera"></i> Cámara
+            </a>
+          </li>
         </ul>
 
         <!-- Contenido dinámico -->
@@ -155,6 +160,98 @@ include '../../controladores/consultas_configuracion_tap1.php';
                     </select>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab de Cámara -->
+          <div id="tab8" class="tab-content d-none">
+            <h3>Configuración de Cámara</h3>
+            <p class="text-muted small">Configure la cámara para el reconocimiento automático de placas</p>
+            <div class="card p-4 mb-4">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Seleccionar Dispositivo</label>
+                    <select class="form-select" id="cameraSelect">
+                      <option value="">Seleccione una cámara...</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Resolución</label>
+                    <select class="form-select" id="resolutionSelect">
+                      <option value="640x480">640x480</option>
+                      <option value="1280x720">1280x720</option>
+                      <option value="1920x1080">1920x1080</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Intervalo de Reconocimiento (segundos)</label>
+                    <input type="number" class="form-control" id="scanInterval" min="1" max="10" value="3">
+                  </div>
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="autoStartCamera" checked>
+                    <label class="form-check-label" for="autoStartCamera">Iniciar cámara automáticamente</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Vista Previa</label>
+                    <div class="border rounded p-2 d-flex justify-content-center align-items-center bg-light" style="height: 240px;">
+                      <div id="cameraPreview" class="text-center">
+                        <i class="bi bi-camera-video-off" style="font-size: 48px;"></i>
+                        <p>La cámara no está activa</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-primary" id="startCameraBtn">
+                      <i class="bi bi-camera-video"></i> Iniciar Cámara
+                    </button>
+                    <button class="btn btn-danger" id="stopCameraBtn" disabled>
+                      <i class="bi bi-camera-video-off"></i> Detener Cámara
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card p-4 mb-4">
+              <h4>Configuración de Reconocimiento</h4>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Sensibilidad de Detección</label>
+                    <input type="range" class="form-range" id="sensitivityRange" min="1" max="10" value="5">
+                    <div class="d-flex justify-content-between">
+                      <span>Baja</span>
+                      <span>Media</span>
+                      <span>Alta</span>
+                    </div>
+                  </div>
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="enableNotifications" checked>
+                    <label class="form-check-label" for="enableNotifications">Habilitar notificaciones sonoras</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Última Placa Detectada</label>
+                    <div class="d-flex">
+                      <input type="text" class="form-control" id="lastDetectedPlate" readonly value="" placeholder="Ninguna placa detectada">
+                      <button class="btn btn-outline-secondary ms-2" id="testRecognitionBtn" title="Probar reconocimiento">
+                        <i class="bi bi-play-fill"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> El sistema de reconocimiento de placas funciona mejor con buena iluminación y placas claramente visibles.
+                  </div>
+                </div>
+              </div>
+              <div class="d-grid gap-2 col-md-4 mx-auto mt-3">
+                <button class="btn btn-success" id="saveSettingsBtn">
+                  <i class="bi bi-save"></i> Guardar Configuración
+                </button>
               </div>
             </div>
           </div>
@@ -223,6 +320,19 @@ include '../../controladores/consultas_configuracion_tap1.php';
   <script src="../assets/js/fonts/custom-font.js"></script>
   <script src="../assets/js/pcoded.js"></script>
   <script src="../assets/js/plugins/feather.min.js"></script>
+  <!-- El script de cámara persistente ya está cargado en el header -->
+  <script>
+    // Asegurarse de que la página de configuración interactúe con el controlador persistente
+    document.addEventListener('DOMContentLoaded', function() {
+      // Esperar a que el controlador persistente esté disponible
+      const checkController = setInterval(() => {
+        if (window.persistentCameraController) {
+          clearInterval(checkController);
+          console.log('Controlador de cámara persistente detectado en la página de configuración');
+        }
+      }, 100);
+    });
+  </script>
   <script>
     layout_change('light');
   </script>
