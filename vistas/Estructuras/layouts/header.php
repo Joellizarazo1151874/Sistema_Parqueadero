@@ -44,18 +44,6 @@
               <i class="ti ti-camera"></i>
             </a>
           </li>
-          <li class="dropdown pc-h-item">
-            <a
-              class="pc-head-link dropdown-toggle arrow-none me-0"
-              data-bs-toggle="dropdown"
-              href="#"
-              role="button"
-              aria-haspopup="false"
-              aria-expanded="false">
-              <i class="ti ti-mail"></i>
-            </a>
-
-          </li>
           <li class="dropdown pc-h-item header-user-profile">
             <a
               class="pc-head-link dropdown-toggle arrow-none me-0"

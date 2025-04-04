@@ -414,8 +414,8 @@ const addCameraStyles = () => {
     style.textContent = `
         .camera-floating-window {
             position: fixed;
-            width: 320px;
-            height: 280px;
+            width: 256px; /* Reducido en 20% de 320px */
+            height: 224px; /* Reducido en 20% de 280px */
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -478,6 +478,10 @@ const addCameraStyles = () => {
         
         .camera-status:hover {
             background-color: #e0e0e0;
+        }
+        
+        .camera-floating-window.minimized {
+            height: auto;
         }
         
         .camera-floating-window.minimized .camera-body {
