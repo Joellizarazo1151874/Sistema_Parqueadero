@@ -2,6 +2,14 @@
 session_start();
 include '../../modelo/conexion.php';
 include '../../controladores/seguridad.php';
+
+// Verificar si el usuario es administrador
+if(!isset($_SESSION['datos_login']) || $_SESSION['datos_login']['rol'] != 'administrador') {
+    // Redirigir al usuario a la página principal si no es administrador
+    header("location: gestion.php");
+    exit();
+}
+
 include '../../controladores/consultas_configuracion_tap1.php';
 ?>
 <!DOCTYPE html>

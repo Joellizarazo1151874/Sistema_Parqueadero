@@ -20,7 +20,7 @@ try {
         
         // No lanzar excepciones ni mostrar errores, dejamos que los controladores se encarguen
     } else {
-        // Establecer el conjunto de caracteres a UTF-8
+	// Establecer el conjunto de caracteres a UTF-8
         $conexion->set_charset("utf8mb4");
     }
 } catch (Exception $e) {
