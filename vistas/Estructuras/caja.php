@@ -441,34 +441,22 @@ include '../../controladores/seguridad.php';
                           <h5>Historial de Reportes</h5>
                         </div>
                         <div class="card-body">
-                        <div class="mb-3">
-                          <label for="fecha_busqueda" class="form-label">Buscar por fecha</label>
-                          <div class="input-group">
-                            <input type="date" class="form-control" id="fecha_busqueda" name="fecha_busqueda">
-                            <button class="btn btn-primary" type="button" id="btnBuscarReportes">
-                              <i class="fas fa-search"></i> Buscar
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" id="btnLimpiarBusqueda" style="display: none;">
-                              <i class="fas fa-times"></i> Limpiar
-                            </button>
+                          <div class="table-responsive">
+                            <table class="table table-striped">
+                              <thead>
+                                <tr>
+                                  <th>Fecha</th>
+                                  <th>Hora</th>
+                                  <th>Total Recaudado</th>
+                                  <th>Operador</th>
+                                  <th>Acciones</th>
+                                </tr>
+                              </thead>
+                              <tbody id="tablaHistorialReportes">
+                                <!-- Aquí se cargarán los reportes históricos -->
+                              </tbody>
+                            </table>
                           </div>
-                          <small class="form-text text-muted">Seleccione una fecha para filtrar los reportes</small>
-                        </div>
-                        <div class="table-responsive">
-                          <table class="table table-striped">
-                            <thead>
-                              <tr>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Total Recaudado</th>
-                                <th>Operador</th>
-                                <th>Acciones</th>
-                              </tr>
-                            </thead>
-                            <tbody id="tablaHistorialReportes">
-                              <!-- Aquí se cargarán los reportes históricos -->
-                            </tbody>
-                          </table>
                         </div>
                       </div>
                     </div>
