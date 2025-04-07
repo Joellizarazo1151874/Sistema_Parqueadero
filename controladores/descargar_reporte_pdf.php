@@ -49,7 +49,7 @@ $sql_tickets = "SELECT
                 rp.hora_salida,
                 rp.total_pagado,
                 rp.metodo_pago,
-                COALESCE(mp.nombre, rp.metodo_pago) as nombre_metodo,
+                COALESCE(mp.nombre, 'Efectivo') as nombre_metodo,
                 v.placa,
                 v.tipo,
                 v.descripcion AS descripcion_vehiculo
@@ -60,14 +60,43 @@ $sql_tickets = "SELECT
             LEFT JOIN
                 metodos_pago mp ON rp.metodo_pago = mp.id_metodo
             WHERE 
-                DATE(rp.hora_salida) = ?
+                rp.id_reporte = ?
                 AND rp.estado = 'cerrado'
             ORDER BY 
                 rp.hora_salida ASC";
 $stmt_tickets = $conexion->prepare($sql_tickets);
-$stmt_tickets->bind_param('s', $fecha_cierre);
+$stmt_tickets->bind_param('s', $id_reporte);
 $stmt_tickets->execute();
 $resultado_tickets = $stmt_tickets->get_result();
+
+// Si no hay tickets con el id_reporte, intentar buscar por fecha
+if ($resultado_tickets->num_rows === 0) {
+    $sql_tickets = "SELECT 
+                    rp.id_registro,
+                    rp.hora_ingreso,
+                    rp.hora_salida,
+                    rp.total_pagado,
+                    rp.metodo_pago,
+                    COALESCE(mp.nombre, 'Efectivo') as nombre_metodo,
+                    v.placa,
+                    v.tipo,
+                    v.descripcion AS descripcion_vehiculo
+                FROM 
+                    registros_parqueo rp
+                JOIN 
+                    vehiculos v ON rp.id_vehiculo = v.id_vehiculo
+                LEFT JOIN
+                    metodos_pago mp ON rp.metodo_pago = mp.id_metodo
+                WHERE 
+                    DATE(rp.hora_salida) = ?
+                    AND rp.estado = 'cerrado'
+                ORDER BY 
+                    rp.hora_salida ASC";
+    $stmt_tickets = $conexion->prepare($sql_tickets);
+    $stmt_tickets->bind_param('s', $fecha_cierre);
+    $stmt_tickets->execute();
+    $resultado_tickets = $stmt_tickets->get_result();
+}
 
 // Generar el contenido HTML
 $html_content = '
@@ -81,33 +110,55 @@ $html_content = '
             font-family: Arial, sans-serif;
             margin: 20px;
             line-height: 1.6;
+            color: #333;
         }
         h1, h2 {
             color: #333;
             text-align: center;
+            margin-bottom: 20px;
         }
         .info {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 10px;
             text-align: left;
         }
         th {
             background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
         }
         .total {
             font-weight: bold;
-            background-color: #f2f2f2;
+            background-color: #e9ecef;
         }
         .text-right {
             text-align: right;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
         }
         @media print {
             body {
@@ -116,6 +167,9 @@ $html_content = '
             }
             @page {
                 margin: 1cm;
+            }
+            .no-print {
+                display: none;
             }
         }
     </style>
@@ -171,16 +225,38 @@ $html_content .= '
         </thead>
         <tbody>';
 
+// Variable para verificar si hay tickets
+$hay_tickets = false;
+
 while ($ticket = $resultado_tickets->fetch_assoc()) {
+    $hay_tickets = true;
+    
+    // Asegurarse de que el método de pago tenga un valor válido
+    $metodo_pago = !empty($ticket['nombre_metodo']) ? $ticket['nombre_metodo'] : 'Efectivo';
+    
+    // Formatear las fechas correctamente
+    $fecha_ingreso = date('d/m/Y', strtotime($ticket['hora_ingreso']));
+    $hora_ingreso = date('H:i', strtotime($ticket['hora_ingreso']));
+    $fecha_salida = date('d/m/Y', strtotime($ticket['hora_salida']));
+    $hora_salida = date('H:i', strtotime($ticket['hora_salida']));
+    
     $html_content .= '
             <tr>
                 <td>' . $ticket['id_registro'] . '</td>
-                <td>' . $ticket['placa'] . '</td>
-                <td>' . $ticket['tipo'] . '</td>
-                <td>' . date('d/m/Y H:i', strtotime($ticket['hora_ingreso'])) . '</td>
-                <td>' . date('d/m/Y H:i', strtotime($ticket['hora_salida'])) . '</td>
-                <td>' . $ticket['nombre_metodo'] . '</td>
+                <td>' . htmlspecialchars($ticket['placa']) . '</td>
+                <td>' . htmlspecialchars($ticket['tipo']) . '</td>
+                <td>' . $fecha_ingreso . ' ' . $hora_ingreso . '</td>
+                <td>' . $fecha_salida . ' ' . $hora_salida . '</td>
+                <td>' . htmlspecialchars($metodo_pago) . '</td>
                 <td class="text-right">$ ' . number_format($ticket['total_pagado'], 0, '', ',') . '</td>
+            </tr>';
+}
+
+// Si no hay tickets, mostrar un mensaje
+if (!$hay_tickets) {
+    $html_content .= '
+            <tr>
+                <td colspan="7" style="text-align: center;">No se encontraron tickets para este reporte</td>
             </tr>';
 }
 
