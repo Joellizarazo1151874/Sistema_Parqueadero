@@ -405,7 +405,7 @@ include '../../controladores/seguridad.php';
                         <i class="ti ti-info-circle me-2"></i>
                         <strong>Nota:</strong> El reporte solo incluirá los tickets que no han sido reportados previamente.
                       </div>
-                      <button type="submit" class="btn btn-primary" id="btnGenerarReporte">Generar Reporte</button>
+                      <button type="submit" class="btn btn-primary mb-1" id="btnGenerarReporte">Generar Reporte</button>
                     </form>
                   </div>
                   <div class="col-md-6">
@@ -434,7 +434,7 @@ include '../../controladores/seguridad.php';
                       </div>
                     </div>
                   </div>
-                  <div class="row">
+                  <div class="row mt-5">
                     <div class="col-12">
                       <div class="card">
                         <div class="card-header">
