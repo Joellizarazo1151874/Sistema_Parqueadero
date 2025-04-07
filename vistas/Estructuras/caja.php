@@ -1,5 +1,7 @@
 <?php
 session_start();
+// Configurar la zona horaria para Colombia
+date_default_timezone_set('America/Bogota');
 include '../../modelo/conexion.php';
 include '../../controladores/seguridad.php';
 ?>
@@ -36,6 +38,58 @@ include '../../controladores/seguridad.php';
   <!-- [Template CSS Files] -->
   <link rel="stylesheet" href="../assets/css/style.css" id="main-style-link">
   <link rel="stylesheet" href="../assets/css/style-preset.css">
+  
+  <!-- Estilos para notificaciones toast -->
+  <style>
+    .colored-toast {
+      border-radius: 8px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+      padding: 12px !important;
+      width: 300px !important;
+      max-width: 90vw !important;
+    }
+    
+    .colored-toast.swal2-icon-success {
+      background-color: #a5dc86 !important;
+      color: #fff !important;
+    }
+    
+    .colored-toast.swal2-icon-error {
+      background-color: #f27474 !important;
+      color: #fff !important;
+    }
+    
+    .colored-toast.swal2-icon-warning {
+      background-color: #f8bb86 !important;
+      color: #fff !important;
+    }
+    
+    .colored-toast.swal2-icon-info {
+      background-color: #3fc3ee !important;
+      color: #fff !important;
+    }
+    
+    .colored-toast .swal2-title,
+    .colored-toast .swal2-content {
+      color: #fff !important;
+    }
+    
+    .colored-toast .swal2-icon {
+      margin: 0 !important;
+      color: #fff !important;
+      border-color: #fff !important;
+    }
+    
+    .toast-title {
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      margin-bottom: 4px !important;
+    }
+    
+    .toast-content {
+      font-size: 14px !important;
+    }
+  </style>
 
 </head>
 <!-- [Body] Start -->
@@ -81,8 +135,99 @@ include '../../controladores/seguridad.php';
             <p>Aquí encontrarás los tickets que ya han sido resueltos y cerrados.</p>
           </div>
           <div id="tab3" class="tab-content d-none">
-            <h3>Cierre de caja</h3>
-            <p>Registro de entradas y salidas de los usuarios en el sistema.</p>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Cierre de Caja</h3>
+              </div>
+              <div class="card-body">
+                <div class="row mb-4">
+                  <div class="col-md-6">
+                    <form id="formCierreCaja" action="../../controladores/generar_reporte_caja.php" method="POST" class="needs-validation" novalidate>
+                      <div class="mb-3">
+                        <label for="fecha_cierre" class="form-label">Fecha de Cierre</label>
+                        <input type="date" class="form-control" id="fecha_cierre" name="fecha_cierre" value="<?php echo date('Y-m-d'); ?>" required>
+                        <div class="invalid-feedback">
+                          Por favor seleccione una fecha.
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="hora_cierre" class="form-label">Hora de Cierre</label>
+                        <input type="time" class="form-control" id="hora_cierre" name="hora_cierre" value="<?php echo date('H:i'); ?>" required>
+                        <div class="invalid-feedback">
+                          Por favor seleccione una hora.
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="operador" class="form-label">Operador</label>
+                        <input type="text" class="form-control" id="operador" name="operador" value="<?php echo isset($_SESSION['datos_login']) ? $_SESSION['datos_login']['nombre'] : ''; ?>" readonly>
+                      </div>
+                      <button type="submit" class="btn btn-primary" id="btnGenerarReporte">Generar Reporte</button>
+                    </form>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card">
+                      <div class="card-header">
+                        <h5>Reportes Generados Hoy</h5>
+                      </div>
+                      <div class="card-body">
+                        <div id="reportesHoy">
+                          <div class="table-responsive">
+                            <table class="table table-striped">
+                              <thead>
+                                <tr>
+                                  <th>Fecha</th>
+                                  <th>Hora</th>
+                                  <th>Operador</th>
+                                  <th>Acciones</th>
+                                </tr>
+                              </thead>
+                              <tbody id="tablaReportesHoy">
+                                <!-- Aquí se cargarán los reportes generados hoy -->
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-12">
+                    <div class="card">
+                      <div class="card-header">
+                        <h5>Historial de Reportes</h5>
+                      </div>
+                      <div class="card-body">
+                        <div class="mb-3">
+                          <label for="fecha_busqueda" class="form-label">Buscar por fecha</label>
+                          <div class="input-group">
+                            <input type="date" class="form-control" id="fecha_busqueda" name="fecha_busqueda">
+                            <button class="btn btn-outline-secondary" type="button" id="btnBuscarReportes">Buscar</button>
+                          </div>
+                        </div>
+                        <div class="table-responsive">
+                          <table class="table table-striped">
+                            <thead>
+                              <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Total Recaudado</th>
+                                <th>Operador</th>
+                                <th>Acciones</th>
+                              </tr>
+                            </thead>
+                            <tbody id="tablaHistorialReportes">
+                              <!-- Aquí se cargarán los reportes históricos -->
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -138,6 +283,9 @@ include '../../controladores/seguridad.php';
   <script>
     font_change("Public-Sans");
   </script>
+  
+  <!-- Script para el cierre de caja -->
+  <script src="../assets/js/cierre_caja.js"></script>
 </body>
 <!-- [Body] end -->
 

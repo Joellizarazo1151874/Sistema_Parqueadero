@@ -43,6 +43,7 @@
                                 <th>Hora</th>
                                 <th>Detalle</th>
                                 <th>Categoría</th>
+                                <th>Placa</th>
                                 <th>Ticket ID</th>
                                 <th>Método Pago</th>
                                 <th>Operador</th>
@@ -56,6 +57,7 @@
                                     <td><?php echo date('H:i', strtotime($row['hora_ingreso'])); ?></td>
                                     <td><?php echo htmlspecialchars($row['descripcion_vehiculo']); ?></td>
                                     <td><?php echo htmlspecialchars($row['tipo']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['placa']); ?></td>
                                     <td><?php echo htmlspecialchars($row['id_registro']); ?></td>
                                     <td><?php echo htmlspecialchars($row['metodo_pago']); ?></td>
                                     <td><?php echo htmlspecialchars($row['abierto_por']); ?></td>

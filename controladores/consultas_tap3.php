@@ -79,6 +79,7 @@ $sql_tickets_activos_cerrados = "SELECT
     rp.metodo_pago, 
     v.tipo, 
     v.descripcion AS descripcion_vehiculo, 
+    v.placa,
     rp.cerrado_por, 
     rp.abierto_por 
 FROM 
