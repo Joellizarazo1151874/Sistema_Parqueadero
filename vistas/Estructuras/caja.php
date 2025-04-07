@@ -394,12 +394,16 @@ include '../../controladores/seguridad.php';
                         <label for="hora_cierre" class="form-label">Hora de Cierre</label>
                         <input type="time" class="form-control" id="hora_cierre" name="hora_cierre" value="<?php echo date('H:i'); ?>" required>
                         <div class="invalid-feedback">
-                          Por favor seleccione una hora.
+                          Por favor ingrese la hora.
                         </div>
                       </div>
                       <div class="mb-3">
                         <label for="operador" class="form-label">Operador</label>
                         <input type="text" class="form-control" id="operador" name="operador" value="<?php echo isset($_SESSION['datos_login']) ? $_SESSION['datos_login']['nombre'] : ''; ?>" readonly>
+                      </div>
+                      <div class="alert alert-info" role="alert">
+                        <i class="ti ti-info-circle me-2"></i>
+                        <strong>Nota:</strong> El reporte solo incluirá los tickets que no han sido reportados previamente.
                       </div>
                       <button type="submit" class="btn btn-primary" id="btnGenerarReporte">Generar Reporte</button>
                     </form>

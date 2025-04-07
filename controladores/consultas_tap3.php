@@ -16,7 +16,8 @@ $ticket_id = isset($_GET['Ticketid']) ? $_GET['Ticketid'] : '';
 // Obtener el Detalle ingresado
 $detalle = isset($_GET['Detalle']) ? '%' . $_GET['Detalle'] . '%' : '';
 
-
+// Filtro para mostrar solo tickets no reportados
+$solo_no_reportados = isset($_GET['no_reportados']) && $_GET['no_reportados'] == '1';
 
 // Consulta para contar el total de registros
 $sql_count = "SELECT COUNT(*) as total FROM registros_parqueo rp JOIN vehiculos v ON rp.id_vehiculo = v.id_vehiculo WHERE rp.estado IN ('activo', 'cerrado')";
@@ -32,8 +33,43 @@ if ($ticket_id) {
 if ($detalle) {
     $sql_count .= " AND v.descripcion LIKE ?";
 }
+if ($solo_no_reportados) {
+    $sql_count .= " AND (rp.reportado IS NULL OR rp.reportado = 0)";
+}
 $stmt_count = $conexion->prepare($sql_count);
-if ($fecha_seleccionada && $matricula && $ticket_id && $detalle) {
+if ($fecha_seleccionada && $matricula && $ticket_id && $detalle && $solo_no_reportados) {
+    $stmt_count->bind_param('ssss', $fecha_seleccionada, $matricula, $ticket_id, $detalle);
+} elseif ($fecha_seleccionada && $matricula && $ticket_id && $solo_no_reportados) {
+    $stmt_count->bind_param('sss', $fecha_seleccionada, $matricula, $ticket_id);
+} elseif ($fecha_seleccionada && $matricula && $detalle && $solo_no_reportados) {
+    $stmt_count->bind_param('sss', $fecha_seleccionada, $matricula, $detalle);
+} elseif ($fecha_seleccionada && $ticket_id && $detalle && $solo_no_reportados) {
+    $stmt_count->bind_param('sss', $fecha_seleccionada, $ticket_id, $detalle);
+} elseif ($matricula && $ticket_id && $detalle && $solo_no_reportados) {
+    $stmt_count->bind_param('sss', $matricula, $ticket_id, $detalle);
+} elseif ($fecha_seleccionada && $matricula && $solo_no_reportados) {
+    $stmt_count->bind_param('ss', $fecha_seleccionada, $matricula);
+} elseif ($fecha_seleccionada && $ticket_id && $solo_no_reportados) {
+    $stmt_count->bind_param('ss', $fecha_seleccionada, $ticket_id);
+} elseif ($fecha_seleccionada && $detalle && $solo_no_reportados) {
+    $stmt_count->bind_param('ss', $fecha_seleccionada, $detalle);
+} elseif ($matricula && $ticket_id && $solo_no_reportados) {
+    $stmt_count->bind_param('ss', $matricula, $ticket_id);
+} elseif ($matricula && $detalle && $solo_no_reportados) {
+    $stmt_count->bind_param('ss', $matricula, $detalle);
+} elseif ($ticket_id && $detalle && $solo_no_reportados) {
+    $stmt_count->bind_param('ss', $ticket_id, $detalle);
+} elseif ($fecha_seleccionada && $solo_no_reportados) {
+    $stmt_count->bind_param('s', $fecha_seleccionada);
+} elseif ($matricula && $solo_no_reportados) {
+    $stmt_count->bind_param('s', $matricula);
+} elseif ($ticket_id && $solo_no_reportados) {
+    $stmt_count->bind_param('s', $ticket_id);
+} elseif ($detalle && $solo_no_reportados) {
+    $stmt_count->bind_param('s', $detalle);
+} elseif ($solo_no_reportados) {
+    $stmt_count->bind_param('', '');
+} elseif ($fecha_seleccionada && $matricula && $ticket_id && $detalle) {
     $stmt_count->bind_param('ssss', $fecha_seleccionada, $matricula, $ticket_id, $detalle);
 } elseif ($fecha_seleccionada && $matricula && $ticket_id) {
     $stmt_count->bind_param('sss', $fecha_seleccionada, $matricula, $ticket_id);
@@ -82,7 +118,9 @@ $sql_tickets_activos_cerrados = "SELECT
     v.placa,
     rp.cerrado_por, 
     rp.abierto_por,
-    mp.nombre AS nombre_metodo_pago
+    mp.nombre AS nombre_metodo_pago,
+    rp.reportado,
+    rp.id_reporte
 FROM 
     registros_parqueo rp 
 JOIN 
@@ -103,10 +141,45 @@ if ($ticket_id) {
 if ($detalle) {
     $sql_tickets_activos_cerrados .= " AND v.descripcion LIKE ?";
 }
+if ($solo_no_reportados) {
+    $sql_tickets_activos_cerrados .= " AND (rp.reportado IS NULL OR rp.reportado = 0)";
+}
 $sql_tickets_activos_cerrados .= " ORDER BY rp.hora_ingreso DESC LIMIT ? OFFSET ?";
 
 $stmt_tickets_activos_cerrados = $conexion->prepare($sql_tickets_activos_cerrados);
-if ($fecha_seleccionada && $matricula && $ticket_id && $detalle) {
+if ($fecha_seleccionada && $matricula && $ticket_id && $detalle && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('ssssii', $fecha_seleccionada, $matricula, $ticket_id, $detalle, $registros_por_pagina, $offset);
+} elseif ($fecha_seleccionada && $matricula && $ticket_id && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('sssii', $fecha_seleccionada, $matricula, $ticket_id, $registros_por_pagina, $offset);
+} elseif ($fecha_seleccionada && $matricula && $detalle && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('sssii', $fecha_seleccionada, $matricula, $detalle, $registros_por_pagina, $offset);
+} elseif ($fecha_seleccionada && $ticket_id && $detalle && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('sssii', $fecha_seleccionada, $ticket_id, $detalle, $registros_por_pagina, $offset);
+} elseif ($matricula && $ticket_id && $detalle && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('sssii', $matricula, $ticket_id, $detalle, $registros_por_pagina, $offset);
+} elseif ($fecha_seleccionada && $matricula && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('ssii', $fecha_seleccionada, $matricula, $registros_por_pagina, $offset);
+} elseif ($fecha_seleccionada && $ticket_id && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('ssii', $fecha_seleccionada, $ticket_id, $registros_por_pagina, $offset);
+} elseif ($fecha_seleccionada && $detalle && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('ssii', $fecha_seleccionada, $detalle, $registros_por_pagina, $offset);
+} elseif ($matricula && $ticket_id && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('ssii', $matricula, $ticket_id, $registros_por_pagina, $offset);
+} elseif ($matricula && $detalle && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('ssii', $matricula, $detalle, $registros_por_pagina, $offset);
+} elseif ($ticket_id && $detalle && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('ssii', $ticket_id, $detalle, $registros_por_pagina, $offset);
+} elseif ($fecha_seleccionada && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('sii', $fecha_seleccionada, $registros_por_pagina, $offset);
+} elseif ($matricula && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('sii', $matricula, $registros_por_pagina, $offset);
+} elseif ($ticket_id && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('sii', $ticket_id, $registros_por_pagina, $offset);
+} elseif ($detalle && $solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('sii', $detalle, $registros_por_pagina, $offset);
+} elseif ($solo_no_reportados) {
+    $stmt_tickets_activos_cerrados->bind_param('ii', $registros_por_pagina, $offset);
+} elseif ($fecha_seleccionada && $matricula && $ticket_id && $detalle) {
     $stmt_tickets_activos_cerrados->bind_param('ssssii', $fecha_seleccionada, $matricula, $ticket_id, $detalle, $registros_por_pagina, $offset);
 } elseif ($fecha_seleccionada && $matricula && $ticket_id) {
     $stmt_tickets_activos_cerrados->bind_param('sssii', $fecha_seleccionada, $matricula, $ticket_id, $registros_por_pagina, $offset);

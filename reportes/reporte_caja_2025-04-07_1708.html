@@ -1,0 +1,164 @@
+
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Reporte de Cierre de Caja</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                line-height: 1.6;
+            }
+            h1, h2 {
+                color: #333;
+                text-align: center;
+            }
+            .info {
+                margin-bottom: 20px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            .total {
+                font-weight: bold;
+                background-color: #f2f2f2;
+            }
+            .text-right {
+                text-align: right;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>REPORTE DE CIERRE DE CAJA</h1>
+        
+        <div class="info">
+            <p><strong>ID Reporte:</strong> REP-67f44cdeb0f49</p>
+            <p><strong>Fecha de Cierre:</strong> 07/04/2025</p>
+            <p><strong>Hora de Cierre:</strong> 17:08</p>
+            <p><strong>Operador:</strong> Admin Principal</p>
+        </div>
+        
+        <h2>Resumen de Ingresos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Método de Pago</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Efectivo</td>
+                    <td class="text-right">$ 765,400</td>
+                </tr>
+                <tr>
+                    <td>Tarjeta</td>
+                    <td class="text-right">$ 1,900</td>
+                </tr>
+                <tr>
+                    <td>Transferencia</td>
+                    <td class="text-right">$ 0</td>
+                </tr>
+                <tr class="total">
+                    <td>TOTAL RECAUDADO</td>
+                    <td class="text-right">$ 767,300</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Detalle de Tickets</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Placa</th>
+                    <th>Tipo</th>
+                    <th>Ingreso</th>
+                    <th>Salida</th>
+                    <th>Método Pago</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>115</td>
+                    <td>HCN196</td>
+                    <td>camioneta</td>
+                    <td>03/04/2025 10:27</td>
+                    <td>07/04/2025 11:06</td>
+                    <td>Efectivo</td>
+                    <td class="text-right">$ 241,600</td>
+                </tr>
+                <tr>
+                    <td>110</td>
+                    <td>SQL625</td>
+                    <td>auto</td>
+                    <td>03/04/2025 09:29</td>
+                    <td>07/04/2025 11:20</td>
+                    <td>Efectivo</td>
+                    <td class="text-right">$ 489,200</td>
+                </tr>
+                <tr>
+                    <td>129</td>
+                    <td>YEV52G</td>
+                    <td>moto</td>
+                    <td>07/04/2025 11:25</td>
+                    <td>07/04/2025 15:59</td>
+                    <td>Efectivo</td>
+                    <td class="text-right">$ 9,100</td>
+                </tr>
+                <tr>
+                    <td>128</td>
+                    <td>SQL625</td>
+                    <td>auto</td>
+                    <td>07/04/2025 11:25</td>
+                    <td>07/04/2025 16:21</td>
+                    <td>Efectivo</td>
+                    <td class="text-right">$ 24,600</td>
+                </tr>
+                <tr>
+                    <td>130</td>
+                    <td>SQL625</td>
+                    <td>auto</td>
+                    <td>07/04/2025 16:21</td>
+                    <td>07/04/2025 16:33</td>
+                    <td>Efectivo</td>
+                    <td class="text-right">$ 900</td>
+                </tr>
+                <tr>
+                    <td>131</td>
+                    <td>SQL-623</td>
+                    <td>auto</td>
+                    <td>07/04/2025 16:21</td>
+                    <td>07/04/2025 16:45</td>
+                    <td>Tarjeta</td>
+                    <td class="text-right">$ 1,900</td>
+                </tr>
+                <tr>
+                    <td>133</td>
+                    <td>HDN123</td>
+                    <td>auto</td>
+                    <td>07/04/2025 16:47</td>
+                    <td>07/04/2025 16:47</td>
+                    <td>Transferencia</td>
+                    <td class="text-right">$ 0</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            <p>Este reporte fue generado automáticamente por el sistema.</p>
+        </div>
+    </body>
+    </html>

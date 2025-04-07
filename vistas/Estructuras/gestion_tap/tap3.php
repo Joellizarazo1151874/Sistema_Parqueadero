@@ -27,6 +27,12 @@
                         <input type="text" class="form-control" name="matricula" placeholder="Matrícula" value="<?php echo htmlspecialchars(isset($_GET['matricula']) ? $_GET['matricula'] : ''); ?>">
                         <input type="text" class="form-control" name="Ticketid" placeholder="Ticket ID">
                         <input type="text" class="form-control" name="Detalle" placeholder="Detalle">
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="no_reportados" value="1" id="checkNoReportados" <?php echo isset($_GET['no_reportados']) && $_GET['no_reportados'] == '1' ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="checkNoReportados">
+                                Solo tickets no reportados
+                            </label>
+                        </div>
                         <button type="submit" class="btn btn-outline-secondary">
                             <i class="fas fa-search"></i>
                         </button>
@@ -48,6 +54,7 @@
                                 <th>Método Pago</th>
                                 <th>Total Pagado</th>
                                 <th>Operador</th>
+                                <th>Reportado</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -69,6 +76,18 @@
                                     ?></td>
                                     <td>$<?php echo number_format((float)$row['total_pagado'], 0, '', ','); ?></td>
                                     <td><?php echo htmlspecialchars($row['abierto_por']); ?></td>
+                                    <td>
+                                        <?php 
+                                            if ($row['reportado'] == 1) {
+                                                echo '<span class="badge bg-success">Sí</span>';
+                                                if (!empty($row['id_reporte'])) {
+                                                    echo ' <small>(' . htmlspecialchars($row['id_reporte']) . ')</small>';
+                                                }
+                                            } else {
+                                                echo '<span class="badge bg-warning">No</span>';
+                                            }
+                                        ?>
+                                    </td>
                                 </tr>
                             <?php endwhile; ?>
                         </tbody>
