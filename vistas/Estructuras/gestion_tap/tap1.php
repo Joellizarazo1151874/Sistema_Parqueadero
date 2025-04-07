@@ -237,10 +237,27 @@
                                         <div class="mb-3">
                                             <label class="form-label">Seleccione la forma de pago</label>
                                             <select class="form-select" id="metodoPago" name="metodo_pago">
-                                                <option value="efectivo">Efectivo</option>
-                                                <option value="tarjeta_credito">Tarjeta de Crédito</option>
-                                                <option value="tarjeta_debito">Tarjeta de Débito</option>
-                                                <option value="mercadopago">MercadoPago</option>
+                                                <?php
+                                                // Incluir la función para obtener métodos de pago si no está incluida
+                                                if (!function_exists('obtenerMetodosPago')) {
+                                                    include_once '../../controladores/obtener_metodos_pago.php';
+                                                }
+                                                
+                                                // Obtener los métodos de pago activos
+                                                $metodos_pago = obtenerMetodosPago();
+                                                
+                                                // Si no hay métodos de pago, mostrar opciones por defecto
+                                                if (empty($metodos_pago)) {
+                                                    echo '<option value="efectivo">Efectivo</option>';
+                                                    echo '<option value="tarjeta">Tarjeta</option>';
+                                                    echo '<option value="transferencia">Transferencia</option>';
+                                                } else {
+                                                    // Mostrar los métodos de pago de la base de datos
+                                                    foreach ($metodos_pago as $metodo) {
+                                                        echo '<option value="' . $metodo['id_metodo'] . '">' . htmlspecialchars($metodo['nombre']) . '</option>';
+                                                    }
+                                                }
+                                                ?>
                                             </select>
                                         </div>
                                         <label class="form-label">Descripción (Caja)</label>

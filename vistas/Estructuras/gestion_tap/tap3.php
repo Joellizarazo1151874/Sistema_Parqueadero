@@ -37,7 +37,7 @@
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
-                            <tr class="table-light">
+                        <tr class="table-light">
                                 <th>E/S</th>
                                 <th>Fecha</th>
                                 <th>Hora</th>
@@ -46,6 +46,7 @@
                                 <th>Placa</th>
                                 <th>Ticket ID</th>
                                 <th>Método Pago</th>
+                                <th>Total Pagado</th>
                                 <th>Operador</th>
                             </tr>
                         </thead>
@@ -59,7 +60,14 @@
                                     <td><?php echo htmlspecialchars($row['tipo']); ?></td>
                                     <td><?php echo htmlspecialchars($row['placa']); ?></td>
                                     <td><?php echo htmlspecialchars($row['id_registro']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['metodo_pago']); ?></td>
+                                    <td><?php 
+                                        if ($row['estado'] === 'cancelado') {
+                                            echo 'Cancelado';
+                                        } else {
+                                            echo htmlspecialchars($row['nombre_metodo_pago'] ?? 'No especificado');
+                                        }
+                                    ?></td>
+                                    <td>$<?php echo number_format((float)$row['total_pagado'], 0, '', ','); ?></td>
                                     <td><?php echo htmlspecialchars($row['abierto_por']); ?></td>
                                 </tr>
                             <?php endwhile; ?>

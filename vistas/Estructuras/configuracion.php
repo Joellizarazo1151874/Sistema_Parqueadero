@@ -122,15 +122,16 @@ include '../../controladores/consultas_configuracion_tap1.php';
 
           <!-- Tab de Tarifas -->
           <?php include 'configuracion_tap/tap2.php'; ?>
+
           <!-- Tab de Precios -->
           <?php include 'configuracion_tap/tap3.php'; ?>
+
           <!-- Tab de Usuarios -->
           <?php include 'configuracion_tap/tap4.php'; ?>
+
           <!-- Tab de Medios de Pago -->
-          <div id="tab5" class="tab-content d-none">
-            <h3>Medios de pago</h3>
-            <p>Sección de análisis y estadísticas sobre el rendimiento del sistema.</p>
-          </div>
+          <?php include 'configuracion_tap/tap5.php'; ?>
+
           <!-- Tab de Informes -->
           <div id="tab6" class="tab-content d-none">
             <h3>Informes</h3>

@@ -49,6 +49,7 @@ $sql_tickets = "SELECT
                 rp.hora_salida,
                 rp.total_pagado,
                 rp.metodo_pago,
+                COALESCE(mp.nombre, rp.metodo_pago) as nombre_metodo,
                 v.placa,
                 v.tipo,
                 v.descripcion AS descripcion_vehiculo
@@ -56,6 +57,8 @@ $sql_tickets = "SELECT
                 registros_parqueo rp
             JOIN 
                 vehiculos v ON rp.id_vehiculo = v.id_vehiculo
+            LEFT JOIN
+                metodos_pago mp ON rp.metodo_pago = mp.id_metodo
             WHERE 
                 DATE(rp.hora_salida) = ?
                 AND rp.estado = 'cerrado'
@@ -176,7 +179,7 @@ while ($ticket = $resultado_tickets->fetch_assoc()) {
                 <td>' . $ticket['tipo'] . '</td>
                 <td>' . date('d/m/Y H:i', strtotime($ticket['hora_ingreso'])) . '</td>
                 <td>' . date('d/m/Y H:i', strtotime($ticket['hora_salida'])) . '</td>
-                <td>' . $ticket['metodo_pago'] . '</td>
+                <td>' . $ticket['nombre_metodo'] . '</td>
                 <td class="text-right">$ ' . number_format($ticket['total_pagado'], 0, '', ',') . '</td>
             </tr>';
 }

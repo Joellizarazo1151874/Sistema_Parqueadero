@@ -132,7 +132,247 @@ include '../../controladores/seguridad.php';
           </div>
           <div id="tab2" class="tab-content d-none">
             <h3>Recibos</h3>
-            <p>Aquí encontrarás los tickets que ya han sido resueltos y cerrados.</p>
+            <div class="card">
+              <div class="card-header">
+                <h5>Tickets Cerrados</h5>
+              </div>
+              <div class="card-body">
+                <!-- Filtros de búsqueda -->
+                <div class="row mb-3">
+                  <div class="col-md-12">
+                    <form id="formBusquedaRecibos" method="GET" class="d-flex flex-wrap gap-2">
+                      <input type="hidden" name="tab" value="tab2">
+                      <div class="input-group" style="max-width: 200px;">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        <input type="date" class="form-control" id="fecha_busqueda" name="fecha_busqueda" value="<?php echo isset($_GET['fecha_busqueda']) ? htmlspecialchars($_GET['fecha_busqueda']) : ''; ?>">
+                      </div>
+                      <div class="input-group" style="max-width: 200px;">
+                        <span class="input-group-text"><i class="fas fa-car"></i></span>
+                        <input type="text" class="form-control" name="placa_busqueda" placeholder="Placa" value="<?php echo isset($_GET['placa_busqueda']) ? htmlspecialchars($_GET['placa_busqueda']) : ''; ?>">
+                      </div>
+                      <div class="input-group" style="max-width: 200px;">
+                        <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                        <select class="form-select" name="tipo_busqueda">
+                          <option value="">Todos los tipos</option>
+                          <?php
+                          // Consulta para obtener tipos de vehículos únicos desde la tabla tarifas
+                          $sql_tipos = "SELECT DISTINCT tipo_vehiculo FROM tarifas";
+                          $result_tipos = $conexion->query($sql_tipos);
+                          if ($result_tipos && $result_tipos->num_rows > 0) {
+                            while ($row_tipo = $result_tipos->fetch_assoc()) {
+                              $selected = (isset($_GET['tipo_busqueda']) && $_GET['tipo_busqueda'] == $row_tipo['tipo_vehiculo']) ? 'selected' : '';
+                              echo '<option value="' . htmlspecialchars($row_tipo['tipo_vehiculo']) . '" ' . $selected . '>' . htmlspecialchars(ucfirst($row_tipo['tipo_vehiculo'])) . '</option>';
+                            }
+                          }
+                          ?>
+                        </select>
+                      </div>
+                      <div class="input-group" style="max-width: 200px;">
+                        <span class="input-group-text"><i class="fas fa-money-bill"></i></span>
+                        <select class="form-select" name="metodo_pago_busqueda">
+                          <option value="">Todos los métodos</option>
+                          <?php
+                          // Incluir el controlador de métodos de pago
+                          include_once '../../controladores/obtener_metodos_pago.php';
+                          
+                          // Obtener métodos de pago desde la base de datos
+                          $metodos_pago = obtenerMetodosPago();
+                          
+                          // Mostrar opciones dinámicamente
+                          foreach ($metodos_pago as $metodo) {
+                            $selected = (isset($_GET['metodo_pago_busqueda']) && $_GET['metodo_pago_busqueda'] == $metodo['nombre']) ? 'selected' : '';
+                            echo '<option value="' . htmlspecialchars($metodo['nombre']) . '" ' . $selected . '>' . htmlspecialchars($metodo['nombre']) . '</option>';
+                          }
+                          ?>
+                        </select>
+                      </div>
+                      <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                      </button>
+                      <?php
+                      // Mostrar el botón Limpiar solo si hay algún parámetro de búsqueda
+                      $hayBusqueda = isset($_GET['fecha_busqueda']) || isset($_GET['placa_busqueda']) || isset($_GET['tipo_busqueda']) || isset($_GET['metodo_pago_busqueda']);
+                      $hayValorBusqueda = !empty($_GET['fecha_busqueda']) || !empty($_GET['placa_busqueda']) || !empty($_GET['tipo_busqueda']) || !empty($_GET['metodo_pago_busqueda']);
+                      if ($hayBusqueda && $hayValorBusqueda) {
+                      ?>
+                      <button type="button" id="limpiarFiltros" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Limpiar
+                      </button>
+                      <?php } ?>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Tabla de recibos -->
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Placa</th>
+                        <th>Tipo</th>
+                        <th>Ingreso</th>
+                        <th>Salida</th>
+                        <th>Tiempo</th>
+                        <th>Método Pago</th>
+                        <th>Total</th>
+                        <th>Operador</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaRecibos">
+                      <?php
+                      // Configuración de paginación
+                      $registros_por_pagina = 10;
+                      $pagina_actual = isset($_GET['pagina']) ? intval($_GET['pagina']) : 1;
+                      $offset = ($pagina_actual - 1) * $registros_por_pagina;
+
+                      // Construir la consulta SQL base
+                      $sql_recibos = "SELECT r.*, v.placa, v.tipo as tipo_vehiculo, mp.nombre as nombre_metodo_pago
+                                      FROM registros_parqueo r 
+                                      LEFT JOIN vehiculos v ON r.id_vehiculo = v.id_vehiculo
+                                      LEFT JOIN metodos_pago mp ON r.metodo_pago = mp.id_metodo
+                                      WHERE r.estado = 'cerrado'";
+                      
+                      // Agregar filtros si existen
+                      if (isset($_GET['fecha_busqueda']) && !empty($_GET['fecha_busqueda'])) {
+                        $fecha_busqueda = $conexion->real_escape_string($_GET['fecha_busqueda']);
+                        // Convertimos la fecha al formato correcto para MySQL y aseguramos que filtre por todo el día
+                        $sql_recibos .= " AND DATE(r.hora_salida) = DATE('$fecha_busqueda')";
+                      }
+                      
+                      if (isset($_GET['placa_busqueda']) && !empty($_GET['placa_busqueda'])) {
+                        $placa_busqueda = $conexion->real_escape_string($_GET['placa_busqueda']);
+                        $sql_recibos .= " AND v.placa LIKE '%$placa_busqueda%'";
+                      }
+                      
+                      if (isset($_GET['tipo_busqueda']) && !empty($_GET['tipo_busqueda'])) {
+                        $tipo_busqueda = $conexion->real_escape_string($_GET['tipo_busqueda']);
+                        $sql_recibos .= " AND v.tipo = '$tipo_busqueda'";
+                      }
+                      
+                      if (isset($_GET['metodo_pago_busqueda']) && !empty($_GET['metodo_pago_busqueda'])) {
+                        $metodo_pago_busqueda = $conexion->real_escape_string($_GET['metodo_pago_busqueda']);
+                        $sql_recibos .= " AND mp.nombre = '$metodo_pago_busqueda'";
+                      }
+                      
+                      // Ordenar por fecha de salida más reciente
+                      $sql_recibos .= " ORDER BY r.hora_salida DESC";
+                      
+                      // Consulta para contar el total de registros (para paginación)
+                      $sql_total = "SELECT COUNT(*) as total FROM ($sql_recibos) as subconsulta";
+                      $resultado_total = $conexion->query($sql_total);
+                      $fila_total = $resultado_total->fetch_assoc();
+                      $total_registros = $fila_total['total'];
+                      $total_paginas = ceil($total_registros / $registros_por_pagina);
+                      
+                      // Agregar límite para paginación
+                      $sql_recibos .= " LIMIT $offset, $registros_por_pagina";
+                      
+                      // Ejecutar la consulta
+                      $resultado_recibos = $conexion->query($sql_recibos);
+                      
+                      if ($resultado_recibos && $resultado_recibos->num_rows > 0) {
+                        while ($row = $resultado_recibos->fetch_assoc()) {
+                          // Calcular tiempo de estancia
+                          $hora_ingreso = new DateTime($row['hora_ingreso']);
+                          $hora_salida = new DateTime($row['hora_salida']);
+                          $diferencia = $hora_ingreso->diff($hora_salida);
+                          
+                          // Formatear tiempo de estancia
+                          $tiempo_estancia = '';
+                          if ($diferencia->days > 0) {
+                            $tiempo_estancia .= $diferencia->days . 'd ';
+                          }
+                          $tiempo_estancia .= $diferencia->h . 'h ' . $diferencia->i . 'm';
+                          
+                          // Formatear el total pagado según las preferencias del usuario
+                          $total_pagado = '$' . number_format($row['total_pagado'], 0, '', ',');
+                          
+                          echo '<tr>';
+                          echo '<td>' . $row['id_registro'] . '</td>';
+                          echo '<td>' . htmlspecialchars($row['placa']) . '</td>';
+                          echo '<td>' . htmlspecialchars($row['tipo_vehiculo']) . '</td>';
+                          echo '<td>' . date('d/m/Y H:i', strtotime($row['hora_ingreso'])) . '</td>';
+                          echo '<td>' . date('d/m/Y H:i', strtotime($row['hora_salida'])) . '</td>';
+                          echo '<td>' . $tiempo_estancia . '</td>';
+                          echo '<td>' . htmlspecialchars($row['nombre_metodo_pago'] ?? 'No especificado') . '</td>';
+                          echo '<td>' . $total_pagado . '</td>';
+                          echo '<td>' . htmlspecialchars($row['cerrado_por']) . '</td>';
+                          echo '<td>
+                                  <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-info ver-recibo" data-id="' . $row['id_registro'] . '" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                      <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary imprimir-recibo" data-id="' . $row['id_registro'] . '" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                      <i class="fas fa-print"></i>
+                                    </button>
+                                  </div>
+                                </td>';
+                          echo '</tr>';
+                        }
+                      } else {
+                        echo '<tr><td colspan="10" class="text-center">No se encontraron recibos</td></tr>';
+                      }
+                      ?>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Paginación -->
+                <?php if ($total_paginas > 1): ?>
+                <div class="d-flex justify-content-center mt-3">
+                  <nav aria-label="Navegación de página">
+                    <ul class="pagination">
+                      <li class="page-item <?php echo ($pagina_actual <= 1) ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="?tab=tab2<?php echo isset($_GET['fecha_busqueda']) ? '&fecha_busqueda=' . htmlspecialchars($_GET['fecha_busqueda']) : ''; ?><?php echo isset($_GET['placa_busqueda']) ? '&placa_busqueda=' . htmlspecialchars($_GET['placa_busqueda']) : ''; ?><?php echo isset($_GET['tipo_busqueda']) ? '&tipo_busqueda=' . htmlspecialchars($_GET['tipo_busqueda']) : ''; ?><?php echo isset($_GET['metodo_pago_busqueda']) ? '&metodo_pago_busqueda=' . htmlspecialchars($_GET['metodo_pago_busqueda']) : ''; ?>&pagina=<?php echo $pagina_actual - 1; ?>" aria-label="Anterior">
+                          <span aria-hidden="true">&laquo;</span>
+                        </a>
+                      </li>
+                      
+                      <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+                        <li class="page-item <?php echo ($pagina_actual == $i) ? 'active' : ''; ?>">
+                          <a class="page-link" href="?tab=tab2<?php echo isset($_GET['fecha_busqueda']) ? '&fecha_busqueda=' . htmlspecialchars($_GET['fecha_busqueda']) : ''; ?><?php echo isset($_GET['placa_busqueda']) ? '&placa_busqueda=' . htmlspecialchars($_GET['placa_busqueda']) : ''; ?><?php echo isset($_GET['tipo_busqueda']) ? '&tipo_busqueda=' . htmlspecialchars($_GET['tipo_busqueda']) : ''; ?><?php echo isset($_GET['metodo_pago_busqueda']) ? '&metodo_pago_busqueda=' . htmlspecialchars($_GET['metodo_pago_busqueda']) : ''; ?>&pagina=<?php echo $i; ?>">
+                            <?php echo $i; ?>
+                          </a>
+                        </li>
+                      <?php endfor; ?>
+                      
+                      <li class="page-item <?php echo ($pagina_actual >= $total_paginas) ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="?tab=tab2<?php echo isset($_GET['fecha_busqueda']) ? '&fecha_busqueda=' . htmlspecialchars($_GET['fecha_busqueda']) : ''; ?><?php echo isset($_GET['placa_busqueda']) ? '&placa_busqueda=' . htmlspecialchars($_GET['placa_busqueda']) : ''; ?><?php echo isset($_GET['tipo_busqueda']) ? '&tipo_busqueda=' . htmlspecialchars($_GET['tipo_busqueda']) : ''; ?><?php echo isset($_GET['metodo_pago_busqueda']) ? '&metodo_pago_busqueda=' . htmlspecialchars($_GET['metodo_pago_busqueda']) : ''; ?>&pagina=<?php echo $pagina_actual + 1; ?>" aria-label="Siguiente">
+                          <span aria-hidden="true">&raquo;</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+                <?php endif; ?>
+              </div>
+            </div>
+
+            <!-- Modal para ver detalles del recibo -->
+            <div class="modal fade" id="modalDetalleRecibo" tabindex="-1" aria-labelledby="modalDetalleReciboLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalDetalleReciboLabel">Detalle del Recibo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body" id="contenidoDetalleRecibo">
+                    <div class="text-center">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                      </div>
+                      <p>Cargando detalles del recibo...</p>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btnImprimirReciboModal">Imprimir</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div id="tab3" class="tab-content d-none">
             <div class="card">
@@ -190,21 +430,25 @@ include '../../controladores/seguridad.php';
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <div class="row">
-                  <div class="col-12">
-                    <div class="card">
-                      <div class="card-header">
-                        <h5>Historial de Reportes</h5>
-                      </div>
-                      <div class="card-body">
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="card">
+                        <div class="card-header">
+                          <h5>Historial de Reportes</h5>
+                        </div>
+                        <div class="card-body">
                         <div class="mb-3">
                           <label for="fecha_busqueda" class="form-label">Buscar por fecha</label>
                           <div class="input-group">
                             <input type="date" class="form-control" id="fecha_busqueda" name="fecha_busqueda">
-                            <button class="btn btn-outline-secondary" type="button" id="btnBuscarReportes">Buscar</button>
+                            <button class="btn btn-primary" type="button" id="btnBuscarReportes">
+                              <i class="fas fa-search"></i> Buscar
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" id="btnLimpiarBusqueda" style="display: none;">
+                              <i class="fas fa-times"></i> Limpiar
+                            </button>
                           </div>
+                          <small class="form-text text-muted">Seleccione una fecha para filtrar los reportes</small>
                         </div>
                         <div class="table-responsive">
                           <table class="table table-striped">
@@ -256,6 +500,116 @@ include '../../controladores/seguridad.php';
           document.getElementById(this.getAttribute("data-tab")).classList.remove("d-none");
         });
       });
+      
+      // Verificar si hay un parámetro de tab en la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabParam = urlParams.get('tab');
+      if (tabParam) {
+        // Activar la pestaña correspondiente
+        const tabToActivate = document.querySelector(`.nav-link[data-tab="${tabParam}"]`);
+        if (tabToActivate) {
+          tabToActivate.click();
+        }
+      }
+      
+      // Botón para limpiar filtros en la sección de recibos
+      const btnLimpiarFiltros = document.getElementById('limpiarFiltros');
+      if (btnLimpiarFiltros) {
+        btnLimpiarFiltros.addEventListener('click', function() {
+          // Redirigir a la página sin filtros pero manteniendo la pestaña activa
+          window.location.href = '?tab=tab2';
+        });
+      }
+      
+      // Botones para ver detalles de recibos
+      const botonesVerRecibo = document.querySelectorAll('.ver-recibo');
+      if (botonesVerRecibo.length > 0) {
+        botonesVerRecibo.forEach(boton => {
+          boton.addEventListener('click', function() {
+            const idRecibo = this.getAttribute('data-id');
+            const modal = new bootstrap.Modal(document.getElementById('modalDetalleRecibo'));
+            
+            // Mostrar el modal con el spinner de carga
+            modal.show();
+            
+            // Cargar los detalles del recibo mediante AJAX
+            fetch(`../../controladores/obtener_detalle_recibo.php?id=${idRecibo}`)
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  // Formatear los datos para mostrarlos en el modal
+                  let contenidoHTML = `
+                    <div class="recibo-detalle">
+                      <div class="text-center mb-4">
+                        <h4>Comprobante de Pago</h4>
+                        <p>SmartPark - Sistema de Parqueadero</p>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <p><strong>Recibo #:</strong> ${data.recibo.id_registro}</p>
+                          <p><strong>Fecha de Ingreso:</strong> ${data.recibo.hora_ingreso_formateada}</p>
+                          <p><strong>Fecha de Salida:</strong> ${data.recibo.hora_salida_formateada}</p>
+                          <p><strong>Tiempo de Estancia:</strong> ${data.recibo.tiempo_estancia}</p>
+                        </div>
+                        <div class="col-md-6">
+                          <p><strong>Placa:</strong> ${data.recibo.placa}</p>
+                          <p><strong>Tipo de Vehículo:</strong> ${data.recibo.tipo_vehiculo}</p>
+                          <p><strong>Método de Pago:</strong> ${data.recibo.metodo_pago}</p>
+                          <p><strong>Total Pagado:</strong> $${Number(data.recibo.total_pagado).toLocaleString('es-CO')}</p>
+                        </div>
+                      </div>
+                      <hr>
+                      <div class="row">
+                        <div class="col-12">
+                          <p><strong>Descripción:</strong> ${data.recibo.descripcion || 'Sin descripción'}</p>
+                          <p><strong>Operador que abrió:</strong> ${data.recibo.abierto_por}</p>
+                          <p><strong>Operador que cerró:</strong> ${data.recibo.cerrado_por}</p>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                  
+                  // Actualizar el contenido del modal
+                  document.getElementById('contenidoDetalleRecibo').innerHTML = contenidoHTML;
+                  
+                  // Configurar el botón de imprimir
+                  const btnImprimir = document.getElementById('btnImprimirReciboModal');
+                  btnImprimir.setAttribute('data-id', idRecibo);
+                  btnImprimir.addEventListener('click', function() {
+                    const idRecibo = this.getAttribute('data-id');
+                    window.open(`../../controladores/imprimir_recibo.php?id=${idRecibo}`, '_blank');
+                  });
+                } else {
+                  // Mostrar mensaje de error
+                  document.getElementById('contenidoDetalleRecibo').innerHTML = `
+                    <div class="alert alert-danger">
+                      <p>Error al cargar los detalles del recibo: ${data.message}</p>
+                    </div>
+                  `;
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('contenidoDetalleRecibo').innerHTML = `
+                  <div class="alert alert-danger">
+                    <p>Error al cargar los detalles del recibo. Por favor, inténtelo de nuevo.</p>
+                  </div>
+                `;
+              });
+          });
+        });
+      }
+      
+      // Botones para imprimir recibos directamente desde la tabla
+      const botonesImprimirRecibo = document.querySelectorAll('.imprimir-recibo');
+      if (botonesImprimirRecibo.length > 0) {
+        botonesImprimirRecibo.forEach(boton => {
+          boton.addEventListener('click', function() {
+            const idRecibo = this.getAttribute('data-id');
+            window.open(`../../controladores/imprimir_recibo.php?id=${idRecibo}`, '_blank');
+          });
+        });
+      }
     });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -286,6 +640,42 @@ include '../../controladores/seguridad.php';
   
   <!-- Script para el cierre de caja -->
   <script src="../assets/js/cierre_caja.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Manejar el formulario de búsqueda de recibos
+      const formBusqueda = document.getElementById('formBusquedaRecibos');
+      const fechaBusqueda = document.getElementById('fecha_busqueda');
+      const placaBusqueda = document.querySelector('input[name="placa_busqueda"]');
+      const tipoBusqueda = document.querySelector('select[name="tipo_busqueda"]');
+      const metodoPagoBusqueda = document.querySelector('select[name="metodo_pago_busqueda"]');
+      
+      if (formBusqueda) {
+        // Asegurarse de que el campo de fecha esté vacío al cargar la página
+        fechaBusqueda.value = '';
+        
+        formBusqueda.addEventListener('submit', function(e) {
+          // No establecer la fecha automáticamente en ningún caso
+          // Permitir que el usuario busque con cualquier combinación de filtros
+          // sin modificar el valor del campo fecha
+        });
+
+        // Manejar el botón de limpiar filtros
+        const btnLimpiar = document.getElementById('limpiarFiltros');
+        if (btnLimpiar) {
+          btnLimpiar.addEventListener('click', function() {
+            // Limpiar todos los campos del formulario
+            fechaBusqueda.value = '';
+            placaBusqueda.value = '';
+            tipoBusqueda.value = '';
+            metodoPagoBusqueda.value = '';
+            
+            // Enviar el formulario para recargar la página sin filtros
+            formBusqueda.submit();
+          });
+        }
+      }
+    });
+  </script>
 </body>
 <!-- [Body] end -->
 

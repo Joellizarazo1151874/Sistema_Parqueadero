@@ -96,7 +96,13 @@
                                         <td><?php echo $fecha_ingreso; ?></td>
                                         <td><?php echo $fecha_salida; ?></td>
                                         <td>$<?php echo number_format($row['total_pagado'], 0, ',', '.'); ?></td>
-                                        <td><?php echo $row['metodo_pago']; ?></td>
+                                        <td><?php 
+                                            if ($row['estado'] === 'cancelado') {
+                                                echo 'Cancelado';
+                                            } else {
+                                                echo htmlspecialchars($row['nombre_metodo_pago'] ?? 'No especificado');
+                                            }
+                                        ?></td>
                                         <td>
                                             <div class="descripcion-scrolleable" title="<?php echo htmlspecialchars($row['descripcion_ticket']); ?>">
                                                 <?php echo $row['descripcion_ticket']; ?>

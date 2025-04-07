@@ -15,6 +15,13 @@ if (!isset($_SESSION['datos_login'])) {
 $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 'hoy';
 $fecha = isset($_GET['fecha']) ? $_GET['fecha'] : date('Y-m-d');
 
+// Para depuración
+$debug = [
+    'tipo_consulta' => $tipo,
+    'fecha_solicitada' => $fecha,
+    'fecha_actual' => date('Y-m-d')
+];
+
 // Preparar la consulta según el tipo
 if ($tipo === 'hoy') {
     // Reportes generados hoy
@@ -49,6 +56,10 @@ if ($tipo === 'hoy') {
                 r.fecha_cierre DESC";
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param('s', $fecha);
+    
+    // Añadir más información de depuración
+    $debug['fecha_formateada'] = $fecha;
+    $debug['sql_con_valores'] = str_replace('?', "'$fecha'", $sql);
 } else {
     // Historial de reportes (últimos 30 días por defecto)
     $sql = "SELECT 
@@ -70,6 +81,10 @@ $stmt->execute();
 $resultado = $stmt->get_result();
 $reportes = [];
 
+// Añadir información de depuración
+$debug['num_resultados'] = $resultado->num_rows;
+$debug['consulta_sql'] = $sql;
+
 while ($row = $resultado->fetch_assoc()) {
     // Verificar si existe el archivo HTML
     $fecha_formateada = date('Y-m-d', strtotime($row['fecha_cierre']));
@@ -89,5 +104,10 @@ while ($row = $resultado->fetch_assoc()) {
 
 // Devolver los resultados en formato JSON
 header('Content-Type: application/json');
-echo json_encode($reportes);
+// Incluir información de depuración en la respuesta
+$response = [
+    'debug' => $debug,
+    'reportes' => $reportes
+];
+echo json_encode($response, JSON_PRETTY_PRINT);
 ?>

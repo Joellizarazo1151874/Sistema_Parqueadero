@@ -1,0 +1,111 @@
+
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Reporte de Cierre de Caja</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                line-height: 1.6;
+            }
+            h1, h2 {
+                color: #333;
+                text-align: center;
+            }
+            .info {
+                margin-bottom: 20px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            .total {
+                font-weight: bold;
+                background-color: #f2f2f2;
+            }
+            .text-right {
+                text-align: right;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>REPORTE DE CIERRE DE CAJA</h1>
+        
+        <div class="info">
+            <p><strong>ID Reporte:</strong> REP-67f4191058e2b</p>
+            <p><strong>Fecha de Cierre:</strong> 07/04/2025</p>
+            <p><strong>Hora de Cierre:</strong> 13:27</p>
+            <p><strong>Operador:</strong> Admin Principal</p>
+        </div>
+        
+        <h2>Resumen de Ingresos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Método de Pago</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>efectivo</td>
+                    <td class="text-right">$ 730,800</td>
+                </tr>
+                <tr class="total">
+                    <td>TOTAL RECAUDADO</td>
+                    <td class="text-right">$ 730,800</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>Detalle de Tickets</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Placa</th>
+                    <th>Tipo</th>
+                    <th>Ingreso</th>
+                    <th>Salida</th>
+                    <th>Método Pago</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>115</td>
+                    <td>HCN196</td>
+                    <td>camioneta</td>
+                    <td>03/04/2025 10:27</td>
+                    <td>07/04/2025 11:06</td>
+                    <td>efectivo</td>
+                    <td class="text-right">$ 241,600</td>
+                </tr>
+                <tr>
+                    <td>110</td>
+                    <td>SQL625</td>
+                    <td>auto</td>
+                    <td>03/04/2025 09:29</td>
+                    <td>07/04/2025 11:20</td>
+                    <td>efectivo</td>
+                    <td class="text-right">$ 489,200</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            <p>Este reporte fue generado automáticamente por el sistema.</p>
+        </div>
+    </body>
+    </html>

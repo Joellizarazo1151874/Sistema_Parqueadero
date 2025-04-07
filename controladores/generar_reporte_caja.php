@@ -39,23 +39,28 @@ if ($resultado_verificar->num_rows > 0) {
 
 // Obtener los ingresos del día agrupados por método de pago
 $sql_ingresos = "SELECT 
-                    metodo_pago, 
-                    SUM(total_pagado) as total 
+                    rp.metodo_pago, 
+                    COALESCE(mp.nombre, rp.metodo_pago) as nombre_metodo,
+                    SUM(rp.total_pagado) as total 
                 FROM 
-                    registros_parqueo 
+                    registros_parqueo rp
+                LEFT JOIN
+                    metodos_pago mp ON rp.metodo_pago = mp.id_metodo
                 WHERE 
-                    DATE(hora_salida) = ? 
-                    AND estado = 'cerrado' 
+                    DATE(rp.hora_salida) = ? 
+                    AND rp.estado = 'cerrado' 
+                    AND (rp.reportado IS NULL OR rp.reportado = 0)
                 GROUP BY 
-                    metodo_pago";
+                    rp.metodo_pago, nombre_metodo";
 
 // Para depuración
 $fecha_debug = $fecha_cierre;
-$sql_debug = "SELECT id_registro, placa, hora_ingreso, hora_salida, total_pagado, metodo_pago, estado 
+$sql_debug = "SELECT id_registro, placa, hora_ingreso, hora_salida, total_pagado, metodo_pago, estado, reportado 
              FROM registros_parqueo rp
              JOIN vehiculos v ON rp.id_vehiculo = v.id_vehiculo
              WHERE DATE(hora_salida) = '$fecha_debug' 
-             AND estado = 'cerrado'";
+             AND estado = 'cerrado'
+             AND (rp.reportado IS NULL OR rp.reportado = 0)";
 $resultado_debug = $conexion->query($sql_debug);
 $tickets_encontrados = $resultado_debug->num_rows;
 
@@ -171,32 +176,38 @@ $resultado_ingresos = $stmt_ingresos->get_result();
 
 // Calcular el total recaudado
 $total_recaudado = 0;
-$ingresos_por_metodo = [];
+$ingresos_por_metodo = array();
 
-while ($row = $resultado_ingresos->fetch_assoc()) {
-    $total_recaudado += $row['total'];
-    $ingresos_por_metodo[$row['metodo_pago']] = $row['total'];
+while ($fila = $resultado_ingresos->fetch_assoc()) {
+    $metodo = $fila['nombre_metodo']; // Usar el nombre del método en lugar del ID
+    $total = $fila['total'];
+    $ingresos_por_metodo[$metodo] = $total;
+    $total_recaudado += $total;
 }
 
 // Obtener el detalle de todos los tickets cerrados en el día
 $sql_tickets = "SELECT 
-                    rp.id_registro,
-                    rp.hora_ingreso,
-                    rp.hora_salida,
-                    rp.total_pagado,
-                    rp.metodo_pago,
-                    v.placa,
-                    v.tipo,
-                    v.descripcion AS descripcion_vehiculo
-                FROM 
-                    registros_parqueo rp
-                JOIN 
-                    vehiculos v ON rp.id_vehiculo = v.id_vehiculo
-                WHERE 
-                    DATE(rp.hora_salida) = ?
-                    AND rp.estado = 'cerrado'
-                ORDER BY 
-                    rp.hora_salida ASC";
+                rp.id_registro, 
+                rp.hora_ingreso, 
+                rp.hora_salida, 
+                rp.total_pagado, 
+                rp.metodo_pago,
+                COALESCE(mp.nombre, rp.metodo_pago) as nombre_metodo,
+                v.placa,
+                v.tipo,
+                v.descripcion AS descripcion_vehiculo
+              FROM 
+                registros_parqueo rp
+              JOIN 
+                vehiculos v ON rp.id_vehiculo = v.id_vehiculo
+              LEFT JOIN
+                metodos_pago mp ON rp.metodo_pago = mp.id_metodo
+              WHERE 
+                DATE(rp.hora_salida) = ? 
+                AND rp.estado = 'cerrado' 
+                AND (rp.reportado IS NULL OR rp.reportado = 0)
+              ORDER BY 
+                rp.hora_salida ASC";
 
 $stmt_tickets = $conexion->prepare($sql_tickets);
 $stmt_tickets->bind_param('s', $fecha_cierre);
@@ -227,6 +238,16 @@ if ($stmt_guardar->execute()) {
     if (!is_dir($dir)) {
         mkdir($dir, 0777, true);
     }
+
+    // Marcar los tickets incluidos en este reporte como reportados
+    $sql_marcar_reportados = "UPDATE registros_parqueo 
+                             SET reportado = 1, id_reporte = ? 
+                             WHERE DATE(hora_salida) = ? 
+                             AND estado = 'cerrado' 
+                             AND (reportado IS NULL OR reportado = 0)";
+    $stmt_marcar = $conexion->prepare($sql_marcar_reportados);
+    $stmt_marcar->bind_param('ss', $id_reporte, $fecha_cierre);
+    $stmt_marcar->execute();
 
     // En lugar de generar un PDF, crearemos un archivo HTML con los datos
     $html_content = '
@@ -329,7 +350,7 @@ if ($stmt_guardar->execute()) {
                     <td>' . $ticket['tipo'] . '</td>
                     <td>' . date('d/m/Y H:i', strtotime($ticket['hora_ingreso'])) . '</td>
                     <td>' . date('d/m/Y H:i', strtotime($ticket['hora_salida'])) . '</td>
-                    <td>' . $ticket['metodo_pago'] . '</td>
+                    <td>' . $ticket['nombre_metodo'] . '</td>
                     <td class="text-right">$ ' . number_format($ticket['total_pagado'], 0, '', ',') . '</td>
                 </tr>';
     }

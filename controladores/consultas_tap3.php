@@ -81,11 +81,14 @@ $sql_tickets_activos_cerrados = "SELECT
     v.descripcion AS descripcion_vehiculo, 
     v.placa,
     rp.cerrado_por, 
-    rp.abierto_por 
+    rp.abierto_por,
+    mp.nombre AS nombre_metodo_pago
 FROM 
     registros_parqueo rp 
 JOIN 
     vehiculos v ON rp.id_vehiculo = v.id_vehiculo 
+LEFT JOIN
+    metodos_pago mp ON rp.metodo_pago = mp.id_metodo
 WHERE 
     rp.estado IN ('activo', 'cerrado')";
 if ($fecha_seleccionada) {

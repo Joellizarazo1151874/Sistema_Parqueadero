@@ -83,11 +83,14 @@ if ($tipo_ticket === 'Cancelados') {
     rp.tipo AS tipo_registro,
     v.placa, 
     v.tipo, 
-    v.descripcion 
+    v.descripcion,
+    mp.nombre AS nombre_metodo_pago
 FROM 
     registros_parqueo rp 
 JOIN 
     vehiculos v ON rp.id_vehiculo = v.id_vehiculo 
+LEFT JOIN
+    metodos_pago mp ON rp.metodo_pago = mp.id_metodo
 WHERE 
     (rp.estado = 'cancelado')";
 }else{
@@ -97,11 +100,14 @@ WHERE
     rp.tipo AS tipo_registro,
     v.placa, 
     v.tipo, 
-    v.descripcion 
+    v.descripcion,
+    mp.nombre AS nombre_metodo_pago
 FROM 
     registros_parqueo rp 
 JOIN 
     vehiculos v ON rp.id_vehiculo = v.id_vehiculo 
+LEFT JOIN
+    metodos_pago mp ON rp.metodo_pago = mp.id_metodo
 WHERE 
     (rp.estado = 'cerrado')";
 }
