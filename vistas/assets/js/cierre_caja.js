@@ -10,12 +10,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const fechaBusqueda = document.getElementById('fecha_busqueda');
     const tablaReportesHoy = document.getElementById('tablaReportesHoy');
     const tablaHistorialReportes = document.getElementById('tablaHistorialReportes');
+    
+    // Elementos para el filtro del historial de reportes
+    const fechaFiltroHistorial = document.getElementById('fecha_filtro_historial');
+    const btnFiltrarHistorial = document.getElementById('btnFiltrarHistorial');
+    const btnLimpiarFiltroHistorial = document.getElementById('btnLimpiarFiltroHistorial');
 
     // Establecer la fecha actual como valor predeterminado
     if (fechaBusqueda) {
         const hoy = new Date();
         const formatoFecha = hoy.toISOString().split('T')[0];
         fechaBusqueda.value = formatoFecha;
+    }
+    
+    // Establecer la fecha actual como valor predeterminado para el filtro del historial
+    if (fechaFiltroHistorial) {
+        const hoy = new Date();
+        const formatoFecha = hoy.toISOString().split('T')[0];
+        fechaFiltroHistorial.value = formatoFecha;
     }
 
     // Cargar reportes generados hoy
@@ -46,6 +58,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 buscarReportesPorFecha();
             }
         });
+    }
+    
+    // Eventos para el filtro del historial de reportes
+    if (btnFiltrarHistorial) {
+        btnFiltrarHistorial.addEventListener('click', function() {
+            filtrarHistorialReportes();
+        });
+    }
+    
+    if (btnLimpiarFiltroHistorial) {
+        btnLimpiarFiltroHistorial.addEventListener('click', function() {
+            limpiarFiltroHistorial();
+        });
+    }
+    
+    if (fechaFiltroHistorial) {
+        fechaFiltroHistorial.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filtrarHistorialReportes();
+            }
+        });
+    }
+    
+    // Función para filtrar el historial de reportes por fecha
+    function filtrarHistorialReportes() {
+        const fecha = fechaFiltroHistorial.value;
+        if (fecha) {
+            cargarHistorialReportesPorFecha(fecha);
+            // Mostrar el botón de limpiar cuando se realiza una búsqueda
+            if (btnLimpiarFiltroHistorial) {
+                btnLimpiarFiltroHistorial.style.display = 'inline-block';
+            }
+        } else {
+            mostrarNotificacion('Fecha requerida', 'Por favor, seleccione una fecha para filtrar', 'warning');
+        }
+    }
+    
+    // Función para limpiar el filtro del historial y volver a cargar todos los reportes
+    function limpiarFiltroHistorial() {
+        if (fechaFiltroHistorial) {
+            // Establecer la fecha actual
+            const hoy = new Date().toISOString().split('T')[0];
+            fechaFiltroHistorial.value = hoy;
+        }
+        
+        // Ocultar el botón de limpiar
+        if (btnLimpiarFiltroHistorial) {
+            btnLimpiarFiltroHistorial.style.display = 'none';
+        }
+        
+        // Cargar el historial de reportes
+        cargarHistorialReportes();
+        mostrarNotificacion('Filtro limpiado', 'Se ha restablecido la búsqueda del historial', 'info');
     }
 
     // Función para validar y buscar reportes por fecha
@@ -146,10 +212,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>
                                 ${reporte.html_existe ? 
                                     `<div class="d-flex gap-2">
-                                        <a href="../../${reporte.ruta_html}" target="_blank" class="btn btn-sm btn-info ver-recibo" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                        <a href="../../${reporte.ruta_html}" target="_blank" class="btn btn-sm btn-info" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-eye"></i> 
                                         </a> 
-                                        <a href="../../controladores/descargar_reporte_pdf.php?id=${reporte.id_reporte}" target="_blank" class="btn btn-sm btn-danger imprimir-recibo" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                        <a href="../../controladores/descargar_reporte_pdf.php?id=${reporte.id_reporte}" target="_blank" class="btn btn-sm btn-danger" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-file-pdf"></i>
                                         </a>
                                     </div>` : 
@@ -169,28 +235,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para cargar el historial de reportes
     function cargarHistorialReportes() {
+        if (!tablaHistorialReportes) return;
+        
         fetch('../../controladores/obtener_reportes_caja.php?tipo=historial')
             .then(response => response.json())
             .then(data => {
-                if (data.error) {
-                    console.error(data.error);
+                if (!data.reportes || data.reportes.length === 0) {
+                    tablaHistorialReportes.innerHTML = '<tr><td colspan="5" class="text-center">No hay reportes históricos disponibles</td></tr>';
                     return;
                 }
                 
-                // Mostrar información de depuración en la consola
-                if (data.debug) {
-                    console.log('Información de depuración (historial):', data.debug);
-                }
-                
-                const reportes = data.reportes || data; // Compatibilidad con ambos formatos
-                
-                if (reportes.length === 0) {
-                    tablaHistorialReportes.innerHTML = '<tr><td colspan="5" class="text-center">No hay reportes en el historial</td></tr>';
-                    return;
-                }
-
                 let html = '';
-                reportes.forEach(reporte => {
+                data.reportes.forEach(reporte => {
                     html += `
                         <tr>
                             <td>${reporte.fecha}</td>
@@ -200,10 +256,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>
                                 ${reporte.html_existe ? 
                                     `<div class="d-flex gap-2">
-                                        <a href="../../${reporte.ruta_html}" target="_blank" class="btn btn-sm btn-info ver-recibo" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                        <a href="../../${reporte.ruta_html}" target="_blank" class="btn btn-sm btn-info" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="../../controladores/descargar_reporte_pdf.php?id=${reporte.id_reporte}" target="_blank" class="btn btn-sm btn-danger imprimir-recibo" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                        <a href="../../controladores/descargar_reporte_pdf.php?id=${reporte.id_reporte}" target="_blank" class="btn btn-sm btn-danger" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-file-pdf"></i>
                                         </a>
                                     </div>` : 
@@ -217,7 +273,54 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error al cargar historial de reportes:', error);
+                tablaHistorialReportes.innerHTML = '<tr><td colspan="5" class="text-center">Error al cargar reportes históricos</td></tr>';
+            });
+    }
+    
+    // Función para cargar el historial de reportes por fecha específica
+    function cargarHistorialReportesPorFecha(fecha) {
+        if (!tablaHistorialReportes) return;
+        
+        fetch(`../../controladores/obtener_reportes_caja.php?tipo=fecha&fecha=${fecha}`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.reportes || data.reportes.length === 0) {
+                    tablaHistorialReportes.innerHTML = '<tr><td colspan="5" class="text-center">No hay reportes para la fecha seleccionada</td></tr>';
+                    mostrarNotificacion('Sin resultados', `No se encontraron reportes para la fecha ${fecha}`, 'info');
+                    return;
+                }
+                
+                let html = '';
+                data.reportes.forEach(reporte => {
+                    html += `
+                        <tr>
+                            <td>${reporte.fecha}</td>
+                            <td>${reporte.hora}</td>
+                            <td>$${Number(reporte.total_recaudado).toLocaleString('es-CO')}</td>
+                            <td>${reporte.operador}</td>
+                            <td>
+                                ${reporte.html_existe ? 
+                                    `<div class="d-flex gap-2">
+                                        <a href="../../${reporte.ruta_html}" target="_blank" class="btn btn-sm btn-info" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="../../controladores/descargar_reporte_pdf.php?id=${reporte.id_reporte}" target="_blank" class="btn btn-sm btn-danger" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </a>
+                                    </div>` : 
+                                    '<span class="badge bg-danger">Reporte no disponible</span>'}
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tablaHistorialReportes.innerHTML = html;
+                mostrarNotificacion('Búsqueda completada', `Se encontraron reportes para la fecha ${fecha}`, 'success');
+            })
+            .catch(error => {
+                console.error('Error al cargar reportes por fecha:', error);
                 tablaHistorialReportes.innerHTML = '<tr><td colspan="5" class="text-center">Error al cargar reportes</td></tr>';
+                mostrarNotificacion('Error', 'Ocurrió un error al buscar los reportes', 'error');
             });
     }
 
@@ -268,14 +371,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>${reporte.operador}</td>
                             <td>
                                 ${reporte.html_existe ? 
-                                    `
-                                        <a href="../../${reporte.ruta_html}" target="_blank" class="btn btn-sm btn-info ver-recibo" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                    `<div class="d-flex gap-2">
+                                        <a href="../../${reporte.ruta_html}" target="_blank" class="btn btn-sm btn-info" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="../../controladores/descargar_reporte_pdf.php?id=${reporte.id_reporte}" target="_blank" class="btn btn-sm btn-danger imprimir-recibo" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
+                                        <a href="../../controladores/descargar_reporte_pdf.php?id=${reporte.id_reporte}" target="_blank" class="btn btn-sm btn-danger" style="width: 38px; height: 31px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-file-pdf"></i>
                                         </a>
-                                    ` : 
+                                    </div>` : 
                                     '<span class="badge bg-danger">Reporte no disponible</span>'}
                             </td>
                         </tr>

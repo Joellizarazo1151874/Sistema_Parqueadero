@@ -441,6 +441,24 @@ include '../../controladores/seguridad.php';
                           <h5>Historial de Reportes</h5>
                         </div>
                         <div class="card-body">
+                          <div class="mb-3">
+                            <div class="row">
+                              <div class="col-md-4">
+                                <div class="input-group">
+                                  <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                  <input type="date" class="form-control" id="fecha_filtro_historial" placeholder="Filtrar por fecha">
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <button type="button" class="btn btn-primary" id="btnFiltrarHistorial">
+                                  <i class="fas fa-search"></i> Filtrar
+                                </button>
+                                <button type="button" class="btn btn-secondary ms-2" id="btnLimpiarFiltroHistorial" style="display: none;">
+                                  <i class="fas fa-times"></i> Limpiar
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                           <div class="table-responsive">
                             <table class="table table-striped">
                               <thead>
