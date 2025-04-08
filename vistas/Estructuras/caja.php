@@ -39,6 +39,10 @@ include '../../controladores/seguridad.php';
   <link rel="stylesheet" href="../assets/css/style.css" id="main-style-link">
   <link rel="stylesheet" href="../assets/css/style-preset.css">
   
+  <!-- jQuery y SweetAlert2 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
   <!-- Estilos para notificaciones toast -->
   <style>
     .colored-toast {
@@ -127,8 +131,96 @@ include '../../controladores/seguridad.php';
         <!-- Contenido dinámico -->
         <div class="tab-container mt-4">
           <div id="tab1" class="tab-content active">
-            <h3>Caja</h3>
-            <p>Esta sección muestra todos los tickets abiertos actualmente.</p>
+            <div class="row">
+              <!-- Resumen de Caja -->
+              <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                  <div class="card-header text-white py-3">
+                    <div class="d-flex align-items-center">
+                      <span class="rounded-circle bg-light p-2 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="fas fa-chart-pie text-dark"></i>
+                      </span>
+                      <h4 class="mb-0">Resumen de Caja</h4>
+                    </div>
+                  </div>
+                  <div class="card-body p-0">
+                    <!-- Tickets Activos -->
+                    <div class="p-3 border-bottom d-flex align-items-center">
+                      <div class="rounded-circle bg-primary text-white p-3 me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-ticket-alt fa-2x"></i>
+                      </div>
+                      <div>
+                        <h6 class="text-muted mb-1">Tickets Activos</h6>
+                        <h4 class="mb-0" id="total-tickets">0</h4>
+                      </div>
+                    </div>
+                    
+                    <!-- Total Efectivo -->
+                    <div class="p-3 border-bottom d-flex align-items-center">
+                      <div class="rounded-circle bg-success text-white p-3 me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                      </div>
+                      <div>
+                        <h6 class="text-muted mb-1">Total Efectivo</h6>
+                        <h4 class="mb-0" id="total-efectivo">$0</h4>
+                      </div>
+                    </div>
+                    
+                    <!-- Total Tarjeta -->
+                    <div class="p-3 border-bottom d-flex align-items-center">
+                      <div class="rounded-circle bg-info text-white p-3 me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-credit-card fa-2x"></i>
+                      </div>
+                      <div>
+                        <h6 class="text-muted mb-1">Total Tarjeta</h6>
+                        <h4 class="mb-0" id="total-tarjeta">$0</h4>
+                      </div>
+                    </div>
+                    
+                    <!-- Total Transferencia -->
+                    <div class="p-3 d-flex align-items-center">
+                      <div class="rounded-circle bg-warning text-white p-3 me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-exchange-alt fa-2x"></i>
+                      </div>
+                      <div>
+                        <h6 class="text-muted mb-1">Total Transferencia</h6>
+                        <h4 class="mb-0" id="total-transferencia">$0</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lista de Tickets Activos -->
+              <div class="col-md-8">
+                <div class="card">
+                  <div class="card-header">
+                    <h5>Tickets Activos</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-striped" id="tabla-tickets">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Placa</th>
+                            <th>Tipo Vehículo</th>
+                            <th>Tipo Tiempo</th>
+                            <th>Cliente</th>
+                            <th>Ingreso</th>
+                            <th>Tiempo</th>
+                            <th>Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody id="lista-tickets">
+                          <!-- Los tickets se cargarán dinámicamente aquí -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div id="tab2" class="tab-content d-none">
             <h3>Recibos</h3>
@@ -684,6 +776,149 @@ include '../../controladores/seguridad.php';
           });
         }
       }
+    });
+  </script>
+  <script>
+    // Función para formatear moneda
+    function formatearMoneda(valor) {
+      return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0
+      }).format(valor);
+    }
+
+    // Función para formatear tiempo
+    function formatearTiempo(horas, minutos) {
+      if (horas < 1) {
+        if (minutos === 0) {
+          return 'Menos de 1m';
+        }
+        return `${minutos}m`;
+      }
+      return `${Math.floor(horas)}h ${minutos}m`;
+    }
+
+    // Función para cargar los tickets activos
+    function cargarTicketsActivos() {
+      $.ajax({
+        url: '../../controladores/caja.php',
+        type: 'POST',
+        data: { accion: 'obtener_tickets' },
+        success: function(response) {
+          const tickets = JSON.parse(response);
+          let html = '';
+          
+          tickets.forEach(ticket => {
+            html += `
+              <tr>
+                <td>${ticket.id_registro}</td>
+                <td>${ticket.placa}</td>
+                <td>${ticket.tipo_vehiculo}</td>
+                <td>${ticket.tipo_tiempo}</td>
+                <td>${ticket.nombre_cliente || 'N/A'}</td>
+                <td>${new Date(ticket.hora_ingreso).toLocaleString()}</td>
+                <td>${formatearTiempo(ticket.horas_transcurridas, ticket.minutos_transcurridos)}</td>
+                <td>
+                  <button class="btn btn-sm btn-info" onclick="verDetalleTicket(${ticket.id_registro})">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+          
+          $('#lista-tickets').html(html);
+        }
+      });
+    }
+
+    // Función para cargar el resumen de caja
+    function cargarResumenCaja() {
+      $.ajax({
+        url: '../../controladores/caja.php',
+        type: 'POST',
+        data: { accion: 'obtener_resumen' },
+        success: function(response) {
+          const resumen = JSON.parse(response);
+          $('#total-tickets').text(resumen.total_tickets);
+          $('#total-efectivo').text(formatearMoneda(resumen.total_efectivo));
+          $('#total-tarjeta').text(formatearMoneda(resumen.total_tarjeta));
+          $('#total-transferencia').text(formatearMoneda(resumen.total_transferencia));
+        }
+      });
+    }
+
+    // Función para actualizar método de pago
+    function actualizarMetodoPago(select) {
+      const idRegistro = $(select).data('id');
+      const metodoPago = $(select).val();
+      
+      $.ajax({
+        url: '../../controladores/caja.php',
+        type: 'POST',
+        data: {
+          accion: 'actualizar_metodo_pago',
+          id_registro: idRegistro,
+          metodo_pago: metodoPago
+        },
+        success: function(response) {
+          const result = JSON.parse(response);
+          if (result.success) {
+            Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: 'Método de pago actualizado correctamente',
+              showConfirmButton: false,
+              timer: 3000
+            });
+            cargarResumenCaja();
+          }
+        }
+      });
+    }
+
+    // Función para ver detalle del ticket
+    function verDetalleTicket(idRegistro) {
+      $.ajax({
+        url: '../../controladores/caja.php',
+        type: 'POST',
+        data: {
+          accion: 'obtener_detalle_ticket',
+          id_registro: idRegistro
+        },
+        success: function(response) {
+          const ticket = JSON.parse(response);
+          Swal.fire({
+            title: 'Detalle del Ticket',
+            html: `
+              <div class="text-start">
+                <p><strong>ID:</strong> ${ticket.id_registro}</p>
+                <p><strong>Placa:</strong> ${ticket.placa}</p>
+                <p><strong>Tipo Vehículo:</strong> ${ticket.tipo_vehiculo}</p>
+                <p><strong>Tipo Tiempo:</strong> ${ticket.tipo_tiempo}</p>
+                <p><strong>Cliente:</strong> ${ticket.nombre_cliente || 'N/A'}</p>
+                <p><strong>Ingreso:</strong> ${new Date(ticket.hora_ingreso).toLocaleString()}</p>
+                <p><strong>Tiempo:</strong> ${formatearTiempo(ticket.horas_transcurridas, ticket.minutos_transcurridos)}</p>
+              </div>
+            `,
+            icon: 'info'
+          });
+        }
+      });
+    }
+
+    // Cargar datos iniciales
+    $(document).ready(function() {
+      cargarTicketsActivos();
+      cargarResumenCaja();
+      
+      // Actualizar cada minuto
+      setInterval(function() {
+        cargarTicketsActivos();
+        cargarResumenCaja();
+      }, 60000);
     });
   </script>
 </body>
