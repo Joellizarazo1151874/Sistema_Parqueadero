@@ -341,6 +341,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let cantidadHoras = Math.floor(minutosTranscurridos / 60);
         let cantidadMinutos = minutosTranscurridos % 60;
         let detalleCobro = '';
+        let tarifaAplicadaTexto = '';
         
         // Ajustar el detalle según el tipo de registro y el tiempo configurado
         if (tipoRegistro === 'hora') {
@@ -359,6 +360,9 @@ document.addEventListener("DOMContentLoaded", function () {
           // Redondear a múltiplos de 100
           costoItem = Math.floor(costoItem / 100) * 100;
           
+          // Establecer textos simplificados para el resumen
+          tarifaAplicadaTexto = `$${tarifaHora.toLocaleString('es-CO')}/hora`;
+          
           detalleCobro = `${cantidadHoras} x Hora ($${tarifaHora.toLocaleString()}) + ${Math.max(0, cantidadMinutos - toleranciaMinutos)} min ($${Math.floor(costoMinutos)})`;
         } else {
           // Para cualquier tipo de tarifa que no sea hora, usar el tiempo configurado
@@ -369,9 +373,13 @@ document.addEventListener("DOMContentLoaded", function () {
           if (minutosTranscurridos <= toleranciaMinutos) {
             costoItem = 0;
             detalleCobro = `Dentro de tolerancia (${toleranciaMinutos} min)`;
+            tarifaAplicadaTexto = `$${tarifaValor.toLocaleString('es-CO')}/${tipoRegistro}`;
           } else {
             // Calcular proporción del periodo transcurrido
             let proporcion = Math.min(horasTranscurridas / tiempoHoras, 1);
+            
+            // Texto simplificado para tarifa aplicada
+            tarifaAplicadaTexto = `$${tarifaValor.toLocaleString('es-CO')}/${tipoRegistro}`;
             
             // Si ha pasado más tiempo que el configurado, calcular periodos completos y la proporción adicional
             if (horasTranscurridas > tiempoHoras) {
@@ -417,6 +425,11 @@ document.addEventListener("DOMContentLoaded", function () {
           costoItem = Math.floor(costoItem / 100) * 100;
         }
 
+        // Remover referencias a los elementos eliminados
+        // Actualizar importe de estacionamiento en el detalle de factura
+        document.getElementById('importe_estacionamiento').textContent = `$${costoItem.toLocaleString('es-CO')}`;
+        document.getElementById('total_factura').textContent = `$${costoItem.toLocaleString('es-CO')}`;
+        
         // Usar costoItem calculado para el total a pagar
         costoItem = costoItem;
 
@@ -457,10 +470,35 @@ document.addEventListener("DOMContentLoaded", function () {
               
               // Actualizar el detalle en "Items" para incluir los adicionales
               document.getElementById("modalItems").value = `${detalleCobro} = $${costoItem.toLocaleString('en-US')} + Adicionales $${totalAdicionales.toLocaleString('en-US')}`;
+
+              // Actualizar la sección de detalle de factura con los adicionales específicos
+              const conceptosContainer = document.getElementById('conceptos_adicionales');
+              conceptosContainer.innerHTML = ''; // Limpiar conceptos anteriores
+              
+              // Añadir cada concepto como una fila individual
+              if (data.costos && data.costos.length > 0) {
+                data.costos.forEach(costo => {
+                  const conceptoRow = document.createElement('div');
+                  conceptoRow.className = 'row mb-1';
+                  conceptoRow.innerHTML = `
+                    <div class="col-6"><small>${costo.concepto}</small></div>
+                    <div class="col-6 text-end"><small>$${parseFloat(costo.valor).toLocaleString('es-CO')}</small></div>
+                  `;
+                  conceptosContainer.appendChild(conceptoRow);
+                });
+              }
+              
+              // Actualizar el total de la factura
+              document.getElementById('total_factura').textContent = `$${totalFinal.toLocaleString('es-CO')}`;
+            } else {
+              // Limpiar el contenedor de conceptos si no hay costos adicionales
+              document.getElementById('conceptos_adicionales').innerHTML = ''; // Limpiar conceptos
             }
           })
           .catch(error => {
             console.error('Error al actualizar costos adicionales:', error);
+            // Limpiar el contenedor de conceptos en caso de error
+            document.getElementById('conceptos_adicionales').innerHTML = ''; // Limpiar conceptos
           });
       }
 
@@ -480,55 +518,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
-
-// Función para cargar los costos adicionales en el modal de pago
-function cargarCostosAdicionalesPago(idRegistro) {
-  fetch(`../../controladores/obtener_costos_adicionales.php?id_registro=${idRegistro}`)
-    .then(response => response.json())
-    .then(data => {
-      const costosContainer = document.getElementById('costos_adicionales_pago');
-      const listaContainer = document.getElementById('lista_costos_adicionales');
-      const totalElement = document.getElementById('total_costos_adicionales_pago');
-      
-      // Si no hay costos adicionales, ocultar la sección
-      if (!data.costos || data.costos.length === 0) {
-        costosContainer.classList.add('d-none');
-        return;
-      }
-      
-      // Mostrar la sección de costos adicionales
-      costosContainer.classList.remove('d-none');
-      
-      // Limpiar contenedor
-      listaContainer.innerHTML = '';
-      
-      // Crear lista de costos
-      const ul = document.createElement('ul');
-      ul.className = 'list-group list-group-flush mb-2';
-      
-      // Añadir cada costo a la lista
-      data.costos.forEach(costo => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-        li.innerHTML = `
-          <span>${costo.concepto}</span>
-          <span>$${parseFloat(costo.valor).toLocaleString('es-CO')}</span>
-        `;
-        ul.appendChild(li);
-      });
-      
-      listaContainer.appendChild(ul);
-      
-      // Actualizar el total de costos adicionales
-      totalElement.textContent = `$${parseFloat(data.total).toLocaleString('es-CO')}`;
-      
-      // Ya no sumamos los costos adicionales aquí porque ya se suman en actualizarTiempoYCostoModal
-    })
-    .catch(error => {
-      console.error('Error al cargar los costos adicionales:', error);
-      document.getElementById('costos_adicionales_pago').classList.add('d-none');
-    });
-}
 
 //funcion para la busqueda de tickets
 // ... existing code ...

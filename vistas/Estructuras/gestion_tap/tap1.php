@@ -255,24 +255,29 @@
                                     <div class="ticket-info mb-3">
                                         <h6 id="ticketInfo"></h6>
                                     </div>
-                                    <div class="amount text-center mb-4">
-                                        <h6>Importe:</h6>
+                                    
+                                    <div class="amount text-center mb-3">
+                                        <h6>Importe Total:</h6>
                                         <h3><b id="modalCosto">$0</b></h3> <!-- Aquí se mostrará el costo actualizado -->
                                     </div>
                                     
-                                    <!-- Costos adicionales -->
-                                    <div id="costos_adicionales_pago" class="mb-3 d-none">
+                                    <!-- Detalle de factura -->
+                                    <div id="detalle_factura" class="mb-3">
                                         <div class="card">
-                                            <div class="card-header bg-warning-subtle">
-                                                <h6 class="mb-0">Costos adicionales</h6>
+                                            <div class="card-header bg-info-subtle py-1">
+                                                <small class="mb-0 fw-bold">Detalle de factura</small>
                                             </div>
-                                            <div class="card-body">
-                                                <div id="lista_costos_adicionales">
-                                                    <!-- Aquí se cargarán los costos adicionales -->
+                                            <div class="card-body p-2">
+                                                <div class="row mb-2">
+                                                    <div class="col-6"><small>Estacionamiento</small></div>
+                                                    <div class="col-6 text-end"><small id="importe_estacionamiento">$0</small></div>
                                                 </div>
-                                                <div class="d-flex justify-content-between mt-2">
-                                                    <strong>Total costos adicionales:</strong>
-                                                    <span id="total_costos_adicionales_pago">$0</span>
+                                                <!-- Los adicionales se insertarán dinámicamente aquí -->
+                                                <div id="conceptos_adicionales"></div>
+                                                <hr class="my-1">
+                                                <div class="row">
+                                                    <div class="col-6"><small><strong>TOTAL</strong></small></div>
+                                                    <div class="col-6 text-end"><small><strong id="total_factura">$0</strong></small></div>
                                                 </div>
                                             </div>
                                         </div>
