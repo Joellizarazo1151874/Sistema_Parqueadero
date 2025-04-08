@@ -657,10 +657,32 @@ include '../../controladores/seguridad.php';
                           <p><strong>Placa:</strong> ${data.recibo.placa}</p>
                           <p><strong>Tipo de Vehículo:</strong> ${data.recibo.tipo_vehiculo}</p>
                           <p><strong>Método de Pago:</strong> ${data.recibo.metodo_pago}</p>
-                          <p><strong>Total Pagado:</strong> $${Number(data.recibo.total_pagado).toLocaleString('es-CO')}</p>
                         </div>
                       </div>
                       <hr>
+                      <div class="card mb-3">
+                        <div class="card-header bg-info-subtle py-2">
+                          <h6 class="mb-0">Detalle de factura</h6>
+                        </div>
+                        <div class="card-body p-3">
+                          <div class="row mb-2">
+                            <div class="col-6"><strong>Estacionamiento</strong></div>
+                            <div class="col-6 text-end">${data.recibo.costo_estacionamiento_formateado}</div>
+                          </div>
+                          ${data.recibo.costos_adicionales && data.recibo.costos_adicionales.length > 0 ? 
+                            data.recibo.costos_adicionales.map(costo => `
+                              <div class="row mb-2">
+                                <div class="col-6">${costo.concepto}</div>
+                                <div class="col-6 text-end">${costo.valor_formateado}</div>
+                              </div>
+                            `).join('') : ''}
+                          <hr class="my-2">
+                          <div class="row">
+                            <div class="col-6"><strong>TOTAL</strong></div>
+                            <div class="col-6 text-end fw-bold">$${Number(data.recibo.total_pagado).toLocaleString('es-CO')}</div>
+                          </div>
+                        </div>
+                      </div>
                       <div class="row">
                         <div class="col-12">
                           <p><strong>Descripción:</strong> ${data.recibo.descripcion || 'Sin descripción'}</p>

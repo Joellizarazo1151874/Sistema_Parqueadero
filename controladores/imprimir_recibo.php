@@ -14,9 +14,10 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $id_recibo = intval($_GET['id']);
 
 // Consultar los detalles del recibo
-$sql = "SELECT r.*, v.placa, v.tipo as tipo_vehiculo 
+$sql = "SELECT r.*, v.placa, v.tipo as tipo_vehiculo, mp.nombre as nombre_metodo_pago
         FROM registros_parqueo r 
         LEFT JOIN vehiculos v ON r.id_vehiculo = v.id_vehiculo
+        LEFT JOIN metodos_pago mp ON r.metodo_pago = mp.id_metodo
         WHERE r.id_registro = ? AND r.estado = 'cerrado'";
 
 $stmt = $conexion->prepare($sql);
@@ -47,8 +48,33 @@ $tiempo_estancia .= $diferencia->h . 'h ' . $diferencia->i . 'm';
 $hora_ingreso_formateada = $hora_ingreso->format('d/m/Y H:i');
 $hora_salida_formateada = $hora_salida->format('d/m/Y H:i');
 
-// Formatear el total pagado según las preferencias del usuario (sin decimales, con separadores de miles)
-$total_pagado = '$' . number_format($recibo['total_pagado'], 0, '', ',');
+// Obtener costos adicionales
+$sql_costos = "SELECT * FROM costos_adicionales WHERE id_registro = ?";
+$stmt_costos = $conexion->prepare($sql_costos);
+$stmt_costos->bind_param("i", $id_recibo);
+$stmt_costos->execute();
+$resultado_costos = $stmt_costos->get_result();
+
+$costos_adicionales = [];
+$total_adicionales = 0;
+
+if ($resultado_costos && $resultado_costos->num_rows > 0) {
+    while ($costo = $resultado_costos->fetch_assoc()) {
+        $costos_adicionales[] = [
+            'concepto' => $costo['concepto'],
+            'valor' => $costo['valor']
+        ];
+        $total_adicionales += floatval($costo['valor']);
+    }
+}
+
+// Calcular costo de estacionamiento (total - adicionales)
+$costo_estacionamiento = floatval($recibo['total_pagado']) - $total_adicionales;
+
+// Formatear el total pagado y otros montos según las preferencias del usuario
+$total_pagado_formateado = '$' . number_format($recibo['total_pagado'], 0, '', ',');
+$costo_estacionamiento_formateado = '$' . number_format($costo_estacionamiento, 0, '', ',');
+$total_adicionales_formateado = '$' . number_format($total_adicionales, 0, '', ',');
 
 // Generar el HTML para imprimir
 ?>
@@ -107,6 +133,19 @@ $total_pagado = '$' . number_format($recibo['total_pagado'], 0, '', ',');
             margin-top: 3mm;
             padding-top: 2mm;
             border-top: 1px dashed #000;
+        }
+        .detalle-factura {
+            margin: 3mm 0;
+            border: 1px solid #000;
+            padding: 2mm;
+            background-color: #f9f9f9;
+        }
+        .detalle-factura .titulo {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 2mm;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1mm;
         }
         .footer {
             margin-top: 5mm;
@@ -182,35 +221,38 @@ $total_pagado = '$' . number_format($recibo['total_pagado'], 0, '', ',');
         
         <div class="info-item">
             <span class="label">MÉTODO PAGO:</span>
-            <span class="value"><?php echo htmlspecialchars($recibo['metodo_pago']); ?></span>
+            <span class="value"><?php echo htmlspecialchars($recibo['nombre_metodo_pago'] ?? $recibo['metodo_pago']); ?></span>
         </div>
-        
-        <?php if (!empty($recibo['descripcion'])): ?>
-        <div class="separator"></div>
-        <div>
-            <div class="label">DESCRIPCIÓN:</div>
-            <div class="value"><?php echo nl2br(htmlspecialchars($recibo['descripcion'])); ?></div>
-        </div>
-        <?php endif; ?>
         
         <div class="separator"></div>
         
-        <div class="info-item">
-            <span class="label">ABIERTO POR:</span>
-            <span class="value"><?php echo htmlspecialchars($recibo['abierto_por']); ?></span>
-        </div>
-        
-        <div class="info-item">
-            <span class="label">CERRADO POR:</span>
-            <span class="value"><?php echo htmlspecialchars($recibo['cerrado_por']); ?></span>
-        </div>
-        
-        <div class="total">
+        <!-- Detalle de factura -->
+
+            <div class="titulo" style="text-align: center;">Detalle de factura</div>
+            
             <div class="info-item">
-                <span class="label">TOTAL PAGADO:</span>
-                <span class="value"><?php echo $total_pagado; ?></span>
+                <span class="label">Estacionamiento</span>
+                <span class="value"><?php echo $costo_estacionamiento_formateado; ?></span>
             </div>
-        </div>
+            
+            <?php if (count($costos_adicionales) > 0): ?>
+                <?php foreach ($costos_adicionales as $costo): ?>
+                <div class="info-item">
+                    <span class="label"><?php echo htmlspecialchars($costo['concepto']); ?></span>
+                    <span class="value">$<?php echo number_format($costo['valor'], 0, '', ','); ?></span>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            
+            <div class="separator"></div>
+            
+            <div class="info-item">
+                <span class="label"><strong>TOTAL</strong></span>
+                <span class="value"><strong><?php echo $total_pagado_formateado; ?></strong></span>
+            </div>
+     
+        
+        <div class="separator"></div>
         
         <!-- Código de barras simple (podría ser reemplazado por un código QR) -->
         <div class="barcode">
@@ -245,5 +287,6 @@ $total_pagado = '$' . number_format($recibo['total_pagado'], 0, '', ',');
 </html>
 <?php
 $stmt->close();
+$stmt_costos->close();
 $conexion->close();
 ?>
