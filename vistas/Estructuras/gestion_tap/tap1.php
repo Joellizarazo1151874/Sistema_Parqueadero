@@ -158,6 +158,26 @@
                                     data-tiempo-horas="<?php echo $tiempo_horas; ?>">
                                     Calculando...
                                 </b>
+                                
+                                <?php
+                                // Consultar costos adicionales
+                                $id_registro = $row['id_registro'];
+                                $sql_costos = "SELECT SUM(valor) as total_costos FROM costos_adicionales WHERE id_registro = $id_registro";
+                                $result_costos = $conexion->query($sql_costos);
+                                $total_costos = 0;
+                                
+                                if ($result_costos && $result_costos->num_rows > 0) {
+                                    $row_costos = $result_costos->fetch_assoc();
+                                    if ($row_costos['total_costos']) {
+                                        $total_costos = floatval($row_costos['total_costos']);
+                                    }
+                                }
+                                
+                                if ($total_costos > 0) {
+                                    echo '<br><small class="text-warning">COSTOS ADICIONALES</small><br>';
+                                    echo '<b class="text-warning">$' . number_format($total_costos, 0, ',', '.') . '</b>';
+                                }
+                                ?>
                             </div>
                             <div class="col-6 text-end">
                                 <small>TIEMPO</small>
@@ -189,7 +209,12 @@
                                    data-descripcion="<?php echo isset($row['descripcion']) ? htmlspecialchars($row['descripcion']) : ''; ?>">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="icon-btn"><i class="fas fa-print"></i></button>
+                            <button class="icon-btn agregar-costo" 
+                                   data-id="<?php echo $row['id_registro']; ?>"
+                                   data-placa="<?php echo $row['placa']; ?>"
+                                   data-tipo="<?php echo strtoupper($row['tipo']); ?>">
+                                <i class="fas fa-dollar-sign"></i>
+                            </button>
                             <button class="icon-btn cancelar-ticket" 
                                    data-id="<?php echo $row['id_registro']; ?>"
                                    data-placa="<?php echo $row['placa']; ?>">
@@ -233,6 +258,25 @@
                                         <h6>Importe:</h6>
                                         <h3><b id="modalCosto">$0</b></h3> <!-- Aquí se mostrará el costo actualizado -->
                                     </div>
+                                    
+                                    <!-- Costos adicionales -->
+                                    <div id="costos_adicionales_pago" class="mb-3 d-none">
+                                        <div class="card">
+                                            <div class="card-header bg-warning-subtle">
+                                                <h6 class="mb-0">Costos adicionales</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="lista_costos_adicionales">
+                                                    <!-- Aquí se cargarán los costos adicionales -->
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-2">
+                                                    <strong>Total costos adicionales:</strong>
+                                                    <span id="total_costos_adicionales_pago">$0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="mb-3">
                                         <div class="mb-3">
                                             <label class="form-label">Seleccione la forma de pago</label>
@@ -450,5 +494,247 @@
                 });
             }
         });
+        
+        // Manejo del modal de costos adicionales
+        const botonesCostoAdicional = document.querySelectorAll('.agregar-costo');
+        botonesCostoAdicional.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idRegistro = this.getAttribute('data-id');
+                const placa = this.getAttribute('data-placa');
+                const tipo = this.getAttribute('data-tipo');
+                
+                // Actualizar la información en el modal
+                document.getElementById('costo_id_registro').value = idRegistro;
+                document.getElementById('costoTicketInfo').textContent = `Ticket #${placa} • ${tipo}`;
+                
+                // Cargar los costos adicionales actuales
+                cargarCostosAdicionales(idRegistro);
+                
+                // Mostrar el modal
+                const modalCostosAdicionales = new bootstrap.Modal(document.getElementById('modalCostosAdicionales'));
+                modalCostosAdicionales.show();
+            });
+        });
+        
+        // Manejar el cambio en el concepto
+        document.getElementById('concepto_costo').addEventListener('change', function() {
+            const otroConceptoContainer = document.getElementById('otro_concepto_container');
+            if (this.value === 'Otro') {
+                otroConceptoContainer.style.display = 'block';
+                document.getElementById('otro_concepto').setAttribute('required', 'required');
+            } else {
+                otroConceptoContainer.style.display = 'none';
+                document.getElementById('otro_concepto').removeAttribute('required');
+            }
+        });
+        
+        // Manejar el envío del formulario de costos adicionales
+        document.getElementById('formCostosAdicionales').addEventListener('submit', function(e) {
+            // No prevenimos el evento predeterminado para permitir que el formulario se envíe normalmente
+            
+            // Si se seleccionó "Otro" como concepto, usar el valor especificado
+            if (document.getElementById('concepto_costo').value === 'Otro') {
+                const otroConcepto = document.getElementById('otro_concepto').value;
+                
+                if (!otroConcepto.trim()) {
+                    e.preventDefault();
+                    alert('Por favor, especifique el concepto');
+                    return;
+                }
+                
+                // Crear un campo oculto para enviar el concepto personalizado
+                const hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.name = 'concepto';
+                hiddenField.value = otroConcepto;
+                
+                this.appendChild(hiddenField);
+            }
+        });
     });
+
+    // Función para cargar los costos adicionales de un ticket
+    function cargarCostosAdicionales(idRegistro) {
+        fetch(`../../controladores/obtener_costos_adicionales.php?id_registro=${idRegistro}`)
+            .then(response => response.json())
+            .then(data => {
+                const costosLista = document.getElementById('costos_actuales_lista');
+                
+                // Limpiar el contenido actual
+                costosLista.innerHTML = '';
+                
+                if (data.costos && data.costos.length > 0) {
+                    // Crear una tabla para mostrar los costos
+                    const table = document.createElement('table');
+                    table.className = 'table table-sm';
+                    
+                    // Crear encabezado de tabla
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                        <tr>
+                            <th>Concepto</th>
+                            <th>Valor</th>
+                            <th>Acciones</th>
+                        </tr>
+                    `;
+                    table.appendChild(thead);
+                    
+                    // Crear cuerpo de tabla
+                    const tbody = document.createElement('tbody');
+                    
+                    // Añadir cada costo a la tabla
+                    data.costos.forEach(costo => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${costo.concepto}</td>
+                            <td>$${parseFloat(costo.valor).toLocaleString('es-CO')}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-danger eliminar-costo" data-id="${costo.id_costo}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    
+                    table.appendChild(tbody);
+                    
+                    // Añadir pie de tabla con el total
+                    const tfoot = document.createElement('tfoot');
+                    tfoot.innerHTML = `
+                        <tr>
+                            <th>Total</th>
+                            <th colspan="2">$${parseFloat(data.total).toLocaleString('es-CO')}</th>
+                        </tr>
+                    `;
+                    table.appendChild(tfoot);
+                    
+                    // Añadir tabla al contenedor
+                    costosLista.appendChild(table);
+                    
+                    // Añadir eventos para eliminar costos
+                    document.querySelectorAll('.eliminar-costo').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const idCosto = this.getAttribute('data-id');
+                            eliminarCostoAdicional(idCosto, idRegistro);
+                        });
+                    });
+                } else {
+                    // No hay costos, mostrar mensaje
+                    costosLista.innerHTML = '<p class="text-muted">No hay costos adicionales registrados</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar los costos adicionales:', error);
+                document.getElementById('costos_actuales_lista').innerHTML = 
+                    '<p class="text-danger">Error al cargar los costos. Por favor, intente de nuevo.</p>';
+            });
+    }
+    
+    // Función para eliminar un costo adicional
+    function eliminarCostoAdicional(idCosto, idRegistro) {
+        if (confirm('¿Está seguro de eliminar este costo adicional?')) {
+            const formData = new FormData();
+            formData.append('id_costo', idCosto);
+            
+            fetch('../../controladores/eliminar_costo_adicional.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Recargar los costos
+                    cargarCostosAdicionales(idRegistro);
+                    
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        title: '¡Eliminado!',
+                        text: 'El costo adicional ha sido eliminado correctamente',
+                        icon: 'success',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        toast: true
+                    });
+                } else {
+                    // Mostrar mensaje de error
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.error || 'No se pudo eliminar el costo adicional',
+                        icon: 'error',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        toast: true
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error al eliminar el costo adicional:', error);
+                alert('Ocurrió un error al intentar eliminar el costo adicional');
+            });
+        }
+    }
 </script>
+
+<!-- Modal de Costos Adicionales -->
+<div class="modal fade" id="modalCostosAdicionales" tabindex="-1" aria-labelledby="modalCostosAdicionalesLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCostosAdicionalesLabel">Agregar Costo Adicional</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ticket-info mb-3">
+                    <h6 id="costoTicketInfo"></h6>
+                </div>
+                
+                <form id="formCostosAdicionales" action="../../controladores/agregar_costo_adicional.php" method="POST">
+                    <input type="hidden" id="costo_id_registro" name="id_registro">
+                    
+                    <div class="mb-3">
+                        <label for="concepto_costo" class="form-label">Concepto</label>
+                        <select class="form-select" id="concepto_costo" name="concepto">
+                            <option value="Guardar casco">Guardar casco</option>
+                            <option value="Lavado">Lavado de vehículo</option>
+                            <option value="Seguro adicional">Seguro adicional</option>
+                            <option value="Otro">Otro (especificar)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="otro_concepto_container" style="display: none;">
+                        <label for="otro_concepto" class="form-label">Especificar concepto</label>
+                        <input type="text" class="form-control" id="otro_concepto" name="otro_concepto">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="valor_costo" class="form-label">Valor</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="valor_costo" name="valor" min="1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+                
+                <div class="costos-actuales mt-4">
+                    <h6>Costos adicionales actuales:</h6>
+                    <div id="costos_actuales_lista">
+                        <!-- Aquí se cargarán los costos adicionales -->
+                        <p class="text-muted">No hay costos adicionales registrados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -54,6 +54,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Obtener la hora actual del servidor
     $hora_salida = date('Y-m-d H:i:s');
 
+    // Calcular el total de costos adicionales para este ticket
+    $query_costos = "SELECT SUM(valor) as total_costos FROM costos_adicionales WHERE id_registro = ?";
+    $stmt_costos = $conexion->prepare($query_costos);
+    $stmt_costos->bind_param("i", $id_registro);
+    $stmt_costos->execute();
+    $result_costos = $stmt_costos->get_result();
+    $row_costos = $result_costos->fetch_assoc();
+    $total_costos_adicionales = ($row_costos['total_costos']) ? floatval($row_costos['total_costos']) : 0;
+    
+    // Sumar los costos adicionales al total pagado
+    $total_pagado = floatval($total_pagado) + $total_costos_adicionales;
+    
+    // Incluir información de los costos adicionales en la descripción
+    if ($total_costos_adicionales > 0) {
+        // Obtener el detalle de los costos adicionales
+        $query_detalle = "SELECT concepto, valor FROM costos_adicionales WHERE id_registro = ?";
+        $stmt_detalle = $conexion->prepare($query_detalle);
+        $stmt_detalle->bind_param("i", $id_registro);
+        $stmt_detalle->execute();
+        $result_detalle = $stmt_detalle->get_result();
+        
+        $detalles_costos = [];
+        while ($row_detalle = $result_detalle->fetch_assoc()) {
+            $detalles_costos[] = $row_detalle['concepto'] . ': $' . number_format($row_detalle['valor'], 0, ',', '.');
+        }
+        
+        $descripcion_adicional = " + Costos adicionales: " . implode(", ", $detalles_costos);
+        $descripcion .= $descripcion_adicional;
+        
+        $stmt_detalle->close();
+    }
+    
     // Actualizar el registro en la base de datos
     $query = "UPDATE registros_parqueo 
               SET hora_salida = ?, estado = 'cerrado', total_pagado = ?, metodo_pago = ?, descripcion = ?, cerrado_por = ?
@@ -76,6 +108,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Cerrar la conexión
     $stmt->close();
+    if (isset($stmt_costos)) $stmt_costos->close();
     $conexion->close();
 } else {
     echo "Acceso no permitido.";

@@ -398,6 +398,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (intervaloCosto) clearInterval(intervaloCosto);
       intervaloCosto = setInterval(actualizarTiempoYCostoModal, 1000);
 
+      // Cargar costos adicionales
+      cargarCostosAdicionalesPago(ticketId);
+
       // Mostrar el modal
       const modal = new bootstrap.Modal(document.getElementById("modalPago"));
       modal.show();
@@ -409,6 +412,64 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+
+// Función para cargar los costos adicionales en el modal de pago
+function cargarCostosAdicionalesPago(idRegistro) {
+  fetch(`../../controladores/obtener_costos_adicionales.php?id_registro=${idRegistro}`)
+    .then(response => response.json())
+    .then(data => {
+      const costosContainer = document.getElementById('costos_adicionales_pago');
+      const listaContainer = document.getElementById('lista_costos_adicionales');
+      const totalElement = document.getElementById('total_costos_adicionales_pago');
+      const modalCostoElement = document.getElementById('modalCosto');
+      
+      // Si no hay costos adicionales, ocultar la sección
+      if (!data.costos || data.costos.length === 0) {
+        costosContainer.classList.add('d-none');
+        return;
+      }
+      
+      // Mostrar la sección de costos adicionales
+      costosContainer.classList.remove('d-none');
+      
+      // Limpiar contenedor
+      listaContainer.innerHTML = '';
+      
+      // Crear lista de costos
+      const ul = document.createElement('ul');
+      ul.className = 'list-group list-group-flush mb-2';
+      
+      // Añadir cada costo a la lista
+      data.costos.forEach(costo => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.innerHTML = `
+          <span>${costo.concepto}</span>
+          <span>$${parseFloat(costo.valor).toLocaleString('es-CO')}</span>
+        `;
+        ul.appendChild(li);
+      });
+      
+      listaContainer.appendChild(ul);
+      
+      // Actualizar el total de costos adicionales
+      totalElement.textContent = `$${parseFloat(data.total).toLocaleString('es-CO')}`;
+      
+      // Actualizar el costo total (sumando el costo de estacionamiento + adicionales)
+      const costoEstacionamiento = parseInt(document.getElementById('total_pagado').value.replace(/\./g, '')) || 0;
+      const totalFinal = costoEstacionamiento + parseFloat(data.total);
+      
+      // Actualizar el valor mostrado
+      modalCostoElement.innerText = `$${totalFinal.toLocaleString('es-CO')}`;
+      
+      // Actualizar el valor que se enviará al formulario
+      document.getElementById('total_pagado').value = `${totalFinal}`;
+    })
+    .catch(error => {
+      console.error('Error al cargar los costos adicionales:', error);
+      document.getElementById('costos_adicionales_pago').classList.add('d-none');
+    });
+}
 
 //funcion para la busqueda de tickets
 document.addEventListener('DOMContentLoaded', function() {
