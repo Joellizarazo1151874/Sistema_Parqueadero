@@ -53,8 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $stmt->bind_param("issd", $id_vehiculo, $abierto_por, $tipo_registro, $tiempo_tarifa);
         $stmt->execute();
-
-        header("Location: ../vistas/Estructuras/gestion.php?success=1");
+        
+        // Obtener el ID del registro recién insertado
+        $id_registro = $conexion->insert_id;
+        
+        // Redirigir a la página de impresión de ticket con código QR
+        header("Location: imprimir_ticket_ingreso.php?id=" . $id_registro);
         exit();
 
     } catch (Exception $e) {

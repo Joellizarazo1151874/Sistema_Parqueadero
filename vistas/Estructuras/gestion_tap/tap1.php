@@ -458,6 +458,8 @@
         // Verificar si hay mensajes de éxito en la URL
         const urlParams = new URLSearchParams(window.location.search);
         const success = urlParams.get('success');
+        const escaneo = urlParams.get('escaneo');
+        const idTicket = urlParams.get('id');
 
         if (success && success === '1') {
             Swal.fire({
@@ -470,6 +472,50 @@
                 timerProgressBar: true,
                 toast: true
             });
+        }
+        
+        // Verificar si se ha escaneado un ticket y abrir automáticamente el modal de cierre
+        if (escaneo && escaneo === '1' && idTicket) {
+            // Buscar el botón cerrar-ticket correspondiente al ID escaneado
+            const cerrarBotones = document.querySelectorAll('.cerrar-ticket');
+            let botonEncontrado = null;
+            
+            cerrarBotones.forEach(boton => {
+                if (boton.getAttribute('data-id') === idTicket) {
+                    botonEncontrado = boton;
+                }
+            });
+            
+            if (botonEncontrado) {
+                // Simular clic en el botón para abrir el modal de cierre
+                setTimeout(() => {
+                    botonEncontrado.click();
+                }, 500);
+                
+                // Mostrar mensaje de éxito con el escaneo
+                Swal.fire({
+                    title: '¡Ticket escaneado!',
+                    text: 'El ticket ha sido identificado correctamente',
+                    icon: 'success',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+            } else {
+                // Ticket no encontrado, mostrar mensaje de error
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se encontró el ticket escaneado o ya ha sido cerrado',
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    toast: true
+                });
+            }
         }
 
         console.log('DOM cargado completamente');
