@@ -219,7 +219,7 @@
                             <button class="icon-btn cancelar-ticket" 
                                    data-id="<?php echo $row['id_registro']; ?>"
                                    data-placa="<?php echo $row['placa']; ?>">
-                                <i class="fas fa-file-alt"></i>
+                                <i class="fas fa-ban"></i>
                             </button>
                         </div>
                         <button class="close-btn cerrar-ticket"
@@ -519,6 +519,23 @@
                 // Mostrar el modal
                 const modalCostosAdicionales = new bootstrap.Modal(document.getElementById('modalCostosAdicionales'));
                 modalCostosAdicionales.show();
+            });
+        });
+        
+        // Manejo del modal de cancelación de ticket
+        const botonesCancelarTicket = document.querySelectorAll('.cancelar-ticket');
+        botonesCancelarTicket.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idRegistro = this.getAttribute('data-id');
+                const placa = this.getAttribute('data-placa');
+                
+                // Actualizar la información en el modal
+                document.getElementById('cancelar_id_registro').value = idRegistro;
+                document.getElementById('cancelar_placa').textContent = placa;
+                
+                // Mostrar el modal
+                const modalCancelacion = new bootstrap.Modal(document.getElementById('modalCancelacion'));
+                modalCancelacion.show();
             });
         });
         
