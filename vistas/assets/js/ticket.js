@@ -62,6 +62,26 @@ function actualizarTiempoYCosto() {
     // Redondear hacia abajo en múltiplos de 100
     costo = Math.floor(costo / 100) * 100;
 
+    // Si este elemento es "DEBE", necesitamos agregar los costos adicionales
+    if (elemento.classList.contains('debt')) {
+      try {
+        // Buscar el ticket que contiene este elemento
+        const ticket = elemento.closest('.ticket');
+        if (ticket) {
+          // Buscar el elemento que muestra los costos adicionales en el mismo ticket
+          const adicionales = ticket.querySelector('.col-6.text-end .text-warning + b');
+          if (adicionales) {
+            // Extraer el valor numérico (quitando "$" y separadores de miles)
+            const valorAdicional = parseInt(adicionales.textContent.replace(/[$.,]/g, '')) || 0;
+            // Sumar al costo total
+            costo += valorAdicional;
+          }
+        }
+      } catch (error) {
+        console.error('Error al calcular costos adicionales:', error);
+      }
+    }
+
     elemento.innerText = `$${costo.toLocaleString('en-US')}`;
   });
 }
@@ -284,8 +304,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let cantidadMinutos = minutosTranscurridos % 60;
         let detalleCobro = '';
         
-        console.log('Calculando costo para tipo de registro:', tipoRegistro, 'con tiempo configurado:', tiempoHoras, 'horas');
-        
         // Ajustar el detalle según el tipo de registro y el tiempo configurado
         if (tipoRegistro === 'hora') {
           // Calcular costo por horas completas
@@ -304,7 +322,6 @@ document.addEventListener("DOMContentLoaded", function () {
           costoItem = Math.floor(costoItem / 100) * 100;
           
           detalleCobro = `${cantidadHoras} x Hora ($${tarifaHora.toLocaleString()}) + ${Math.max(0, cantidadMinutos - toleranciaMinutos)} min ($${Math.floor(costoMinutos)})`;
-          console.log('Costo calculado por hora:', costoItem, '(Horas:', cantidadHoras * tarifaHora, '+ Minutos:', costoMinutos, ')');
         } else {
           // Para cualquier tipo de tarifa que no sea hora, usar el tiempo configurado
           // Convertir minutos transcurridos a horas
@@ -360,10 +377,6 @@ document.addEventListener("DOMContentLoaded", function () {
           
           // Redondear a múltiplos de 100
           costoItem = Math.floor(costoItem / 100) * 100;
-          
-          console.log('Costo calculado para', tipoRegistro, ':', costoItem, 
-                      '(', horasTranscurridas.toFixed(2), 'horas transcurridas,',
-                      tiempoHoras, 'horas configuradas, tarifa: $', tarifaValor, ')');
         }
 
         // Usar costoItem calculado para el total a pagar
@@ -391,15 +404,32 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("id_ticket").value = `${ticketId.toLocaleString()}`;
         // Mostrar el detalle en "Items"
         document.getElementById("modalItems").value = `${detalleCobro} = $${costoItem}`;
+        
+        // Después de establecer los valores base, obtener y sumar los costos adicionales
+        fetch(`../../controladores/obtener_costos_adicionales.php?id_registro=${ticketId}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.costos && data.costos.length > 0) {
+              const totalAdicionales = parseFloat(data.total);
+              const totalFinal = costoItem + totalAdicionales;
+              
+              // Actualizar el valor mostrado con el total (estacionamiento + adicionales)
+              document.getElementById("modalCosto").innerText = `$${totalFinal.toLocaleString('en-US')}`;
+              document.getElementById("total_pagado").value = `${totalFinal}`;
+              
+              // Actualizar el detalle en "Items" para incluir los adicionales
+              document.getElementById("modalItems").value = `${detalleCobro} = $${costoItem.toLocaleString('en-US')} + Adicionales $${totalAdicionales.toLocaleString('en-US')}`;
+            }
+          })
+          .catch(error => {
+            console.error('Error al actualizar costos adicionales:', error);
+          });
       }
 
-      // Llamar la función inmediatamente y actualizar cada segundo
+      // Llamar la función inmediatamente y actualizar cada 5 segundos en lugar de cada segundo
       actualizarTiempoYCostoModal();
       if (intervaloCosto) clearInterval(intervaloCosto);
-      intervaloCosto = setInterval(actualizarTiempoYCostoModal, 1000);
-
-      // Cargar costos adicionales
-      cargarCostosAdicionalesPago(ticketId);
+      intervaloCosto = setInterval(actualizarTiempoYCostoModal, 5000);
 
       // Mostrar el modal
       const modal = new bootstrap.Modal(document.getElementById("modalPago"));
@@ -421,7 +451,6 @@ function cargarCostosAdicionalesPago(idRegistro) {
       const costosContainer = document.getElementById('costos_adicionales_pago');
       const listaContainer = document.getElementById('lista_costos_adicionales');
       const totalElement = document.getElementById('total_costos_adicionales_pago');
-      const modalCostoElement = document.getElementById('modalCosto');
       
       // Si no hay costos adicionales, ocultar la sección
       if (!data.costos || data.costos.length === 0) {
@@ -455,15 +484,7 @@ function cargarCostosAdicionalesPago(idRegistro) {
       // Actualizar el total de costos adicionales
       totalElement.textContent = `$${parseFloat(data.total).toLocaleString('es-CO')}`;
       
-      // Actualizar el costo total (sumando el costo de estacionamiento + adicionales)
-      const costoEstacionamiento = parseInt(document.getElementById('total_pagado').value.replace(/\./g, '')) || 0;
-      const totalFinal = costoEstacionamiento + parseFloat(data.total);
-      
-      // Actualizar el valor mostrado
-      modalCostoElement.innerText = `$${totalFinal.toLocaleString('es-CO')}`;
-      
-      // Actualizar el valor que se enviará al formulario
-      document.getElementById('total_pagado').value = `${totalFinal}`;
+      // Ya no sumamos los costos adicionales aquí porque ya se suman en actualizarTiempoYCostoModal
     })
     .catch(error => {
       console.error('Error al cargar los costos adicionales:', error);
@@ -472,127 +493,4 @@ function cargarCostosAdicionalesPago(idRegistro) {
 }
 
 //funcion para la busqueda de tickets
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('searchInput');
-  const searchForm = searchInput.closest('form');
-  const clearSearchBtn = document.getElementById('clearSearchBtn');
-  const tipoVehiculoSelect = document.getElementById('tipoVehiculo');
-  const ordenSelector = document.getElementById('ordenSelector');
-  const hiddenTipoVehiculo = document.getElementById('hiddenTipoVehiculo');
-  const hiddenOrden = document.getElementById('hiddenOrden');
-  let timeoutId;
-
-  // Evento para búsqueda automática al escribir
-  searchInput.addEventListener('input', function() {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(function() {
-          searchForm.submit();
-      }, 800); // Esperar 800ms después de que el usuario deje de escribir
-  });
-
-  // Evento para el select de tipo de vehículo
-  if (tipoVehiculoSelect) {
-      tipoVehiculoSelect.addEventListener('change', function() {
-          hiddenTipoVehiculo.value = tipoVehiculoSelect.value;
-          searchForm.submit();
-      });
-  }
-
-  // Evento para el selector de orden
-  if (ordenSelector) {
-      ordenSelector.addEventListener('change', function() {
-          hiddenOrden.value = ordenSelector.value;
-          searchForm.submit();
-      });
-  }
-
-  // Evento para el botón de limpiar búsqueda
-  if (clearSearchBtn) {
-      clearSearchBtn.addEventListener('click', function() {
-          searchInput.value = ''; // Limpiar el campo de búsqueda
-          hiddenTipoVehiculo.value = ''; // Limpiar el tipo de vehículo
-          hiddenOrden.value = 'desc'; // Restablecer orden a predeterminado
-          
-          // Actualizar los selectores visibles
-          if (tipoVehiculoSelect) tipoVehiculoSelect.value = '';
-          if (ordenSelector) ordenSelector.value = 'desc';
-          
-          searchForm.submit(); // Enviar el formulario para mostrar todos los tickets
-      });
-  }
-});
-
-//navegador
-document.addEventListener("DOMContentLoaded", function () {
-  const tabs = document.querySelectorAll(".nav-link");
-  const contents = document.querySelectorAll(".tab-content");
-
-  // Comprobar si hay un parámetro tab en la URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const tabParam = urlParams.get('tab');
-  
-  if (tabParam) {
-    // Si hay un parámetro tab, activar esa pestaña
-    tabs.forEach(t => t.classList.remove("active"));
-    contents.forEach(content => content.classList.add("d-none"));
-    
-    // Activar la pestaña correspondiente
-    const selectedTab = document.querySelector(`.nav-link[data-tab="${tabParam}"]`);
-    if (selectedTab) {
-      selectedTab.classList.add("active");
-      document.getElementById(tabParam).classList.remove("d-none");
-    }
-  }
-
-  tabs.forEach(tab => {
-    tab.addEventListener("click", function (event) {
-      if (!this.getAttribute('href') || this.getAttribute('href') === '#') {
-        event.preventDefault();
-
-        // Obtener el ID de la pestaña
-        const tabId = this.getAttribute("data-tab");
-        
-        // Actualizar la URL sin recargar la página
-        const url = new URL(window.location.href);
-        url.searchParams.set('tab', tabId);
-        window.history.pushState({}, '', url);
-
-        // Quitar la clase "active" de todas las pestañas
-        tabs.forEach(t => t.classList.remove("active"));
-        // Ocultar todos los contenidos
-        contents.forEach(content => content.classList.add("d-none"));
-
-        // Agregar "active" a la pestaña seleccionada
-        this.classList.add("active");
-        // Mostrar el contenido correspondiente
-        document.getElementById(tabId).classList.remove("d-none");
-      }
-    });
-  });
-});
-
-font_change("Public-Sans");
-preset_change("preset-1");
-layout_rtl_change('false');
-layout_change('light');
-
-// Función para cancelar tickets
-document.addEventListener('DOMContentLoaded', function() {
-  // Seleccionar todos los botones de cancelar
-  const botonesCancelar = document.querySelectorAll('.cancelar-ticket');
-  
-  botonesCancelar.forEach(boton => {
-    boton.addEventListener('click', function() {
-      const ticketId = this.getAttribute('data-id');
-      const placa = this.getAttribute('data-placa');
-      
-      // Llenar los campos en el modal de cancelación
-      document.getElementById('cancelar_id_registro').value = ticketId;
-      document.getElementById('cancelar_placa').textContent = placa;
-      
-      // Mostrar el modal de cancelación
-      const modal = new bootstrap.Modal(document.getElementById('modalCancelacion'));
-      modal.show();
-    });
-  });
-});
+// ... existing code ...

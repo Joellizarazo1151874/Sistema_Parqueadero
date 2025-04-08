@@ -54,7 +54,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Obtener la hora actual del servidor
     $hora_salida = date('Y-m-d H:i:s');
 
-    // Calcular el total de costos adicionales para este ticket
+    // Los costos adicionales ya están incluidos en el total_pagado enviado desde el frontend
+    // Por lo tanto, ya no es necesario volver a calcularlos y sumarlos
+    
+    // Sin embargo, seguimos obteniendo la información para incluirla en la descripción
     $query_costos = "SELECT SUM(valor) as total_costos FROM costos_adicionales WHERE id_registro = ?";
     $stmt_costos = $conexion->prepare($query_costos);
     $stmt_costos->bind_param("i", $id_registro);
@@ -63,8 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $row_costos = $result_costos->fetch_assoc();
     $total_costos_adicionales = ($row_costos['total_costos']) ? floatval($row_costos['total_costos']) : 0;
     
-    // Sumar los costos adicionales al total pagado
-    $total_pagado = floatval($total_pagado) + $total_costos_adicionales;
+    // Ya NO sumamos los costos adicionales al total_pagado porque ya están incluidos
+    // $total_pagado = floatval($total_pagado) + $total_costos_adicionales;
     
     // Incluir información de los costos adicionales en la descripción
     if ($total_costos_adicionales > 0) {

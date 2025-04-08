@@ -54,7 +54,7 @@
             while ($row = $resultado->fetch_assoc()) {
                 // Calcular el tiempo transcurrido
                 $hora_ingreso = new DateTime($row['hora_ingreso']);
-                $fecha_formateada = $hora_ingreso->format('d/n, h:i a'); // Formato: "19/3, 04:53 p. m."
+                $fecha_formateada = $hora_ingreso->format('d/n, h:ia'); // Formato: "19/3, 04:53p.m."
                 $timestamp_ingreso = strtotime($row['hora_ingreso']); // Convertir a timestamp UNIX
                 $timestamp_actual = time(); // Obtiene el tiempo actual
                 
@@ -158,7 +158,12 @@
                                     data-tiempo-horas="<?php echo $tiempo_horas; ?>">
                                     Calculando...
                                 </b>
-                                
+                            </div>
+                            <div class="col-6 text-end">
+                                <small>TIEMPO</small>
+                                <br>
+                                <b class="tiempo-transcurrido" data-ingreso="<?php echo $timestamp_ingreso; ?>">Calculando...</b>
+                                <br>
                                 <?php
                                 // Consultar costos adicionales
                                 $id_registro = $row['id_registro'];
@@ -174,16 +179,11 @@
                                 }
                                 
                                 if ($total_costos > 0) {
-                                    echo '<br><small class="text-warning">COSTOS ADICIONALES</small><br>';
+                                    echo '<small class="text-warning">ADICIONALES</small><br>';
                                     echo '<b class="text-warning">$' . number_format($total_costos, 0, ',', '.') . '</b>';
+                                    echo '<br>';
                                 }
                                 ?>
-                            </div>
-                            <div class="col-6 text-end">
-                                <small>TIEMPO</small>
-                                <br>
-                                <b class="tiempo-transcurrido" data-ingreso="<?php echo $timestamp_ingreso; ?>">Calculando...</b>
-                                <br>
                                 <small class="debt">DEBE</small>
                                 <br>
                                 <b class="debt importe-actual"
