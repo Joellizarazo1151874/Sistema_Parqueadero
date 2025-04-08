@@ -30,7 +30,6 @@
                         <div class="form-check ms-2">
                             <input class="form-check-input" type="checkbox" name="no_reportados" value="1" id="checkNoReportados" <?php echo isset($_GET['no_reportados']) && $_GET['no_reportados'] == '1' ? 'checked' : ''; ?>>
                             <label class="form-check-label" for="checkNoReportados">
-                                Solo tickets no reportados
                             </label>
                         </div>
                         <button type="submit" class="btn btn-outline-secondary">

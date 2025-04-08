@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 08-04-2025 a las 00:48:42
+-- Tiempo de generación: 08-04-2025 a las 16:42:57
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -154,7 +154,7 @@ INSERT INTO `registros_parqueo` (`id_registro`, `id_vehiculo`, `hora_ingreso`, `
 (100, 19, '2025-03-26 13:07:27', '2025-04-03 08:53:58', 'cerrado', 375000, '2', '#YEV52G', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44fc69dc6b'),
 (101, 26, '2025-03-26 17:26:52', '2025-04-03 08:53:56', 'cerrado', 366300, '1', '#HDN121', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44fc69dc6b'),
 (102, 34, '2025-04-02 13:14:18', '2025-04-03 08:53:54', 'cerrado', 38700, '1', '#YEV52N', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44fc69dc6b'),
-(103, 35, '2025-04-02 13:15:22', '2025-04-02 13:16:40', 'cerrado', 0, '2', '#YEV52R', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
+(103, 35, '2025-04-02 13:15:22', '2025-04-02 13:16:40', 'cerrado', 0, '2', '#YEV52R', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f52d02b42f9'),
 (104, 35, '2025-04-02 13:16:49', '2025-04-03 08:53:51', 'cerrado', 38700, '2', '#YEV52R', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44fc69dc6b'),
 (105, 36, '2025-04-02 15:38:15', '2025-04-03 08:53:50', 'cerrado', 33900, '2', '#SQL621', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44fc69dc6b'),
 (106, 37, '2025-04-02 17:45:18', '2025-04-03 08:53:46', 'cerrado', 29700, '2', '#SQL741', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44fc69dc6b'),
@@ -176,8 +176,8 @@ INSERT INTO `registros_parqueo` (`id_registro`, `id_vehiculo`, `hora_ingreso`, `
 (122, 21, '2025-04-03 13:01:36', '2025-04-03 13:29:20', 'cerrado', 90000, '1', '#SQL-623', 'Admin Principal', 'Admin Principal', '4_horas', 1, 1, 'REP-67f44fc69dc6b'),
 (123, 38, '2025-04-03 13:01:56', '2025-04-03 13:28:30', 'cerrado', 10800, '1', '#HDN123', 'Admin Principal', 'Admin Principal', '8_horas', 1, 1, 'REP-67f44fc69dc6b'),
 (124, 19, '2025-04-03 13:03:32', '2025-04-03 13:28:28', 'cerrado', 1600, '1', '#SQL-623', 'Admin Principal', 'Admin Principal', 'dia', 1, 1, 'REP-67f44fc69dc6b'),
-(125, 41, '2025-04-04 13:23:18', '2025-04-04 14:36:06', 'cerrado', 0, '1', '#XKG-720', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
-(126, 42, '2025-04-04 15:57:08', '2025-04-04 17:01:35', 'cerrado', 5300, '1', '#DPY-993', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
+(125, 41, '2025-04-04 13:23:18', '2025-04-04 14:36:06', 'cerrado', 0, '1', '#XKG-720', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f45b1886032'),
+(126, 42, '2025-04-04 15:57:08', '2025-04-04 17:01:35', 'cerrado', 5300, '1', '#DPY-993', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f45b1886032'),
 (127, 26, '2025-04-07 11:20:16', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
 (128, 18, '2025-04-07 11:25:08', '2025-04-07 16:21:39', 'cerrado', 24600, '1', '#SQL625', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44cdeb0f49'),
 (129, 19, '2025-04-07 11:25:13', '2025-04-07 15:59:13', 'cerrado', 9100, '1', '#YEV52G', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44cdeb0f49'),
@@ -187,7 +187,7 @@ INSERT INTO `registros_parqueo` (`id_registro`, `id_vehiculo`, `hora_ingreso`, `
 (133, 38, '2025-04-07 16:47:10', '2025-04-07 16:47:15', 'cerrado', 0, '3', '#HDN123', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44cdeb0f49'),
 (134, 18, '2025-04-07 17:13:25', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
 (135, 19, '2025-04-07 17:13:28', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
-(136, 38, '2025-04-07 17:13:32', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL);
+(136, 38, '2025-04-07 17:13:32', '2025-04-08 09:09:35', 'cerrado', 79600, '1', '#HDN123', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f52e37a9c29');
 
 -- --------------------------------------------------------
 
@@ -213,7 +213,10 @@ CREATE TABLE `reportes_caja` (
 
 INSERT INTO `reportes_caja` (`id`, `id_reporte`, `fecha_cierre`, `total_recaudado`, `id_operador`, `estado`, `detalles`, `ruta_pdf`, `fecha_creacion`) VALUES
 (10, 'REP-67f44cdeb0f49', '2025-04-07 17:08:00', 767300.00, 1, 'completado', '{\"Efectivo\":\"765400\",\"Tarjeta\":\"1900\",\"Transferencia\":\"0\"}', 'reportes/reporte_caja_2025-04-07_1708.html', '2025-04-07 22:08:30'),
-(11, 'REP-67f44d7e2a66f', '2025-04-07 17:11:00', 1900.00, 1, 'completado', '{\"Transferencia\":\"1900\"}', 'reportes/reporte_caja_2025-04-07_1711.html', '2025-04-07 22:11:10');
+(11, 'REP-67f44d7e2a66f', '2025-04-07 17:11:00', 1900.00, 1, 'completado', '{\"Transferencia\":\"1900\"}', 'reportes/reporte_caja_2025-04-07_1711.html', '2025-04-07 22:11:10'),
+(13, 'REP-67f45b1886032', '2025-04-04 18:09:00', 5300.00, 1, 'completado', '{\"Efectivo\":\"5300\"}', 'reportes/reporte_caja_2025-04-04_1809.html', '2025-04-07 23:09:12'),
+(14, 'REP-67f52d02b42f9', '2025-04-02 21:04:00', 0.00, 1, 'completado', '{\"Tarjeta\":\"0\"}', 'reportes/reporte_caja_2025-04-02_2104.html', '2025-04-08 14:04:50'),
+(15, 'REP-67f52e37a9c29', '2025-04-08 09:09:00', 79600.00, 1, 'completado', '{\"Efectivo\":\"79600\"}', 'reportes/reporte_caja_2025-04-08_0909.html', '2025-04-08 14:09:59');
 
 -- --------------------------------------------------------
 
@@ -462,7 +465,7 @@ ALTER TABLE `registros_parqueo`
 -- AUTO_INCREMENT de la tabla `reportes_caja`
 --
 ALTER TABLE `reportes_caja`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `suscripciones`
