@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 08-04-2025 a las 20:29:09
+-- Tiempo de generación: 08-04-2025 a las 21:47:31
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -56,7 +56,7 @@ CREATE TABLE `incidentes` (
   `id_incidente` int(11) NOT NULL,
   `id_cliente` int(11) DEFAULT NULL,
   `id_registro` int(11) DEFAULT NULL,
-  `tipo` enum('robo','daño','mal uso de espacios','PQR') NOT NULL,
+  `tipo` enum('robo','daño','mal uso de espacios','perdida','PQR') NOT NULL,
   `descripcion` text NOT NULL,
   `estado` enum('pendiente','resuelto') NOT NULL DEFAULT 'pendiente',
   `evidencia` text DEFAULT NULL,
@@ -68,12 +68,13 @@ CREATE TABLE `incidentes` (
 --
 
 INSERT INTO `incidentes` (`id_incidente`, `id_cliente`, `id_registro`, `tipo`, `descripcion`, `estado`, `evidencia`, `fecha_registro`) VALUES
-(1, 1, 127, 'daño', 'Rayón en la puerta del conductor del vehículo', 'pendiente', '[{\"nombre\":\"ejemplo_evidencia.jpg\",\"tipo\":\"image\\/jpeg\",\"url\":\"uploads\\/evidencias\\/ejemplo_evidencia.jpg\"}]', '2025-04-08 17:22:39'),
+(1, 1, 127, 'daño', 'Rayón en la puerta del conductor del vehículo', 'resuelto', '[{\"nombre\":\"ejemplo_evidencia.jpg\",\"tipo\":\"image\\/jpeg\",\"url\":\"uploads\\/evidencias\\/ejemplo_evidencia.jpg\"}]', '2025-04-08 17:22:39'),
 (2, 3, 134, 'mal uso de espacios', 'Vehículo estacionado ocupando dos espacios', 'pendiente', NULL, '2025-04-08 17:22:39'),
 (3, 2, 135, 'PQR', 'Cliente solicita mejorar la iluminación en el sector B del parqueadero', 'pendiente', NULL, '2025-04-08 17:22:39'),
-(4, 8, 140, 'daño', 'rayon en el capo, al entrar no tenia ese rayon, el cliente solicita revision de camaras para verificar quien fue el responsable', 'pendiente', '[{\"nombre\":\"67f55cb0bc60d_como-reparar-arranazos-en-el-coche.jpg\",\"tipo\":\"image\\/jpeg\",\"url\":\"uploads\\/evidencias\\/67f55cb0bc60d_como-reparar-arranazos-en-el-coche.jpg\"}]', '2025-04-08 17:28:16'),
+(4, 8, 140, 'daño', 'rayon en el capo, al entrar no tenia ese rayon, el cliente solicita revision de camaras para verificar quien fue el responsable', 'resuelto', '[{\"nombre\":\"67f55cb0bc60d_como-reparar-arranazos-en-el-coche.jpg\",\"tipo\":\"image\\/jpeg\",\"url\":\"uploads\\/evidencias\\/67f55cb0bc60d_como-reparar-arranazos-en-el-coche.jpg\"}]', '2025-04-08 17:28:16'),
 (5, NULL, NULL, 'robo', 'se robaron un bombillo de un pasillo', 'pendiente', NULL, '2025-04-08 17:38:55'),
-(6, NULL, NULL, 'daño', 'solo un rayon', 'pendiente', NULL, '2025-04-08 17:56:58');
+(6, NULL, NULL, 'daño', 'solo un rayon', 'resuelto', NULL, '2025-04-08 17:56:58'),
+(27, 1, NULL, 'perdida', 'se me perdio un billete de 100 mil', 'pendiente', '[{\"nombre\":\"billete_de_100_mil_falso.jpg\",\"tipo\":\"image\\/jpeg\",\"tamano\":97754,\"url\":\"uploads\\/evidencias\\/incidentes\\/INC_27\\/evidencia_67f57cf4021d2.jpg\"}]', '2025-04-08 19:45:56');
 
 -- --------------------------------------------------------
 
@@ -463,7 +464,7 @@ ALTER TABLE `clientes`
 -- AUTO_INCREMENT de la tabla `incidentes`
 --
 ALTER TABLE `incidentes`
-  MODIFY `id_incidente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_incidente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT de la tabla `metodos_pago`
