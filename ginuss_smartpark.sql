@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 08-04-2025 a las 16:42:57
+-- Tiempo de generación: 08-04-2025 a las 20:29:09
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -58,9 +58,22 @@ CREATE TABLE `incidentes` (
   `id_registro` int(11) DEFAULT NULL,
   `tipo` enum('robo','daño','mal uso de espacios','PQR') NOT NULL,
   `descripcion` text NOT NULL,
+  `estado` enum('pendiente','resuelto') NOT NULL DEFAULT 'pendiente',
   `evidencia` text DEFAULT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `incidentes`
+--
+
+INSERT INTO `incidentes` (`id_incidente`, `id_cliente`, `id_registro`, `tipo`, `descripcion`, `estado`, `evidencia`, `fecha_registro`) VALUES
+(1, 1, 127, 'daño', 'Rayón en la puerta del conductor del vehículo', 'pendiente', '[{\"nombre\":\"ejemplo_evidencia.jpg\",\"tipo\":\"image\\/jpeg\",\"url\":\"uploads\\/evidencias\\/ejemplo_evidencia.jpg\"}]', '2025-04-08 17:22:39'),
+(2, 3, 134, 'mal uso de espacios', 'Vehículo estacionado ocupando dos espacios', 'pendiente', NULL, '2025-04-08 17:22:39'),
+(3, 2, 135, 'PQR', 'Cliente solicita mejorar la iluminación en el sector B del parqueadero', 'pendiente', NULL, '2025-04-08 17:22:39'),
+(4, 8, 140, 'daño', 'rayon en el capo, al entrar no tenia ese rayon, el cliente solicita revision de camaras para verificar quien fue el responsable', 'pendiente', '[{\"nombre\":\"67f55cb0bc60d_como-reparar-arranazos-en-el-coche.jpg\",\"tipo\":\"image\\/jpeg\",\"url\":\"uploads\\/evidencias\\/67f55cb0bc60d_como-reparar-arranazos-en-el-coche.jpg\"}]', '2025-04-08 17:28:16'),
+(5, NULL, NULL, 'robo', 'se robaron un bombillo de un pasillo', 'pendiente', NULL, '2025-04-08 17:38:55'),
+(6, NULL, NULL, 'daño', 'solo un rayon', 'pendiente', NULL, '2025-04-08 17:56:58');
 
 -- --------------------------------------------------------
 
@@ -178,16 +191,20 @@ INSERT INTO `registros_parqueo` (`id_registro`, `id_vehiculo`, `hora_ingreso`, `
 (124, 19, '2025-04-03 13:03:32', '2025-04-03 13:28:28', 'cerrado', 1600, '1', '#SQL-623', 'Admin Principal', 'Admin Principal', 'dia', 1, 1, 'REP-67f44fc69dc6b'),
 (125, 41, '2025-04-04 13:23:18', '2025-04-04 14:36:06', 'cerrado', 0, '1', '#XKG-720', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f45b1886032'),
 (126, 42, '2025-04-04 15:57:08', '2025-04-04 17:01:35', 'cerrado', 5300, '1', '#DPY-993', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f45b1886032'),
-(127, 26, '2025-04-07 11:20:16', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
+(127, 26, '2025-04-07 11:20:16', NULL, 'activo', 0, 'Transferencia', '', '', 'Admin Principal', 'hora', 1, 0, NULL),
 (128, 18, '2025-04-07 11:25:08', '2025-04-07 16:21:39', 'cerrado', 24600, '1', '#SQL625', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44cdeb0f49'),
 (129, 19, '2025-04-07 11:25:13', '2025-04-07 15:59:13', 'cerrado', 9100, '1', '#YEV52G', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44cdeb0f49'),
 (130, 18, '2025-04-07 16:21:44', '2025-04-07 16:33:34', 'cerrado', 900, '1', '#SQL625', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44cdeb0f49'),
 (131, 21, '2025-04-07 16:21:49', '2025-04-07 16:45:08', 'cerrado', 1900, '2', '#SQL-623', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44cdeb0f49'),
 (132, 18, '2025-04-07 16:47:06', '2025-04-07 17:11:04', 'cerrado', 1900, '3', '#SQL625', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44d7e2a66f'),
 (133, 38, '2025-04-07 16:47:10', '2025-04-07 16:47:15', 'cerrado', 0, '3', '#HDN123', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f44cdeb0f49'),
-(134, 18, '2025-04-07 17:13:25', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
-(135, 19, '2025-04-07 17:13:28', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
-(136, 38, '2025-04-07 17:13:32', '2025-04-08 09:09:35', 'cerrado', 79600, '1', '#HDN123', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f52e37a9c29');
+(134, 18, '2025-04-07 17:13:25', '2025-04-08 10:17:24', 'cerrado', 85200, '2', '#SQL625', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f565a8640af'),
+(135, 19, '2025-04-07 17:13:28', '2025-04-08 10:17:15', 'cerrado', 34100, '1', '#YEV52G', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f565a8640af'),
+(136, 38, '2025-04-07 17:13:32', '2025-04-08 09:09:35', 'cerrado', 79600, '1', '#HDN123', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f52e37a9c29'),
+(137, 18, '2025-04-08 10:18:28', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
+(138, 21, '2025-04-08 10:18:32', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
+(139, 19, '2025-04-08 10:18:35', '2025-04-08 12:07:56', 'cerrado', 3600, '1', '#FER432', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f565a8640af'),
+(140, 30, '2025-04-08 11:38:48', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -216,7 +233,8 @@ INSERT INTO `reportes_caja` (`id`, `id_reporte`, `fecha_cierre`, `total_recaudad
 (11, 'REP-67f44d7e2a66f', '2025-04-07 17:11:00', 1900.00, 1, 'completado', '{\"Transferencia\":\"1900\"}', 'reportes/reporte_caja_2025-04-07_1711.html', '2025-04-07 22:11:10'),
 (13, 'REP-67f45b1886032', '2025-04-04 18:09:00', 5300.00, 1, 'completado', '{\"Efectivo\":\"5300\"}', 'reportes/reporte_caja_2025-04-04_1809.html', '2025-04-07 23:09:12'),
 (14, 'REP-67f52d02b42f9', '2025-04-02 21:04:00', 0.00, 1, 'completado', '{\"Tarjeta\":\"0\"}', 'reportes/reporte_caja_2025-04-02_2104.html', '2025-04-08 14:04:50'),
-(15, 'REP-67f52e37a9c29', '2025-04-08 09:09:00', 79600.00, 1, 'completado', '{\"Efectivo\":\"79600\"}', 'reportes/reporte_caja_2025-04-08_0909.html', '2025-04-08 14:09:59');
+(15, 'REP-67f52e37a9c29', '2025-04-08 09:09:00', 79600.00, 1, 'completado', '{\"Efectivo\":\"79600\"}', 'reportes/reporte_caja_2025-04-08_0909.html', '2025-04-08 14:09:59'),
+(16, 'REP-67f565a8640af', '2025-04-08 13:05:00', 122900.00, 1, 'completado', '{\"Efectivo\":\"37700\",\"Tarjeta\":\"85200\"}', 'reportes/reporte_caja_2025-04-08_1305.html', '2025-04-08 18:06:32');
 
 -- --------------------------------------------------------
 
@@ -367,7 +385,11 @@ ALTER TABLE `clientes`
 ALTER TABLE `incidentes`
   ADD PRIMARY KEY (`id_incidente`),
   ADD KEY `id_cliente` (`id_cliente`),
-  ADD KEY `id_registro` (`id_registro`);
+  ADD KEY `id_registro` (`id_registro`),
+  ADD KEY `idx_cliente` (`id_cliente`),
+  ADD KEY `idx_registro` (`id_registro`),
+  ADD KEY `idx_fecha` (`fecha_registro`),
+  ADD KEY `idx_estado` (`estado`);
 
 --
 -- Indices de la tabla `metodos_pago`
@@ -441,7 +463,7 @@ ALTER TABLE `clientes`
 -- AUTO_INCREMENT de la tabla `incidentes`
 --
 ALTER TABLE `incidentes`
-  MODIFY `id_incidente` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_incidente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `metodos_pago`
@@ -459,13 +481,13 @@ ALTER TABLE `pagos`
 -- AUTO_INCREMENT de la tabla `registros_parqueo`
 --
 ALTER TABLE `registros_parqueo`
-  MODIFY `id_registro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=137;
+  MODIFY `id_registro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=141;
 
 --
 -- AUTO_INCREMENT de la tabla `reportes_caja`
 --
 ALTER TABLE `reportes_caja`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `suscripciones`
@@ -499,6 +521,8 @@ ALTER TABLE `vehiculos`
 -- Filtros para la tabla `incidentes`
 --
 ALTER TABLE `incidentes`
+  ADD CONSTRAINT `fk_incidentes_cliente` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_incidentes_registro` FOREIGN KEY (`id_registro`) REFERENCES `registros_parqueo` (`id_registro`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `incidentes_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`),
   ADD CONSTRAINT `incidentes_ibfk_2` FOREIGN KEY (`id_registro`) REFERENCES `registros_parqueo` (`id_registro`);
 

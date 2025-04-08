@@ -34,6 +34,13 @@
             </a>
           </li>
 
+          <li class="pc-item">
+            <a href="incidentes.php" class="pc-link">
+              <span class="pc-micon"><i class="ti ti-alert-triangle"></i></span>
+              <span class="pc-mtext">Incidentes</span>
+            </a>
+          </li>
+
           <?php if(isset($_SESSION['datos_login']) && $_SESSION['datos_login']['rol'] == 'administrador'): ?>
           <li class="pc-item">
             <a href="configuracion.php" class="pc-link">
