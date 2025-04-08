@@ -219,11 +219,11 @@ include '../../controladores/seguridad.php';
                   <label for="tipo" class="form-label">Tipo de Incidente</label>
                   <select class="form-select" id="tipo" name="tipo" required>
                     <option value="">Seleccione un tipo</option>
-                    <option value="Daño">Daño</option>
-                    <option value="Pérdida">Pérdida</option>
-                    <option value="Robo">Robo</option>
-                    <option value="Accidente">Accidente</option>
-                    <option value="Otro">Otro</option>
+                    <option value="robo">Robo</option>
+                    <option value="daño">Daño a vehículo</option>
+                    <option value="mal uso de espacios">Mal uso de espacios</option>
+                    <option value="perdida">Pérdida</option>
+                    <option value="PQR">Peticiones, Quejas y Reclamos</option>
                   </select>
                 </div>
                 <div class="mb-3">
@@ -266,14 +266,21 @@ include '../../controladores/seguridad.php';
               </div>
             </div>
             <div class="card-body p-0">
-              <ul class="nav nav-tabs" id="incidentesTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="incidentes-pendientes-tab" data-bs-toggle="tab" data-bs-target="#incidentes-pendientes" type="button" role="tab" aria-controls="incidentes-pendientes" aria-selected="true">Pendientes</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="incidentes-resueltos-tab" data-bs-toggle="tab" data-bs-target="#incidentes-resueltos" type="button" role="tab" aria-controls="incidentes-resueltos" aria-selected="false">Resueltos</button>
-                </li>
-              </ul>
+              <!-- Tabs mejorados con mejor espaciado y centrado -->
+              <div class="pt-4 pb-2">
+                <ul class="nav nav-tabs nav-fill justify-content-center" id="incidentesTabs" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active px-4 py-3" id="incidentes-pendientes-tab" data-bs-toggle="tab" data-bs-target="#incidentes-pendientes" type="button" role="tab" aria-controls="incidentes-pendientes" aria-selected="true">
+                      <i class="fas fa-clock me-2"></i>Pendientes
+                    </button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link px-4 py-3" id="incidentes-resueltos-tab" data-bs-toggle="tab" data-bs-target="#incidentes-resueltos" type="button" role="tab" aria-controls="incidentes-resueltos" aria-selected="false">
+                      <i class="fas fa-check-circle me-2"></i>Resueltos
+                    </button>
+                  </li>
+                </ul>
+              </div>
               <div class="tab-content" id="incidentesTabsContent">
                 <div class="tab-pane fade show active" id="incidentes-pendientes" role="tabpanel" aria-labelledby="incidentes-pendientes-tab">
                   <div class="table-responsive">
@@ -291,6 +298,19 @@ include '../../controladores/seguridad.php';
                       </tbody>
                     </table>
                   </div>
+                  <!-- Paginación para incidentes pendientes -->
+                  <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                    <div>
+                      <span id="totalIncidentesPendientes" class="text-muted">0 incidentes</span>
+                    </div>
+                    <div>
+                      <nav aria-label="Paginación de incidentes pendientes">
+                        <ul class="pagination pagination-sm mb-0" id="paginacionPendientes">
+                          <!-- Se generará dinámicamente -->
+                        </ul>
+                      </nav>
+                    </div>
+                  </div>
                 </div>
                 <div class="tab-pane fade" id="incidentes-resueltos" role="tabpanel" aria-labelledby="incidentes-resueltos-tab">
                   <div class="table-responsive">
@@ -307,6 +327,19 @@ include '../../controladores/seguridad.php';
                         <!-- Se cargará dinámicamente -->
                       </tbody>
                     </table>
+                  </div>
+                  <!-- Paginación para incidentes resueltos -->
+                  <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                    <div>
+                      <span id="totalIncidentesResueltos" class="text-muted">0 incidentes</span>
+                    </div>
+                    <div>
+                      <nav aria-label="Paginación de incidentes resueltos">
+                        <ul class="pagination pagination-sm mb-0" id="paginacionResueltos">
+                          <!-- Se generará dinámicamente -->
+                        </ul>
+                      </nav>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -565,20 +598,22 @@ include '../../controladores/seguridad.php';
     }
     
     // Función para cargar incidentes pendientes
-    function cargarIncidentesPendientes() {
-      fetch('../../controladores/incidentes.php?accion=obtener_incidentes_pendientes')
+    function cargarIncidentesPendientes(pagina = 1) {
+      fetch(`../../controladores/incidentes.php?accion=obtener_incidentes_pendientes&pagina=${pagina}`)
         .then(response => response.json())
         .then(data => {
           const listaIncidentesPendientes = document.getElementById('listaIncidentesPendientes');
           
-          if (!Array.isArray(data) || data.length === 0) {
+          if (!data.incidentes || !Array.isArray(data.incidentes) || data.incidentes.length === 0) {
             listaIncidentesPendientes.innerHTML = '<tr><td colspan="4" class="text-center">No hay incidentes pendientes</td></tr>';
+            document.getElementById('totalIncidentesPendientes').textContent = '0 incidentes';
+            document.getElementById('paginacionPendientes').innerHTML = '';
             return;
           }
           
           listaIncidentesPendientes.innerHTML = '';
           
-          data.forEach(incidente => {
+          data.incidentes.forEach(incidente => {
             const fecha = new Date(incidente.fecha_registro);
             const fechaFormateada = fecha.toLocaleDateString() + ' ' + fecha.toLocaleTimeString();
             
@@ -590,13 +625,24 @@ include '../../controladores/seguridad.php';
                 </td>
                 <td>${fechaFormateada}</td>
                 <td>
-                  <button class="btn btn-sm btn-info" onclick="verDetalleIncidente(${incidente.id_incidente})">
+                  <button class="btn btn-sm btn-info me-2" onclick="verDetalleIncidente(${incidente.id_incidente})">
                     <i class="fas fa-eye"></i>
                   </button>
                 </td>
               </tr>
             `;
           });
+          
+          // Actualizar el total de incidentes pendientes
+          document.getElementById('totalIncidentesPendientes').textContent = `${data.paginacion.total} incidentes`;
+          
+          // Generar la paginación
+          generarPaginacion(
+            'paginacionPendientes', 
+            data.paginacion.paginaActual, 
+            data.paginacion.totalPaginas, 
+            (pagina) => cargarIncidentesPendientes(pagina)
+          );
         })
         .catch(error => {
           console.error('Error al cargar incidentes pendientes:', error);
@@ -605,20 +651,22 @@ include '../../controladores/seguridad.php';
     }
     
     // Función para cargar incidentes resueltos
-    function cargarIncidentesResueltos() {
-      fetch('../../controladores/incidentes.php?accion=obtener_incidentes_resueltos')
+    function cargarIncidentesResueltos(pagina = 1) {
+      fetch(`../../controladores/incidentes.php?accion=obtener_incidentes_resueltos&pagina=${pagina}`)
         .then(response => response.json())
         .then(data => {
           const listaIncidentesResueltos = document.getElementById('listaIncidentesResueltos');
           
-          if (!Array.isArray(data) || data.length === 0) {
+          if (!data.incidentes || !Array.isArray(data.incidentes) || data.incidentes.length === 0) {
             listaIncidentesResueltos.innerHTML = '<tr><td colspan="4" class="text-center">No hay incidentes resueltos</td></tr>';
+            document.getElementById('totalIncidentesResueltos').textContent = '0 incidentes';
+            document.getElementById('paginacionResueltos').innerHTML = '';
             return;
           }
           
           listaIncidentesResueltos.innerHTML = '';
           
-          data.forEach(incidente => {
+          data.incidentes.forEach(incidente => {
             const fecha = new Date(incidente.fecha_registro);
             const fechaFormateada = fecha.toLocaleDateString() + ' ' + fecha.toLocaleTimeString();
             
@@ -637,6 +685,17 @@ include '../../controladores/seguridad.php';
               </tr>
             `;
           });
+          
+          // Actualizar el total de incidentes resueltos
+          document.getElementById('totalIncidentesResueltos').textContent = `${data.paginacion.total} incidentes`;
+          
+          // Generar la paginación
+          generarPaginacion(
+            'paginacionResueltos', 
+            data.paginacion.paginaActual, 
+            data.paginacion.totalPaginas, 
+            (pagina) => cargarIncidentesResueltos(pagina)
+          );
         })
         .catch(error => {
           console.error('Error al cargar incidentes resueltos:', error);
@@ -653,6 +712,8 @@ include '../../controladores/seguridad.php';
           return 'bg-warning';
         case 'mal uso de espacios':
           return 'bg-info';
+        case 'perdida':
+          return 'bg-warning text-dark';
         case 'PQR':
           return 'bg-primary';
         default:
@@ -946,6 +1007,68 @@ include '../../controladores/seguridad.php';
           }
         });
       }, 300); // 300ms de espera para asegurar que el modal anterior se cierre
+    }
+    
+    // Función para generar los controles de paginación
+    function generarPaginacion(contenedorId, paginaActual, totalPaginas, callback) {
+      const paginacionContainer = document.getElementById(contenedorId);
+      paginacionContainer.innerHTML = '';
+      
+      if (totalPaginas <= 1) {
+        return;
+      }
+      
+      // Botón "Anterior"
+      const btnAnterior = document.createElement('li');
+      btnAnterior.className = `page-item ${paginaActual === 1 ? 'disabled' : ''}`;
+      btnAnterior.innerHTML = `<a class="page-link" href="#" aria-label="Anterior"><span aria-hidden="true">&laquo;</span></a>`;
+      
+      if (paginaActual > 1) {
+        btnAnterior.addEventListener('click', (e) => {
+          e.preventDefault();
+          callback(paginaActual - 1);
+        });
+      }
+      
+      paginacionContainer.appendChild(btnAnterior);
+      
+      // Determinar qué páginas mostrar
+      let startPage = Math.max(1, paginaActual - 2);
+      let endPage = Math.min(totalPaginas, startPage + 4);
+      
+      if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+      
+      // Botones de páginas
+      for (let i = startPage; i <= endPage; i++) {
+        const btnPagina = document.createElement('li');
+        btnPagina.className = `page-item ${i === paginaActual ? 'active' : ''}`;
+        btnPagina.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        
+        btnPagina.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (i !== paginaActual) {
+            callback(i);
+          }
+        });
+        
+        paginacionContainer.appendChild(btnPagina);
+      }
+      
+      // Botón "Siguiente"
+      const btnSiguiente = document.createElement('li');
+      btnSiguiente.className = `page-item ${paginaActual === totalPaginas ? 'disabled' : ''}`;
+      btnSiguiente.innerHTML = `<a class="page-link" href="#" aria-label="Siguiente"><span aria-hidden="true">&raquo;</span></a>`;
+      
+      if (paginaActual < totalPaginas) {
+        btnSiguiente.addEventListener('click', (e) => {
+          e.preventDefault();
+          callback(paginaActual + 1);
+        });
+      }
+      
+      paginacionContainer.appendChild(btnSiguiente);
     }
     
     // Función para mostrar notificaciones

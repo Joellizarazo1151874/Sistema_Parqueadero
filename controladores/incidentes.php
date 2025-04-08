@@ -92,7 +92,22 @@ function obtenerClientes() {
 function obtenerIncidentesPendientes() {
     global $conexion;
     
-    $query = "SELECT * FROM incidentes WHERE estado = 'pendiente' ORDER BY fecha_registro DESC LIMIT 20";
+    // Obtener el número de página de la solicitud
+    $pagina = isset($_GET['pagina']) ? intval($_GET['pagina']) : 1;
+    $porPagina = 10; // 10 incidentes por página
+    $inicio = ($pagina - 1) * $porPagina;
+    
+    // Obtener el total de incidentes pendientes
+    $queryTotal = "SELECT COUNT(*) as total FROM incidentes WHERE estado = 'pendiente'";
+    $resultTotal = $conexion->query($queryTotal);
+    $total = 0;
+    
+    if ($resultTotal && $fila = $resultTotal->fetch_assoc()) {
+        $total = $fila['total'];
+    }
+    
+    // Obtener los incidentes de la página actual
+    $query = "SELECT * FROM incidentes WHERE estado = 'pendiente' ORDER BY fecha_registro DESC LIMIT $inicio, $porPagina";
     
     $result = $conexion->query($query);
     
@@ -106,14 +121,41 @@ function obtenerIncidentesPendientes() {
         $incidentes[] = $row;
     }
     
-    echo json_encode($incidentes);
+    // Calcular el número total de páginas
+    $totalPaginas = ceil($total / $porPagina);
+    
+    // Devolver los resultados con información de paginación
+    echo json_encode([
+        'incidentes' => $incidentes,
+        'paginacion' => [
+            'total' => $total,
+            'porPagina' => $porPagina,
+            'paginaActual' => $pagina,
+            'totalPaginas' => $totalPaginas
+        ]
+    ]);
 }
 
 // Función para obtener incidentes resueltos
 function obtenerIncidentesResueltos() {
     global $conexion;
     
-    $query = "SELECT * FROM incidentes WHERE estado = 'resuelto' ORDER BY fecha_registro DESC LIMIT 20";
+    // Obtener el número de página de la solicitud
+    $pagina = isset($_GET['pagina']) ? intval($_GET['pagina']) : 1;
+    $porPagina = 10; // 10 incidentes por página
+    $inicio = ($pagina - 1) * $porPagina;
+    
+    // Obtener el total de incidentes resueltos
+    $queryTotal = "SELECT COUNT(*) as total FROM incidentes WHERE estado = 'resuelto'";
+    $resultTotal = $conexion->query($queryTotal);
+    $total = 0;
+    
+    if ($resultTotal && $fila = $resultTotal->fetch_assoc()) {
+        $total = $fila['total'];
+    }
+    
+    // Obtener los incidentes de la página actual
+    $query = "SELECT * FROM incidentes WHERE estado = 'resuelto' ORDER BY fecha_registro DESC LIMIT $inicio, $porPagina";
     
     $result = $conexion->query($query);
     
@@ -127,7 +169,19 @@ function obtenerIncidentesResueltos() {
         $incidentes[] = $row;
     }
     
-    echo json_encode($incidentes);
+    // Calcular el número total de páginas
+    $totalPaginas = ceil($total / $porPagina);
+    
+    // Devolver los resultados con información de paginación
+    echo json_encode([
+        'incidentes' => $incidentes,
+        'paginacion' => [
+            'total' => $total,
+            'porPagina' => $porPagina,
+            'paginaActual' => $pagina,
+            'totalPaginas' => $totalPaginas
+        ]
+    ]);
 }
 
 // Función para obtener detalle de un incidente
@@ -227,7 +281,7 @@ function registrarIncidente() {
     
     // Verificar que se hayan enviado los datos necesarios
     if (!isset($_POST['tipo']) || empty($_POST['tipo']) || !isset($_POST['descripcion']) || empty($_POST['descripcion'])) {
-        echo json_encode(['success' => false, 'message' => 'Datos incompletos']);
+        echo json_encode(['success' => false, 'message' => 'Los campos Tipo de Incidente y Descripción son obligatorios']);
         return;
     }
     
@@ -241,32 +295,14 @@ function registrarIncidente() {
     $conexion->begin_transaction();
     
     try {
-        // Insertar incidente en la base de datos
-        $query = "INSERT INTO incidentes (tipo, descripcion, id_registro, id_cliente, fecha_registro, estado) 
-                  VALUES ('$tipo', '$descripcion', " . 
-                  ($idRegistro ? "'$idRegistro'" : "NULL") . ", " . 
-                  ($idCliente ? "'$idCliente'" : "NULL") . ", 
-                  NOW(), 'pendiente')";
-        
-        if (!$conexion->query($query)) {
-            throw new Exception('Error al registrar incidente: ' . $conexion->error);
-        }
-        
-        $idIncidente = $conexion->insert_id;
-        
         // Procesar evidencias si se han enviado
         $evidencias = [];
         if (isset($_FILES['evidencia']) && !empty($_FILES['evidencia']['name'][0])) {
             // Crear directorio para evidencias si no existe
             $directorioBase = '../uploads/evidencias/incidentes/';
-            $directorioIncidente = $directorioBase . 'INC_' . $idIncidente . '/';
             
             if (!file_exists($directorioBase)) {
                 mkdir($directorioBase, 0777, true);
-            }
-            
-            if (!file_exists($directorioIncidente)) {
-                mkdir($directorioIncidente, 0777, true);
             }
             
             // Procesar cada archivo
@@ -275,30 +311,77 @@ function registrarIncidente() {
                     $nombreOriginal = $nombre;
                     $extension = pathinfo($nombreOriginal, PATHINFO_EXTENSION);
                     $nombreArchivo = 'evidencia_' . uniqid() . '.' . $extension;
-                    $rutaArchivo = $directorioIncidente . $nombreArchivo;
-                    $rutaRelativa = 'uploads/evidencias/incidentes/INC_' . $idIncidente . '/' . $nombreArchivo;
                     
-                    // Mover archivo al directorio
-                    if (move_uploaded_file($_FILES['evidencia']['tmp_name'][$key], $rutaArchivo)) {
-                        // Guardar información del archivo en la base de datos
-                        $tipoArchivo = $_FILES['evidencia']['type'][$key];
-                        $tamanoArchivo = $_FILES['evidencia']['size'][$key];
-                        
-                        $queryEvidencia = "INSERT INTO evidencias_incidentes (id_incidente, nombre, url, tipo, tamano) 
-                                          VALUES ('$idIncidente', '$nombreOriginal', '$rutaRelativa', '$tipoArchivo', '$tamanoArchivo')";
-                        
-                        if (!$conexion->query($queryEvidencia)) {
-                            throw new Exception('Error al registrar evidencia: ' . $conexion->error);
-                        }
-                        
-                        $evidencias[] = [
-                            'nombre' => $nombreOriginal,
-                            'url' => $rutaRelativa,
-                            'tipo' => $tipoArchivo
-                        ];
-                    } else {
-                        throw new Exception('Error al subir archivo: ' . $nombreOriginal);
-                    }
+                    // Crear un directorio temporal para guardar el archivo
+                    // Lo crearemos después de tener el ID del incidente
+                    $tipoArchivo = $_FILES['evidencia']['type'][$key];
+                    $tamanoArchivo = $_FILES['evidencia']['size'][$key];
+                    
+                    // Guardar información del archivo en el array de evidencias
+                    $evidencias[] = [
+                        'nombre' => $nombreOriginal,
+                        'archivo' => $nombreArchivo,
+                        'tipo' => $tipoArchivo,
+                        'tamano' => $tamanoArchivo,
+                        'tmp_name' => $_FILES['evidencia']['tmp_name'][$key]
+                    ];
+                }
+            }
+        }
+        
+        // Convertir el array de evidencias a JSON para almacenarlo en la base de datos
+        $evidenciasJson = !empty($evidencias) ? json_encode($evidencias) : null;
+        $evidenciasJsonEscaped = $evidenciasJson ? "'" . $conexion->real_escape_string($evidenciasJson) . "'" : "NULL";
+        
+        // Insertar incidente en la base de datos con el JSON de evidencias
+        $query = "INSERT INTO incidentes (tipo, descripcion, id_registro, id_cliente, fecha_registro, estado, evidencia) 
+                  VALUES ('$tipo', '$descripcion', " . 
+                  ($idRegistro ? "'$idRegistro'" : "NULL") . ", " . 
+                  ($idCliente ? "'$idCliente'" : "NULL") . ", 
+                  NOW(), 'pendiente', $evidenciasJsonEscaped)";
+        
+        if (!$conexion->query($query)) {
+            throw new Exception('Error al registrar incidente: ' . $conexion->error);
+        }
+        
+        $idIncidente = $conexion->insert_id;
+        
+        // Si hay evidencias, mover los archivos a su ubicación final
+        if (!empty($evidencias)) {
+            $directorioIncidente = $directorioBase . 'INC_' . $idIncidente . '/';
+            
+            if (!file_exists($directorioIncidente)) {
+                mkdir($directorioIncidente, 0777, true);
+            }
+            
+            $evidenciasActualizadas = [];
+            
+            foreach ($evidencias as $evidencia) {
+                $rutaArchivo = $directorioIncidente . $evidencia['archivo'];
+                $rutaRelativa = 'uploads/evidencias/incidentes/INC_' . $idIncidente . '/' . $evidencia['archivo'];
+                
+                // Mover archivo al directorio
+                if (move_uploaded_file($evidencia['tmp_name'], $rutaArchivo)) {
+                    // Actualizar la URL en el array de evidencias
+                    $evidencia['url'] = $rutaRelativa;
+                    unset($evidencia['tmp_name']); // Eliminar la ruta temporal
+                    unset($evidencia['archivo']); // Eliminar el nombre del archivo temporal
+                    
+                    $evidenciasActualizadas[] = $evidencia;
+                } else {
+                    throw new Exception('Error al subir archivo: ' . $evidencia['nombre']);
+                }
+            }
+            
+            // Actualizar el registro con las URLs correctas
+            if (!empty($evidenciasActualizadas)) {
+                $evidenciasJsonActualizado = json_encode($evidenciasActualizadas);
+                $queryUpdate = "UPDATE incidentes SET evidencia = '" . 
+                               $conexion->real_escape_string($evidenciasJsonActualizado) . 
+                               "' WHERE id_incidente = $idIncidente";
+                
+                if (!$conexion->query($queryUpdate)) {
+                    throw new Exception('Error al actualizar evidencias: ' . $conexion->error);
                 }
             }
         }
@@ -310,7 +393,7 @@ function registrarIncidente() {
             'success' => true, 
             'message' => 'Incidente registrado correctamente', 
             'id_incidente' => $idIncidente,
-            'evidencias' => !empty($evidencias) ? count($evidencias) : 0
+            'evidencias' => !empty($evidenciasActualizadas) ? count($evidenciasActualizadas) : 0
         ]);
         
     } catch (Exception $e) {
