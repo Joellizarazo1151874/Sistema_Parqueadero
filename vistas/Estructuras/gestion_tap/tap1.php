@@ -186,14 +186,15 @@
                                 ?>
                                 <small class="debt">DEBE</small>
                                 <br>
-                                <b class="debt importe-actual"
-                                    data-ingreso="<?php echo $timestamp_ingreso; ?>"
-                                    data-costo-por-minuto="<?php echo $costo_por_minuto; ?>"
-                                    data-tolerancia="<?php echo $tolerancia_minutos; ?>"
-                                    data-tarifa-hora="<?php echo $tarifa_hora; ?>"
-                                    data-tarifa-dia="<?php echo $tarifa_dia; ?>"
-                                    data-tipo-registro="<?php echo $tipo_registro; ?>"
-                                    data-tiempo-horas="<?php echo $tiempo_horas; ?>">
+                                <b class="total-debe debt" 
+                                   data-ingreso="<?php echo $timestamp_ingreso; ?>"
+                                   data-costo-por-minuto="<?php echo $costo_por_minuto; ?>"
+                                   data-tolerancia="<?php echo $tolerancia_minutos; ?>"
+                                   data-tarifa-hora="<?php echo $tarifa_hora; ?>"
+                                   data-tarifa-dia="<?php echo $tarifa_dia; ?>"
+                                   data-tipo-registro="<?php echo $tipo_registro; ?>"
+                                   data-tiempo-horas="<?php echo $tiempo_horas; ?>"
+                                   data-total-costos="<?php echo $total_costos; ?>">
                                     Calculando...
                                 </b>
                             </div>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 08-04-2025 a las 21:47:31
+-- Tiempo de generación: 08-04-2025 a las 23:36:11
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -45,6 +45,38 @@ INSERT INTO `clientes` (`id_cliente`, `nombre`, `telefono`, `correo`, `fecha_reg
 (3, 'Joel Lizarazo ', '3209939812', 'correo@ejemplo.com', '2025-03-26 22:15:38'),
 (5, 'Marcos Mejia', '3209939816', 'correo2@ejemplo.com', '2025-03-26 22:17:15'),
 (8, 'Pancho Villa', '123123121', 'pancho@gmail.com', '2025-03-26 22:38:39');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `costos_adicionales`
+--
+
+CREATE TABLE `costos_adicionales` (
+  `id_costo` int(11) NOT NULL,
+  `id_registro` int(11) NOT NULL,
+  `concepto` varchar(255) NOT NULL,
+  `valor` decimal(10,2) NOT NULL,
+  `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `costos_adicionales`
+--
+
+INSERT INTO `costos_adicionales` (`id_costo`, `id_registro`, `concepto`, `valor`, `fecha_registro`) VALUES
+(1, 140, 'Guardar casco', 2000.00, '2025-04-08 20:26:09'),
+(3, 137, 'BOLSO SOSPECHOSO', 120000.00, '2025-04-08 20:31:05'),
+(4, 141, 'Seguro adicional', 2500.00, '2025-04-08 20:35:43'),
+(5, 141, 'Guardar casco', 2000.00, '2025-04-08 20:45:38'),
+(6, 142, 'Guardar casco', 2000.00, '2025-04-08 20:50:17'),
+(7, 138, 'Guardar casco', 2000.00, '2025-04-08 20:52:42'),
+(8, 138, 'Lavado', 3000.00, '2025-04-08 20:52:50'),
+(9, 144, 'Guardar casco', 2000.00, '2025-04-08 21:21:12'),
+(10, 143, 'Seguro adicional', 5000.00, '2025-04-08 21:22:38'),
+(11, 145, 'Guardar casco', 2000.00, '2025-04-08 21:25:49'),
+(12, 146, 'Guardar casco', 2000.00, '2025-04-08 21:29:41'),
+(13, 149, 'Guardar casco', 2000.00, '2025-04-08 21:35:25');
 
 -- --------------------------------------------------------
 
@@ -202,10 +234,20 @@ INSERT INTO `registros_parqueo` (`id_registro`, `id_vehiculo`, `hora_ingreso`, `
 (134, 18, '2025-04-07 17:13:25', '2025-04-08 10:17:24', 'cerrado', 85200, '2', '#SQL625', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f565a8640af'),
 (135, 19, '2025-04-07 17:13:28', '2025-04-08 10:17:15', 'cerrado', 34100, '1', '#YEV52G', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f565a8640af'),
 (136, 38, '2025-04-07 17:13:32', '2025-04-08 09:09:35', 'cerrado', 79600, '1', '#HDN123', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f52e37a9c29'),
-(137, 18, '2025-04-08 10:18:28', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
+(137, 18, '2025-04-08 10:18:28', '2025-04-08 15:31:33', 'cerrado', 146000, '1', '#SQL625 + Costos adicionales: BOLSO SOSPECHOSO: $120.000', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
 (138, 21, '2025-04-08 10:18:32', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
 (139, 19, '2025-04-08 10:18:35', '2025-04-08 12:07:56', 'cerrado', 3600, '1', '#FER432', 'Admin Principal', 'Admin Principal', 'hora', 1, 1, 'REP-67f565a8640af'),
-(140, 30, '2025-04-08 11:38:48', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL);
+(140, 30, '2025-04-08 11:38:48', '2025-04-08 15:26:52', 'cerrado', 20900, '1', '#FER432 + Costos adicionales: Guardar casco: $2.000', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
+(141, 18, '2025-04-08 15:32:24', '2025-04-08 15:51:54', 'cerrado', 6000, '1', '#SQL625 + Costos adicionales: Seguro adicional: $2.500, Guardar casco: $2.000', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
+(142, 19, '2025-04-08 15:32:29', '2025-04-08 16:09:36', 'cerrado', 3200, '1', '#SQL-623 + Costos adicionales: Guardar casco: $2.000', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
+(143, 18, '2025-04-08 16:09:45', '2025-04-08 16:22:47', 'cerrado', 10900, '2', '#SQL625 + Costos adicionales: Seguro adicional: $5.000', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
+(144, 19, '2025-04-08 16:09:50', '2025-04-08 16:23:44', 'cerrado', 4400, '1', '#YEV52G + Costos adicionales: Guardar casco: $2.000', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
+(145, 38, '2025-04-08 16:10:05', '2025-04-08 16:26:13', 'cerrado', 5300, '1', '#HDN123 + Costos adicionales: Guardar casco: $2.000', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
+(146, 18, '2025-04-08 16:29:33', '2025-04-08 16:31:43', 'cerrado', 2100, '1', '#SQL-623 + Costos adicionales: Guardar casco: $2.000', 'Admin Principal', 'Admin Principal', 'hora', 1, 0, NULL),
+(147, 18, '2025-04-08 16:34:26', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
+(148, 19, '2025-04-08 16:34:32', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
+(149, 38, '2025-04-08 16:34:37', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL),
+(150, 35, '2025-04-08 16:34:58', NULL, 'activo', 0, NULL, '', '', 'Admin Principal', 'hora', 1, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -381,6 +423,13 @@ ALTER TABLE `clientes`
   ADD UNIQUE KEY `correo` (`correo`);
 
 --
+-- Indices de la tabla `costos_adicionales`
+--
+ALTER TABLE `costos_adicionales`
+  ADD PRIMARY KEY (`id_costo`),
+  ADD KEY `id_registro` (`id_registro`);
+
+--
 -- Indices de la tabla `incidentes`
 --
 ALTER TABLE `incidentes`
@@ -461,6 +510,12 @@ ALTER TABLE `clientes`
   MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
+-- AUTO_INCREMENT de la tabla `costos_adicionales`
+--
+ALTER TABLE `costos_adicionales`
+  MODIFY `id_costo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
 -- AUTO_INCREMENT de la tabla `incidentes`
 --
 ALTER TABLE `incidentes`
@@ -482,7 +537,7 @@ ALTER TABLE `pagos`
 -- AUTO_INCREMENT de la tabla `registros_parqueo`
 --
 ALTER TABLE `registros_parqueo`
-  MODIFY `id_registro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=141;
+  MODIFY `id_registro` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=151;
 
 --
 -- AUTO_INCREMENT de la tabla `reportes_caja`
@@ -517,6 +572,12 @@ ALTER TABLE `vehiculos`
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `costos_adicionales`
+--
+ALTER TABLE `costos_adicionales`
+  ADD CONSTRAINT `costos_adicionales_ibfk_1` FOREIGN KEY (`id_registro`) REFERENCES `registros_parqueo` (`id_registro`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `incidentes`

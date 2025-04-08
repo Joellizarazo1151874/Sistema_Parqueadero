@@ -2,6 +2,7 @@
 function actualizarTiempoYCosto() {
   const elementosTiempo = document.querySelectorAll(".tiempo-transcurrido");
   const elementosCosto = document.querySelectorAll(".importe-actual");
+  const elementosDebe = document.querySelectorAll(".total-debe");
 
   const ahora = Math.floor(Date.now() / 1000); // Obtener el tiempo actual en segundos
 
@@ -62,27 +63,64 @@ function actualizarTiempoYCosto() {
     // Redondear hacia abajo en múltiplos de 100
     costo = Math.floor(costo / 100) * 100;
 
-    // Si este elemento es "DEBE", necesitamos agregar los costos adicionales
-    if (elemento.classList.contains('debt')) {
-      try {
-        // Buscar el ticket que contiene este elemento
-        const ticket = elemento.closest('.ticket');
-        if (ticket) {
-          // Buscar el elemento que muestra los costos adicionales en el mismo ticket
-          const adicionales = ticket.querySelector('.col-6.text-end .text-warning + b');
-          if (adicionales) {
-            // Extraer el valor numérico (quitando "$" y separadores de miles)
-            const valorAdicional = parseInt(adicionales.textContent.replace(/[$.,]/g, '')) || 0;
-            // Sumar al costo total
-            costo += valorAdicional;
-          }
-        }
-      } catch (error) {
-        console.error('Error al calcular costos adicionales:', error);
+    elemento.innerText = `$${costo.toLocaleString('es-CO')}`;
+  });
+
+  // Actualizar elementos "DEBE" (total-debe)
+  elementosDebe.forEach(elemento => {
+    const horaIngreso = parseInt(elemento.getAttribute("data-ingreso"));
+    const costoPorMinuto = parseFloat(elemento.getAttribute("data-costo-por-minuto"));
+    const toleranciaMinutos = parseInt(elemento.getAttribute("data-tolerancia") || "15");
+    const tarifaHora = parseFloat(elemento.getAttribute("data-tarifa-hora") || "0");
+    const tarifaDia = parseFloat(elemento.getAttribute("data-tarifa-dia") || "0");
+    const totalCostos = parseFloat(elemento.getAttribute("data-total-costos") || "0");
+    let minutosTranscurridos = Math.floor((ahora - horaIngreso) / 60);
+
+    // Calcular el costo según la tarifa aplicable
+    let costo = 0;
+    
+    // Calcular horas y minutos transcurridos
+    let horasCompletas = Math.floor(minutosTranscurridos / 60);
+    let minutosRestantes = minutosTranscurridos % 60;
+    
+    // Si es tarifa por hora, calcular correctamente
+    if (tarifaHora > 0) {
+      // Costo por horas completas
+      costo = horasCompletas * tarifaHora;
+      
+      // Añadir costo por minutos (solo si superan la tolerancia)
+      if (minutosRestantes > toleranciaMinutos) {
+        costo += (minutosRestantes - toleranciaMinutos) * costoPorMinuto;
+      }
+    } 
+    // Si hay tarifa por día, calcular por días
+    else if (tarifaDia > 0) {
+      // Calcular días transcurridos
+      let diasCompletos = Math.ceil(minutosTranscurridos / (24 * 60));
+      
+      // Si no ha pasado la tolerancia, no se cobra nada
+      if (minutosTranscurridos <= toleranciaMinutos) {
+        diasCompletos = 0;
+      }
+      
+      costo = diasCompletos * tarifaDia;
+    }
+    // Si no hay tarifa por hora ni día pero hay tolerancia y costo por minuto
+    else if (toleranciaMinutos > 0 && costoPorMinuto > 0) {
+      // Si los minutos superan la tolerancia, cobrar los minutos adicionales
+      if (minutosTranscurridos > toleranciaMinutos) {
+        costo = (minutosTranscurridos - toleranciaMinutos) * costoPorMinuto;
       }
     }
-
-    elemento.innerText = `$${costo.toLocaleString('en-US')}`;
+    
+    // Redondear hacia abajo en múltiplos de 100
+    costo = Math.floor(costo / 100) * 100;
+    
+    // Sumar los costos adicionales al importe actual
+    const totalPagar = costo + totalCostos;
+    
+    // Mostrar el total a pagar
+    elemento.innerText = `$${totalPagar.toLocaleString('es-CO')}`;
   });
 }
 
